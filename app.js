@@ -11,6 +11,13 @@ app.get("/", (req, res) => {
     res.send("Start POPHUB!");
 });
 
+app.post("/SMS", (req, res) => {
+    const phoneNumber = req.body.phoneNumber;
+
+    sendMessage(phoneNumber);
+    res.send("Test");
+})
+
 app.listen(PORT, () =>{
     console.log(`${PORT}번 실행 중`)
 })
