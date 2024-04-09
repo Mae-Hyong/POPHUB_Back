@@ -6,12 +6,12 @@ const sendMessage = require('../message');
 const generateToken = require('../jwt');
 
 // ------- GET Query -------
-
+const user_search_query = 'SELECT * FROM user_info WHERE user_id = ?';
 
 // ------- POST Query -------certification
 const sign_in_query = 'SELECT * FROM user_join_info WHERE user_id = ?';
 const sign_up_query = 'INSERT INTO user_join_info (user_id, user_password, user_role) VALUES (?, ?, ?)';
-const user_data_query = 'INSERT INTO user_info (user_id, user_name, phoner_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
+const user_add_query = 'INSERT INTO user_info (user_id, user_name, phoner_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
 
 
 // ------- GET Service -------
@@ -22,6 +22,40 @@ const certification = async (req, res) => {
   sendMessage(phoneNumber, Number);
   
   res.send(phoneNumber, Number);
+};
+
+const userDataSearch = async (req, res) => {
+  const userId = req.body.userId;
+
+  // 아이디가 안담겨 왔을때
+  if (!userId) {
+    return res.status(400).json({
+        resultCode: 400,
+        resultMsg: "사용자 ID를 제공해야 합니다.",
+    });
+  }
+  
+  db.query(user_search_query, [userId], async (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+    
+    if (result.length === 0) {
+      res.status(404).send('User not found');
+      return;
+    }
+    return res.status(200).json({
+      userId : result[0].user_id,
+      userName : result[0].user_name,
+      phoneNumber : result[0].phone_number,
+      pointScore : result[0].point_score,
+      gender : result[0].gender,
+      age : result[0].age,
+      userImage : result[0].user_image,
+    })
+  });
 };
 
 
@@ -68,7 +102,7 @@ const signIn = async (req, res) => {
   });
 };
 
-const user_data_added = async (req, res) => {
+const userDataAdded = async (req, res) => {
   const { userId, userName, phoneNumber, Gender, Age } = req.body;
 
   try {
@@ -77,7 +111,7 @@ const user_data_added = async (req, res) => {
       userImage = req.file.path;
     }
 
-    db.query(user_data_query, [ userId, userName, phoneNumber, Gender, Age, userImage ], (err, result) => {
+    db.query(user_add_query, [ userId, userName, phoneNumber, Gender, Age, userImage ], (err, result) => {
       if (err) {
         console.error(err);
         res.status(500).send('Internal Server Error');
@@ -97,12 +131,14 @@ const user_data_added = async (req, res) => {
   }
 };
 
+
 module.exports = {
   // GET
   certification : certification,
-  userDataAdd : user_data_added,
+  userDataSearch : userDataSearch,
 
   // POST
   signUp : signUp,
   signIn : signIn,
+  userDataAdd : userDataAdded,
 }

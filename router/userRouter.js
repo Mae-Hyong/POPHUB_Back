@@ -10,6 +10,10 @@ router.get("/certification", async (req, res) => {
   userService.certification(req, res);
 });
 
+router.get("/user_data_search", async (req, res) => {
+  userService.userDataSearch(req, res);
+})
+
 // route POST
 router.post("/sign_up", async (req, res) =>{
   userService.signUp(req, res);
