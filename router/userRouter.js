@@ -12,7 +12,12 @@ router.get("/certification", async (req, res) => {
 
 router.get("/user_data_search", async (req, res) => {
   userService.userDataSearch(req, res);
-})
+});
+
+router.get("/name_data_Search", async (req, res) => {
+  userService.userDoubleCheck(req, res);
+});
+
 
 // route POST
 router.post("/sign_up", async (req, res) =>{

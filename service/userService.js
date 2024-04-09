@@ -7,6 +7,7 @@ const generateToken = require('../jwt');
 
 // ------- GET Query -------
 const user_search_query = 'SELECT * FROM user_info WHERE user_id = ?';
+const name_search_query = 'SELECT * FROM user_info WHERE user_name = ? OR user_id = ?';
 
 // ------- POST Query -------certification
 const sign_in_query = 'SELECT * FROM user_join_info WHERE user_id = ?';
@@ -56,6 +57,45 @@ const userDataSearch = async (req, res) => {
       userImage : result[0].user_image,
     })
   });
+};
+
+const userDoubleCheck = async (req, res) => {
+  const userId = req.body.userId;
+  const userName = req.body.userName;
+  console.log(userId);
+  console.log(userName);
+
+  // 아이디 혹은 유저 네임이 안담겨 왔을때
+  if (!userId && !userName) {
+    return res.status(400).json({
+        resultCode: 400,
+        resultMsg: "사용자 userName 혹은 Id를 제공해야 합니다.",
+    });
+  }
+  
+  db.query(name_search_query, [userId, userName], async (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+    
+    if (userId){
+      if(result.length === 0) {
+        return res.status(200).send('User ID not found');
+        
+      }
+      return res.status(200).send('User ID Exists');
+    } else {
+      if(result.length === 0) {
+        console.log('User Name not found');
+        return res.status(200).send('User Name not found');
+      }
+      console.log('User Name Exists');
+      return res.status(200).send('User Name Exists');
+    }
+    
+    })
 };
 
 
@@ -136,6 +176,7 @@ module.exports = {
   // GET
   certification : certification,
   userDataSearch : userDataSearch,
+  userDoubleCheck : userDoubleCheck,
 
   // POST
   signUp : signUp,
