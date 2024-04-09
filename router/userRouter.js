@@ -1,3 +1,4 @@
+const upload = require('../multer');
 const express = require('express');
 const router = express.Router();
 
@@ -16,6 +17,10 @@ router.post("/sign_up", async (req, res) =>{
 
 router.post("/sign_in", async (req, res) => {
     userService.signIn(req, res);
+});
+
+router.post("/profile_update", upload.single("file"), async(req, res) => {
+  userService.userDataAdd(req, res);
 });
 
 module.exports = router;

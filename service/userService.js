@@ -24,21 +24,6 @@ const certification = async (req, res) => {
   res.send(phoneNumber, Number);
 };
 
-const user_data = async (req, res) => {
-  const { userId, userName, phoneNumber, Gender, Age, userImage } = req.body;
-
-  db.query(user_data_query, [ userId, userName, phoneNumber, Gender, Age, userImage ], (err, result) => {
-    if (err) {
-      console.error(err);
-      res.status(500).send('Internal Server Error');
-      return;
-    }
-  
-    console.log('User added:', result);
-    res.status(201).send('User added successfully');
-  })
-};
-
 
 // ------- POST Service -------
 const signUp = async (req, res) =>{
@@ -83,10 +68,39 @@ const signIn = async (req, res) => {
   });
 };
 
+const user_data_added = async (req, res) => {
+  const { userId, userName, phoneNumber, Gender, Age } = req.body;
+
+  try {
+    let userImage = null;
+    if (req.file) {
+      userImage = req.file.path;
+    }
+
+    db.query(user_data_query, [ userId, userName, phoneNumber, Gender, Age, userImage ], (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Internal Server Error');
+        return;
+      }
+    
+      console.log('User added:', result);
+      res.status(201).send('User added successfully');
+    })
+  } catch (error) {
+    console.error("Error uploading image to Cloudinary:", error);
+    return res.status(500).json({
+        resultCode: 500,
+        resultMsg: "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
+        error: error.message
+    });
+  }
+};
+
 module.exports = {
   // GET
   certification : certification,
-  user_data : user_data,
+  userDataAdd : user_data_added,
 
   // POST
   signUp : signUp,
