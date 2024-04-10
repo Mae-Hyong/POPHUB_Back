@@ -13,28 +13,23 @@ const popupModel = {
         })
     },
 
-    createPopup: (popupData) => { //  팝업스토어 생성
+    createPopup: (popupData) => {
         return new Promise((resolve, reject) => {
-            const { category_id, store_name, store_location, store_contact_info, store_description, store_status, store_image, store_artist_name, store_start_date, store_end_date } = popupData;
-            const values = [category_id, store_name, store_location, store_contact_info, store_description, store_status, store_image, store_artist_name, store_start_date, store_end_date];
-    
-            const sql = 'INSERT INTO popup_stores (category_id, store_name, store_location, store_contact_info, store_description, store_status, store_image, store_artist_name, store_start_date, store_end_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-            
-            db.query(sql, values, (err, result) => {
+            db.query('INSERT INTO popup_stores SET ?', popupData, (err, result) => {
                 if (err) {
                     reject(err);
                 } else {
                     const store_id = result.insertId; // 현재 생성된 store_id
-                    resolve({...popupData, store_id});
-                    
+                    resolve({ ...popupData, store_id });
                 }
             });
         });
     },
 
+
     getPopup: (store_id) => {
         return new Promise((resolve, reject) => {
-            db.query('SELECT * FROM popup_stores WHERE store_id = ?', [store_id], (err, result) => {
+            db.query('SELECT * FROM popup_stores WHERE store_id = ?', store_id, (err, result) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -43,7 +38,18 @@ const popupModel = {
             });
         })
     },
-    
+
+    updatePopup: (store_id, popupData) => {
+        return new Promise((resolve, reject) => {
+            db.query('UPDATE popup_stores SET ? WHERE store_id = ?', [popupData, store_id], (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(popupData);
+                }
+            });
+        })
+    },
 
     deletePopup: (store_id) => { // 스토어 아이디로 팝업 정보 삭제
         return new Promise((resolve, reject) => {

@@ -34,6 +34,18 @@ const popupController = {
         }
     },
 
+    updatePopup: async (req, res) => {
+        try {
+            const store_id = req.params.store_id;
+            const popupData = req.body;
+            await popupModel.updatePopup(store_id, popupData);
+            res.status(200).send(`${store_id} 수정 완료`);
+        } catch(err) {
+            console.log(err);
+            throw err;
+        }
+    },
+
     deletePopup: async (req, res) => {
         try{
             const store_id = req.params.store_id;
