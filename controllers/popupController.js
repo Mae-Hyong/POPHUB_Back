@@ -1,12 +1,26 @@
 const popupModel = require('../models/popupModel');
 
 const popupController = {
-    allPopups: async () => {
+    allPopups: async () => { 
         try {
             const result = await popupModel.allPopups();
             return result;
         } catch (err) {
-            console.error(err);
+            console.log(err);
+            throw err;
+        }
+    },
+
+    createPopup: async (req, res) => {
+        try {
+            const popupData = req.body;
+            const result = await popupModel.createPopup(popupData);
+            console.log(result.store_id);
+
+            res.status(200).send('성공하였습니다.');
+
+        } catch(err) {
+            console.log(err);
             throw err;
         }
     },
@@ -18,6 +32,7 @@ const popupController = {
 
         } catch(err) {
             console.log(err);
+            throw err;
         }
     },
 };

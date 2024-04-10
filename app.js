@@ -1,9 +1,12 @@
 const express = require('express');
-
+const bodyParser = require('body-parser');
 const popupRouter = require('./router/popup');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// body-parser 미들웨어 등록
+app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
     res.send("Start POPHUB!");
