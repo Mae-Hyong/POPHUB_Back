@@ -8,11 +8,13 @@ const generateToken = require('../jwt');
 // ------- GET Query -------
 const user_search_query = 'SELECT * FROM user_info WHERE user_id = ?';
 const name_search_query = 'SELECT * FROM user_info WHERE user_name = ? OR user_id = ?';
+const inquiry_search_query = 'SELECT * FROM inquiry WHERE user_name = ?';
 
 // ------- POST Query -------certification
 const sign_in_query = 'SELECT * FROM user_join_info WHERE user_id = ?';
 const sign_up_query = 'INSERT INTO user_join_info (user_id, user_password, user_role) VALUES (?, ?, ?)';
 const user_add_query = 'INSERT INTO user_info (user_id, user_name, phoner_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
+const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content) VALUES (?, ?, ?, ?)';
 
 
 // ------- GET Service -------
@@ -23,6 +25,14 @@ const certification = async (req, res) => {
   sendMessage(phoneNumber, Number);
   
   res.send(phoneNumber, Number);
+};
+
+const verifyCertification = async (req, res) => {
+  const { authCode, expectedCode } = req.body;
+
+  if ( authCode === expectedCode ) res.status(200).send('Successful !');
+  else res.status(401).send('Failed. Invalid code.');
+
 };
 
 const userDataSearch = async (req, res) => {
@@ -62,8 +72,6 @@ const userDataSearch = async (req, res) => {
 const userDoubleCheck = async (req, res) => {
   const userId = req.body.userId;
   const userName = req.body.userName;
-  console.log(userId);
-  console.log(userName);
 
   // 아이디 혹은 유저 네임이 안담겨 왔을때
   if (!userId && !userName) {
@@ -97,6 +105,37 @@ const userDoubleCheck = async (req, res) => {
     
     })
 };
+
+const inquiryDataSearch = async (req, res) => {
+  const userName = req.body.userName;
+
+  if (!userName) {
+    return res.status(400).json({
+        resultCode: 400,
+        resultMsg: "사용자 Name을 제공해야 합니다.",
+    });
+  }
+
+  db.query(inquiry_search_query, [userName], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+    
+    if (result.length === 0) {
+      res.status(404).send('User not found');
+      return;
+    }
+    return res.status(200).json({
+      inquiryId : result[0].inquiry_id,
+      userName : result[0].user_name,
+      categoryId : result[0].category_id,
+      title : result[0].title,
+      content : result[0].content,
+    })
+  });
+}
 
 
 // ------- POST Service -------
@@ -171,15 +210,34 @@ const userDataAdded = async (req, res) => {
   }
 };
 
+const inquiryDataAdded = async (req, res) => {
+  const { userName, categoryId, title, content } = req.body;
 
+  db.query(inquiry_add_query, [userName, categoryId, title, content], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+  
+    console.log('Inquiry added:', result);
+    res.status(201).send('Inquiry added successfully');
+  });
+};
+
+
+// ------- Module Exports -------
 module.exports = {
   // GET
   certification : certification,
+  verifyCertification : verifyCertification,
   userDataSearch : userDataSearch,
   userDoubleCheck : userDoubleCheck,
+  inquiryDataSearch : inquiryDataSearch,
 
   // POST
   signUp : signUp,
   signIn : signIn,
   userDataAdd : userDataAdded,
+  inquiryDataAdded : inquiryDataAdded,
 }
