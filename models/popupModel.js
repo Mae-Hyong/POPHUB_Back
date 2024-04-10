@@ -31,6 +31,18 @@ const popupModel = {
             });
         });
     },
+
+    getPopup: (store_id) => {
+        return new Promise((resolve, reject) => {
+            db.query('SELECT * FROM popup_stores WHERE store_id = ?', [store_id], (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result[0]);
+                }
+            });
+        })
+    },
     
 
     deletePopup: (store_id) => { // 스토어 아이디로 팝업 정보 삭제
