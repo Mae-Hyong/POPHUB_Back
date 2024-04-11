@@ -26,7 +26,32 @@ const popupModel = {
         });
     },
 
-
+    createSchedule: (store_id, popupSchedules) => {
+        return new Promise((resolve, reject) => {
+            const promises = [];
+            const schedules = popupSchedules.map(schedule => ({ store_id, ...schedule }));
+            schedules.forEach(schedule => {
+                promises.push(new Promise((innerResolve, innerReject) => {
+                    db.query('INSERT INTO store_schedules SET ?', schedule, (err, results) => {
+                        if (err) {
+                            innerReject(err);
+                        } else {
+                            innerResolve(results);
+                        }
+                    });
+                }));
+            });
+    
+            Promise.all(promises)
+                .then(results => {
+                    resolve(results);
+                })
+                .catch(err => {
+                    reject(err);
+                });
+        });
+    },
+    
     getPopup: (store_id) => {
         return new Promise((resolve, reject) => {
             db.query('SELECT * FROM popup_stores WHERE store_id = ?', store_id, (err, result) => {
