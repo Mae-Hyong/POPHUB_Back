@@ -1,4 +1,7 @@
 const express = require('express');
+const bodyParser = require('body-parser');
+
+
 const app = express();
 const PORT = 3000;
 const bodyParser = require('body-parser');
@@ -6,6 +9,7 @@ const cors = require("cors");
 
 // Routes
 const userRoute = require('./router/userRouter');
+const popupRouter = require('./router/popup');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,10 +20,15 @@ app.use(cors({
     optionsSuccessStatus: 204,
 }));
 
+// body-parser 미들웨어 등록
+app.use(bodyParser.json());
+
 app.get("/", (req, res) => {
     res.send("Start POPHUB!");
 });
 
+// 인증 라우터
+app.use('/popup', popupRouter); // popup 라우터 사용
 app.use("/user", userRoute);
 
 app.listen(PORT, () =>{
