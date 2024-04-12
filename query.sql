@@ -31,12 +31,12 @@ CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     store_location VARCHAR(255), -- 위치
     store_contact_info VARCHAR(255), -- 팝업 연락처
     store_description TEXT, -- 팝업 소개
-    store_status VARCHAR(50), -- 진행 예정 or 진행중 or 진행 종료 상태 확인
+    store_status VARCHAR(50), -- 진행 예정 or 진행중 or 마감 상태 확인
     store_image LONGTEXT, -- 팝업 이미지
     store_artist_name VARCHAR(255), -- 작가 이름
     store_start_date DATE, -- 팝업 오픈 날짜
     store_end_date DATE, -- 팝업 종료 날짜
-    
+    store_mark_number INT DEFAULT 0, -- 찜 수
     FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 
@@ -47,4 +47,12 @@ CREATE TABLE store_schedules ( -- 요일별 시간
     open_time TIME,
     close_time TIME,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id) ON DELETE CASCADE
+);
+
+CREATE TABLE BookMark (
+    user_id VARCHAR(50) NOT NULL,
+    store_id INT NOT NULL,
+    PRIMARY KEY (user_id, store_id),
+    FOREIGN KEY (user_id) REFERENCES user_info(user_id),
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
 );

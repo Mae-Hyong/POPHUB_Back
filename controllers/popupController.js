@@ -61,6 +61,17 @@ const popupController = {
             throw err;
         }
     },
+
+    likePopup: async (req, res) => {
+        try {
+            const { user_id, store_id } = req.body;
+            const like = await popupModel.likePopup(user_id, store_id);
+            res.status(200).json(like);
+        } catch (err) {
+            console.log(err);
+            throw err;
+        }
+    },
 };
 
 module.exports = { popupController }

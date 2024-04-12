@@ -7,5 +7,6 @@ router.post('/', popupController.createPopup);
 router.get('/:store_id', popupController.getPopup);
 router.put('/:store_id', popupController.updatePopup);
 router.delete('/:store_id', popupController.deletePopup);
+router.post('/like', popupController.likePopup);
 
 module.exports = router;

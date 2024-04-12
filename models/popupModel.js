@@ -87,6 +87,49 @@ const popupModel = {
             });
         });
     },
+
+    likePopup: (user_id, store_id) => {
+        return new Promise((resolve, reject) => {
+            const sql = 'SELECT store_mark_number FROM popup_stores WHERE store_id = ?';
+            db.query('SELECT * FROM BookMark WHERE user_id = ? AND store_id = ?', [user_id, store_id], (err, results) => {
+                if (err) return reject(err);
+    
+                if (results.length > 0) { // 값이 있을 경우, 찜 취소
+                    db.query('DELETE FROM BookMark WHERE user_id = ? AND store_id = ?', [user_id, store_id], (err, results) => {
+                        if (err) return reject(err);
+    
+                        db.query('UPDATE popup_stores SET store_mark_number = store_mark_number - 1 WHERE store_id = ?', [store_id], (err, results) => {
+                            if (err) return reject(err);
+
+                            db.query(sql, [store_id], (err, results) => {
+                                if (err) return reject(err);
+    
+                                resolve({ message: '찜이 취소되었습니다.', mark_number: results[0].store_mark_number });
+                            });
+                        });
+                    });
+                } else { // 찜 추가
+                    db.query('INSERT INTO BookMark (user_id, store_id) VALUES (?, ?)', [user_id, store_id], (err, results) => {
+                        if (err) return reject(err);
+    
+                        db.query('UPDATE popup_stores SET store_mark_number = store_mark_number + 1 WHERE store_id = ?', [store_id], (err, results) => {
+                            if (err) return reject(err);
+    
+                            db.query(sql, [store_id], (err, results) => {
+                                if (err) return reject(err);
+    
+                                resolve({ message: '찜이 추가되었습니다.', mark_number: results[0].store_mark_number });
+                            });
+                        });
+                    });
+                }
+            });
+        });
+    },
+    
+    
+    
+    
 };
 
 module.exports = popupModel;
