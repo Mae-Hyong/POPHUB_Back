@@ -1,49 +1,47 @@
-const db = require('./config/mysqlDatabase');
+const upload = require('../multer');
 const express = require('express');
-const app = express();
+const router = express.Router();
 
-// ------- GET -------
-const sign_in_query = 'SELECT * FROM user_join_info WHERE user_id = ?';
+// Service
+const userService = require('../service/userService');
 
-// ------- POST -------
-const sign_up_query = 'INSERT INTO user_join_info (user_id, user_password, user_role) VALUES (?, ?, ?)';
-
-app.post("/sign_up", async (req, res) =>{
-    const{ userId, userPassword, userRole } = req.body;
-    const hashedPassword = await bcrypt.hash(userPassword, 10);
-    
-    db.query(sign_up_query, [ userId, hashedPassword, userRole ], (err, result) => {
-        if (err) {
-            console.error(err);
-            res.status(500).send('Internal Server Error');
-            return;
-          }
-      
-          console.log('User added:', result);
-          res.status(201).send('User added successfully');
-    });
+// route GET
+router.get("/certification", async (req, res) => {
+  userService.certification(req, res);
 });
 
-app.post("/sign_in", async (req, res) => {
-    const { userId, userPassword } = req.body;
+router.get("/verify_certification", async (req, res) => {
+  userService.verifyCertification(req, res);
+});
 
-    db.query(sign_in_query, [userId], async (err, result) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send('Internal Server Error');
-        return;
-      }
-      if (result.length === 0) {
-        res.status(404).send('User not found');
-        return;
-      }
-  
-      const isPasswordValid = await bcrypt.compare(userPassword, result[0].user_password);
-      if (isPasswordValid) {
-        const token = jwt(userId);
-        return res.status(200).json({ token });
-      } else {
-        res.status(401).send('Invalid password');
-      }
-    });
-  });
+router.get("/user_data_search", async (req, res) => {
+  userService.userDataSearch(req, res);
+});
+
+router.get("/name_data_Search", async (req, res) => {
+  userService.userDoubleCheck(req, res);
+});
+
+router.get("/inquiry_data_search", async (req, res) => {
+  userService.inquiryDataSearch(req, res);
+})
+
+
+// route POST
+router.post("/sign_up", async (req, res) => {
+  userService.signUp(req, res);
+});
+
+router.post("/sign_in", async (req, res) => {
+    userService.signIn(req, res);
+});
+
+router.post("/profile_added", upload.single("file"), async(req, res) => {
+  userService.userDataAdd(req, res);
+});
+
+router.post("/inquiry_add", async (req, res) => {
+  userService.inquiryDataAdded(req, res);
+});
+
+module.exports = router;
