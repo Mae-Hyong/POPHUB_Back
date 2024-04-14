@@ -9,12 +9,14 @@ const generateToken = require('../jwt');
 const user_search_query = 'SELECT * FROM user_info WHERE user_id = ?';
 const name_search_query = 'SELECT * FROM user_info WHERE user_name = ? OR user_id = ?';
 const inquiry_search_query = 'SELECT * FROM inquiry WHERE user_name = ?';
+const id_search_query = 'SELECT user_id From user_info WHERE phone_number = ?';
 
 // ------- POST Query -------certification
 const sign_in_query = 'SELECT * FROM user_join_info WHERE user_id = ?';
 const sign_up_query = 'INSERT INTO user_join_info (user_id, user_password, user_role) VALUES (?, ?, ?)';
-const user_add_query = 'INSERT INTO user_info (user_id, user_name, phoner_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
+const user_add_query = 'INSERT INTO user_info (user_id, user_name, phone_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
 const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content) VALUES (?, ?, ?, ?)';
+const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE user_id = ?';
 
 
 // ------- GET Service -------
@@ -27,6 +29,7 @@ const certification = async (req, res) => {
   res.send(phoneNumber, Number);
 };
 
+// SMS 인증 번호 확인
 const verifyCertification = async (req, res) => {
   const { authCode, expectedCode } = req.body;
 
@@ -35,6 +38,7 @@ const verifyCertification = async (req, res) => {
 
 };
 
+// 유저 프로필 조회
 const userDataSearch = async (req, res) => {
   const userId = req.body.userId;
 
@@ -69,6 +73,7 @@ const userDataSearch = async (req, res) => {
   });
 };
 
+// 유저 ID 혹은 Name 중복 체크
 const userDoubleCheck = async (req, res) => {
   const userId = req.body.userId;
   const userName = req.body.userName;
@@ -106,6 +111,28 @@ const userDoubleCheck = async (req, res) => {
     })
 };
 
+const idSearch = async (req, res) => {
+  const phoneNumber = req.body.phoneNumber;
+
+  if(!phoneNumber) return res.send('사용자의 Phone Number을 제공해야 합니다.').status(400)
+
+  db.query(id_search_query, [phoneNumber], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+    
+    if (result.length === 0) {
+      res.status(404).send('User not found');
+      return;
+    }
+    return res.status(200).json({
+      userId : result[0].user_id
+    })
+  })
+};
+
 const inquiryDataSearch = async (req, res) => {
   const userName = req.body.userName;
 
@@ -135,8 +162,7 @@ const inquiryDataSearch = async (req, res) => {
       content : result[0].content,
     })
   });
-}
-
+};
 
 // ------- POST Service -------
 const signUp = async (req, res) =>{
@@ -210,6 +236,27 @@ const userDataAdded = async (req, res) => {
   }
 };
 
+const passwordChange = async (req, res) => {
+  const {userId, userPassword} = req.body;
+  const hashedPassword = await bcrypt.hash(userPassword, 10);
+
+  if(!userId) return res.send('사용자의 Id를 제공해야 합니다.').status(400)
+
+  db.query(password_change_query, [hashedPassword, userId], (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Internal Server Error');
+      return;
+    }
+    
+    if (result.length === 0) {
+      res.status(404).send('User not found');
+      return;
+    }
+    return res.status(200).send('Password Change successfully');
+  })
+};
+
 const inquiryDataAdded = async (req, res) => {
   const { userName, categoryId, title, content } = req.body;
 
@@ -233,11 +280,13 @@ module.exports = {
   verifyCertification : verifyCertification,
   userDataSearch : userDataSearch,
   userDoubleCheck : userDoubleCheck,
+  idSearch : idSearch,
   inquiryDataSearch : inquiryDataSearch,
 
   // POST
   signUp : signUp,
   signIn : signIn,
   userDataAdd : userDataAdded,
+  passwordChange : passwordChange,
   inquiryDataAdded : inquiryDataAdded,
 }
