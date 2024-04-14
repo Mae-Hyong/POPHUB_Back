@@ -40,12 +40,16 @@ router.post("/sign_in", async (req, res) => {
     userService.signIn(req, res);
 });
 
+router.post("/password_change", async (req, res) => {
+  userService.passwordChange(req, res);
+});
+
 router.post("/profile_added", upload.single("file"), async(req, res) => {
   userService.userDataAdd(req, res);
 });
 
-router.post("/password_change", async (req, res) => {
-  userService.passwordChange(req, res);
+router.post("/profile_update", upload.single("file"), async(req, res) => {
+  userService.profileUpdate(req, res);
 });
 
 router.post("/inquiry_add", async (req, res) => {

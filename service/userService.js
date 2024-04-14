@@ -14,9 +14,10 @@ const id_search_query = 'SELECT user_id From user_info WHERE phone_number = ?';
 // ------- POST Query -------certification
 const sign_in_query = 'SELECT * FROM user_join_info WHERE user_id = ?';
 const sign_up_query = 'INSERT INTO user_join_info (user_id, user_password, user_role) VALUES (?, ?, ?)';
-const user_add_query = 'INSERT INTO user_info (user_id, user_name, phone_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
-const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content) VALUES (?, ?, ?, ?)';
 const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE user_id = ?';
+const user_add_query = 'INSERT INTO user_info (user_id, user_name, phone_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
+const profile_change_query = 'UPDATE user_info SET user_name, user_image  WHERE user_id = ?';
+const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content) VALUES (?, ?, ?, ?)';
 
 
 // ------- GET Service -------
@@ -207,35 +208,6 @@ const signIn = async (req, res) => {
   });
 };
 
-const userDataAdded = async (req, res) => {
-  const { userId, userName, phoneNumber, Gender, Age } = req.body;
-
-  try {
-    let userImage = null;
-    if (req.file) {
-      userImage = req.file.path;
-    }
-
-    db.query(user_add_query, [ userId, userName, phoneNumber, Gender, Age, userImage ], (err, result) => {
-      if (err) {
-        console.error(err);
-        res.status(500).send('Internal Server Error');
-        return;
-      }
-    
-      console.log('User added:', result);
-      res.status(201).send('User added successfully');
-    })
-  } catch (error) {
-    console.error("Error uploading image to Cloudinary:", error);
-    return res.status(500).json({
-        resultCode: 500,
-        resultMsg: "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
-        error: error.message
-    });
-  }
-};
-
 const passwordChange = async (req, res) => {
   const {userId, userPassword} = req.body;
   const hashedPassword = await bcrypt.hash(userPassword, 10);
@@ -255,6 +227,62 @@ const passwordChange = async (req, res) => {
     }
     return res.status(200).send('Password Change successfully');
   })
+};
+
+const userDataAdded = async (req, res) => {
+  const { userId, userName, phoneNumber, Gender, Age } = req.body;
+
+  try {
+    let userImage = null;
+    if (req.file) {
+      userImage = req.file.path;
+    }
+
+    db.query(user_add_query, [ userId, userName, phoneNumber, Gender, Age, userImage ], (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Internal Server Error');
+        return;
+      }
+      
+      res.status(201).send('User added successfully');
+    })
+  } catch (error) {
+    console.error("Error uploading image to Cloudinary:", error);
+    return res.status(500).json({
+        resultCode: 500,
+        resultMsg: "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
+        error: error.message
+    });
+  }
+};
+
+const profileUpdate = async (req, res) => {
+  const { userId, userName } = req.body;
+
+  try {
+    let userImage = null;
+    if (req.file) {
+      userImage = req.file.path;
+    }
+
+    db.query(profile_change_query, [userName, userImage, userId], (err, result) => {
+      if (err) {
+        console.error(err);
+        res.status(500).send('Internal Server Error');
+        return;
+      }
+      
+      res.status(200).send('Profile Update successfully');
+    })
+  } catch (error) {
+    console.error("Error uploading image to Cloudinary:", error);
+    return res.status(500).json({
+        resultCode: 500,
+        resultMsg: "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
+        error: error.message
+    });
+  }
 };
 
 const inquiryDataAdded = async (req, res) => {
@@ -286,7 +314,8 @@ module.exports = {
   // POST
   signUp : signUp,
   signIn : signIn,
-  userDataAdd : userDataAdded,
   passwordChange : passwordChange,
+  userDataAdd : userDataAdded,
+  profileUpdate : profileUpdate,
   inquiryDataAdded : inquiryDataAdded,
 }
