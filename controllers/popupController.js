@@ -41,7 +41,7 @@ const popupController = {
     updatePopup: async (req, res) => {
         try {
             const store_id = req.params.store_id;
-            const popupData = req.body;
+            const popupData = req.body.popupData;
             await popupModel.updatePopup(store_id, popupData);
             res.status(200).send(`${store_id} 수정 완료`);
         } catch (err) {
@@ -57,7 +57,7 @@ const popupController = {
             res.status(200).json(`${store_id} 삭제 완료`);
 
         } catch (err) {
-            console.log(err);
+
             throw err;
         }
     },
@@ -70,6 +70,15 @@ const popupController = {
         } catch (err) {
             console.log(err);
             throw err;
+        }
+    },
+
+    store_review : async (req, res) => {
+        try {
+            const { user_id, store_id } = req.body;
+            const store_review = await popupModel.createReview(user_id, store_id);
+        } catch (err) {
+
         }
     },
 };
