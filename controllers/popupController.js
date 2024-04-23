@@ -20,7 +20,7 @@ const popupController = {
             const store_id = popupDataResult.store_id;
             await popupModel.createSchedule(store_id, popupSchedules); // 팝업 스케줄 정보
 
-            res.status(201).send(`${store_id}가 등록되었습니다.`);
+            res.status(201).json(`${store_id}가 등록되었습니다.`);
         } catch (err) {
             console.log(err);
             throw err;
@@ -43,7 +43,7 @@ const popupController = {
             const store_id = req.params.store_id;
             const popupData = req.body.popupData;
             await popupModel.updatePopup(store_id, popupData);
-            res.status(200).send(`${store_id} 수정 완료`);
+            res.status(200).json(`${store_id} 수정 완료`);
         } catch (err) {
             console.log(err);
             throw err;

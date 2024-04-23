@@ -14,7 +14,7 @@ const productController = {
     createProduct: async (req, res) => {
         try {
             const store_id = req.params.store_id; // 로그인 정보로 수정할 예정
-            const { productData } = req.body; 
+            const { productData } = req.body;
             const data = {
                 store_id: store_id,
                 product_name: productData.product_name,
@@ -24,7 +24,7 @@ const productController = {
             const productDataResult = await productModel.createProduct(data);
             const product_id = productDataResult.product_id;
             res.status(201).send(` ${product_id} 해당 상품이 등록되었습니다.`);
-        } catch(err) {
+        } catch (err) {
             console.log(err);
             throw err;
         }
@@ -34,12 +34,31 @@ const productController = {
         try {
             const store_name = req.body.store_name;
             const products = await productModel.getProduct(store_name);
-            
+
             res.status(200).send({ products: products });
         } catch (err) {
             throw err;
         }
     },
+
+    updateProduct: async (req, res) => {
+        try {
+            const product_id = req.params.product_id;
+            const productData = req.body.productData;
+            await productModel.updateProduct(product_id, productData);
+            res.status(200).send(`${product_id} 수정 완료`);
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    deleteProduct: async (req, res) => {
+        try {
+
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
 module.exports = { productController }

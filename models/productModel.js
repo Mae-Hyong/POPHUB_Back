@@ -37,7 +37,7 @@ const productModel = {
                 db.query('SELECT store_id FROM popup_stores WHERE store_name = ?', store_name, (err, result) => {
                     resolve(result[0]);
                 })
-                
+
             })
 
             if (result) {
@@ -57,6 +57,19 @@ const productModel = {
             throw err;
         }
     },
+
+    updateProduct: async (product_id, productData) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query('UPDATE products SET ? WHERE product_id = ?', [productData, product_id], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                })
+            })
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
 module.exports = productModel;
