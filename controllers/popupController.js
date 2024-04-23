@@ -30,7 +30,7 @@ const popupController = {
     getPopup: async (req, res) => {
         try {
             const store_id = req.params.store_id;
-            const result = await (popupModel.getPopup(store_id));
+            const result = await popupModel.getPopup(store_id);
             res.status(200).json(result);
         } catch (err) {
             console.log(err);

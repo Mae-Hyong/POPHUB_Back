@@ -19,18 +19,44 @@ const productModel = {
         try {
             const result = await new Promise((resolve, reject) => {
                 db.query('INSERT INTO products SET ?', productData, (err, result) => {
-                    if(err) reject(err);
+                    if (err) reject(err);
                     else resolve(result);
                 });
             });
             const product_id = result.insertId;
             return { ...productData, product_id };
-            
+
         } catch (err) {
             throw err;
         }
+    },
 
-    }
+    getProduct: async (store_name) => {
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query('SELECT store_id FROM popup_stores WHERE store_name = ?', store_name, (err, result) => {
+                    resolve(result[0]);
+                })
+                
+            })
+
+            if (result) {
+                const store_id = result.store_id;
+                const products = await new Promise((resolve, reject) => {
+                    db.query('SELECT * FROM products WHERE store_id = ?', store_id, (err, products) => {
+                        if (err) {
+                            reject(err);
+                        } else {
+                            resolve(products);
+                        }
+                    });
+                });
+                console.log(products);
+            }
+        } catch (err) {
+            throw err;
+        }
+    },
 }
 
 module.exports = productModel;
