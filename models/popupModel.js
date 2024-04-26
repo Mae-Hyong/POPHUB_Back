@@ -50,7 +50,7 @@ const popupModel = {
         }
     },
 
-    
+
     getPopup: async (store_id) => { // 팝업 정보 조회
         try {
             const result = await new Promise((resolve, reject) => {
@@ -89,7 +89,7 @@ const popupModel = {
                         else resolve(result[0].count > 0); // 값 존재 여부 반환
                     });
                 });
-    
+
                 if (yes) {
                     await new Promise((resolve, reject) => {
                         db.query(`DELETE FROM ${tableName} WHERE store_id = ?`, [store_id], (err, result) => {
@@ -105,7 +105,7 @@ const popupModel = {
             throw err;
         }
     },
-    
+
 
     likePopup: async (user_id, store_id) => {
         try {
@@ -116,7 +116,7 @@ const popupModel = {
                     else resolve(results);
                 });
             });
-    
+
             if (bookmarks.length > 0) {
                 await new Promise((resolve, reject) => {
                     db.query('DELETE FROM BookMark WHERE user_id = ? AND store_id = ?', [user_id, store_id], (err, results) => {
@@ -124,7 +124,7 @@ const popupModel = {
                         else resolve();
                     });
                 });
-    
+
                 await new Promise((resolve, reject) => {
                     db.query('UPDATE popup_stores SET store_mark_number = store_mark_number - 1 WHERE store_id = ?', [store_id], (err, results) => {
                         if (err) reject(err);
@@ -138,7 +138,7 @@ const popupModel = {
                         else resolve();
                     });
                 });
-    
+
                 await new Promise((resolve, reject) => {
                     db.query('UPDATE popup_stores SET store_mark_number = store_mark_number + 1 WHERE store_id = ?', [store_id], (err, results) => {
                         if (err) reject(err);
@@ -146,14 +146,14 @@ const popupModel = {
                     });
                 });
             }
-    
+
             const store_mark_number = await new Promise((resolve, reject) => {
                 db.query('SELECT store_mark_number FROM popup_stores WHERE store_id = ?', [store_id], (err, results) => {
                     if (err) reject(err);
                     else resolve(results[0].store_mark_number);
                 });
             });
-    
+
             if (bookmarkResults.length > 0) {
                 return { message: '찜이 취소되었습니다.', mark_number: store_mark_number };
             } else {
@@ -163,8 +163,78 @@ const popupModel = {
             throw err;
         }
     },
-    
-    
+
+    storeReview: async (store_id) => {
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query('SELECT * FROM store_review WHERE store_id = ?', store_id, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                });
+            });
+            return results;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    storeReviewDetail: async (review_id) => { // 리뷰 상세 페이지
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query('SELECT * FROM store_review WHERE review_id = ?', review_id, (err, result) => {
+                    if (err) reject(err);
+                    console.log(result);
+                    resolve(result[0]);
+                });
+            });
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    createReview: async (reviewdata) => { // 리뷰 작성
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query('INSERT INTO store_review SET ?', reviewdata, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+            const review_id = result.insertId;
+            return { ...reviewdata, review_id };
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    updateReview: async (reviewdata, review_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query('UPDATE store_review SET? WHERE review_id = ?', [reviewdata, review_id], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+            return reviewdata;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    deleteReview: async (review_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query('DELETE FROM store_review WHERE review_id = ?', review_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+        } catch (err) {
+            throw err;
+        }
+    },
+
 };
 
 module.exports = popupModel;

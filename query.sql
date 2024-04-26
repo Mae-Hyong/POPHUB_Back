@@ -69,10 +69,12 @@ CREATE TABLE store_review (
 );
 
 CREATE TABLE products (
-    product_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL AUTO_INCREMENT,
     store_id INT,
     product_name VARCHAR(255) NOT NULL,
     product_price FLOAT NOT NULL,
     product_description LONGTEXT NOT NULL,
+    product_mark_number INT DEFAULT 0, -- 찜 수
+    PRIMARY KEY (product_id),
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
 );
