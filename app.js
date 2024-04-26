@@ -28,7 +28,7 @@ app.get("/", (req, res) => {
 // 인증 라우터
 app.use("/user", userRoute);
 app.use('/popup', popupRouter); // popup 라우터 사용
-app.use('/products', productRouter);
+app.use('/product', productRouter);
 
 app.listen(PORT, () =>{
     console.log(`${PORT}번 실행 중`)

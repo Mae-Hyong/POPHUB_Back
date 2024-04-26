@@ -1,4 +1,5 @@
 const popupModel = require('../models/popupModel');
+const moment = require('moment');
 
 const popupController = {
     allPopups: async (req, res) => {
@@ -73,14 +74,30 @@ const popupController = {
         }
     },
 
-    store_review : async (req, res) => {
+    createReview : async (req, res) => {
         try {
-            const { user_id, store_id } = req.body;
-            const store_review = await popupModel.createReview(user_id, store_id);
+            const user_id = req.body.user_id;
+            const store_id = req.params.store_id;
+            const reviewData = req.body.reviewData;
+            const review_date = moment().format('YYYY-MM-DD HH:mm:ss');
+            const reviewdata = {
+                user_id,
+                store_id,
+                review_rating: reviewData.review_rating,
+                review_content: reviewData.review_content,
+                review_date,
+            }
+            if(!user_id) {
+                return res.status(400).send("로그인 후 사용해주세요");
+            }
+            const allreview = await popupModel.createReview(reviewdata);
+            console.log(allreview);
+            res.status(201).json(allreview);
         } catch (err) {
-
+            throw err;
         }
     },
+
 };
 
 module.exports = { popupController }

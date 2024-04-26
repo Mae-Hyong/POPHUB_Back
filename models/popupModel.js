@@ -164,7 +164,20 @@ const popupModel = {
         }
     },
     
-    
+    createReview: async (reviewData) => { // 리뷰 작성
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query('INSERT INTO store_review SET ?', reviewData,(err,result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+            const review_id = result.insertId;
+            return { ...reviewData, review_id};
+        } catch (err) {
+            throw err;
+        }
+    },
 };
 
 module.exports = popupModel;

@@ -23,7 +23,7 @@ const productController = {
             };
             const productDataResult = await productModel.createProduct(data);
             const product_id = productDataResult.product_id;
-            res.status(201).send(` ${product_id} 해당 상품이 등록되었습니다.`);
+            res.status(201).json(` ${product_id} 해당 상품이 등록되었습니다.`);
         } catch (err) {
             console.log(err);
             throw err;
@@ -35,7 +35,7 @@ const productController = {
             const store_name = req.body.store_name;
             const products = await productModel.getProduct(store_name);
 
-            res.status(200).send({ products: products });
+            res.status(200).json({ products: products });
         } catch (err) {
             throw err;
         }
@@ -46,7 +46,7 @@ const productController = {
             const product_id = req.params.product_id;
             const productData = req.body.productData;
             await productModel.updateProduct(product_id, productData);
-            res.status(200).send(`${product_id} 수정 완료`);
+            res.status(200).json(`${product_id} 수정되었습니다.`);
         } catch (err) {
             throw err;
         }
@@ -54,7 +54,9 @@ const productController = {
 
     deleteProduct: async (req, res) => {
         try {
-
+            const product_id = req. params.product_id;
+            await productModel.deleteProduct(product_id);
+            res.status(200).json(`${product_id}가 삭제되었습니다.`);
         } catch (err) {
             throw err;
         }
