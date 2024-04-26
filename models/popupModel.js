@@ -183,7 +183,6 @@ const popupModel = {
             const result = await new Promise((resolve, reject) => {
                 db.query('SELECT * FROM store_review WHERE review_id = ?', review_id, (err, result) => {
                     if (err) reject(err);
-                    console.log(result);
                     resolve(result[0]);
                 });
             });
@@ -211,7 +210,7 @@ const popupModel = {
     updateReview: async (reviewdata, review_id) => {
         try {
             await new Promise((resolve, reject) => {
-                db.query('UPDATE store_review SET? WHERE review_id = ?', [reviewdata, review_id], (err, result) => {
+                db.query('UPDATE store_review SET ? WHERE review_id = ?', [reviewdata, review_id], (err, result) => {
                     if (err) reject(err);
                     else resolve(result);
                 });
