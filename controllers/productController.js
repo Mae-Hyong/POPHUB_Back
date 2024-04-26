@@ -144,6 +144,16 @@ const productController = {
             throw err;
         }
     },
+
+    deleteReview: async (req, res) => {
+        try {
+            const review_id = req.params.review_id;
+            await productModel.deleteReview(review_id);
+            res.status(200).json('삭제가 완료되었습니다.');
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
 module.exports = { productController }

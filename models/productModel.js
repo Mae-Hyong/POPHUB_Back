@@ -155,6 +155,19 @@ const productModel = {
         } catch (err) {
             throw err;
         }
+    },
+
+    deleteReview: async (review_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query('DELETE FROM product_review WHERE review_id = ?', review_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+        } catch (err) {
+            throw err;
+        }
     }
 }
 
