@@ -68,7 +68,7 @@ const popupController = {
         }
     },
 
-    storeReview : async (req, res) => { // 스토어 리뷰
+    storeReview: async (req, res) => { // 스토어 리뷰
         try {
             const store_id = req.params.store_id;
             const review = await popupModel.storeReview(store_id);
@@ -78,7 +78,7 @@ const popupController = {
         }
     },
 
-    storeReviewDetail : async (req, res) => {
+    storeReviewDetail: async (req, res) => {
         try {
             const review_id = req.params.review_id;
             const reviewDetail = await popupModel.storeReviewDetail(review_id);
@@ -89,9 +89,9 @@ const popupController = {
     },
 
 
-    createReview : async (req, res) => {
+    createReview: async (req, res) => {
         try {
-            if(!user_id) {
+            if (!user_id) {
                 return res.status(400).send("로그인 후 사용해주세요");
             }
 
@@ -113,10 +113,10 @@ const popupController = {
         }
     },
 
-    updateReview : async (req, res) => {
+    updateReview: async (req, res) => {
         try {
             const user_id = req.body.user_id;
-            if(!user_id) {
+            if (!user_id) {
                 return res.status(400).send("로그인 후 사용해주세요");
             }
 
@@ -124,7 +124,7 @@ const popupController = {
             const reviewData = req.body.reviewData;
             const review_modified_date = moment().format('YYYY-MM-DD HH:mm:ss');
             const reviewdata = {
-                user_id : req.body.user_id,
+                user_id: req.body.user_id,
                 review_rating: reviewData.review_rating,
                 review_content: reviewData.review_content,
                 review_modified_date,
@@ -136,6 +136,15 @@ const popupController = {
         }
     },
 
+    deleteReview: async (req, res) => {
+        try {
+            const review_id = req.params.review_id;
+            await popupModel.deleteReview(review_id);
+            res.status(200).json('삭제가 완료되었습니다.');
+        } catch (err) {
+            throw err;
+        }
+    }
 };
 
 module.exports = { popupController }
