@@ -9,4 +9,7 @@ router.post('/view', productController.storeProduct);
 router.put('/:product_id', productController.updateProduct);
 router.get('/:product_id', productController.storeProductDetail);
 router.delete('/:product_id', productController.deleteProduct);
+router.get('/reviews/:product_id', productController.productReview);
+router.get('/review/:review_id', productController.productReviewDetail);
+router.post('/review/create/:product_id', productController.createReview);
 module.exports = router;

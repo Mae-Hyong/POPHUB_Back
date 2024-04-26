@@ -1,4 +1,5 @@
 const productModel = require('../models/productModel');
+const moment = require('moment');
 
 const productController = {
     allProducts: async (req, res) => {
@@ -74,7 +75,52 @@ const productController = {
         } catch (err) {
             throw err;
         }
-    }
+    },
+
+    productReview: async (req, res) => {
+        try {
+            const product_id = req.params.product_id;
+            const review = await(productModel.productReview(product_id));
+            res.status(200).json(review);
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    productReviewDetail: async (req, res) => {
+        try {
+            const review_id = req.params.review_id;
+            const reviewDetail = await productModel.productReviewDetail(review_id);
+            res.status(200).json(reviewDetail);
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    createReview: async (req, res) => {
+        try {
+            const user_id = req.body.user_id;
+
+            if (!user_id) {
+                return res.status(400).send("로그인 후 사용해주세요");
+            }
+
+            const product_id = req.params.product_id;
+            const reviewData = req.body.reviewData;
+            const review_date = moment().format('YYYY-MM-DD HH:mm:ss');
+            const reviewdata = {
+                user_id,
+                product_id,
+                review_rating: reviewData.review_rating,
+                review_content: reviewData.review_content,
+                review_date,
+            }
+            const allreview = await productModel.createReview(reviewdata);
+            res.status(201).json(allreview);
+        } catch (err) {
+            throw err;
+        }
+    },
 }
 
 module.exports = { productController }

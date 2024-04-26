@@ -91,11 +91,12 @@ const popupController = {
 
     createReview: async (req, res) => {
         try {
+            const user_id = req.body.user_id;
+
             if (!user_id) {
                 return res.status(400).send("로그인 후 사용해주세요");
             }
 
-            const user_id = req.body.user_id;
             const store_id = req.params.store_id;
             const reviewData = req.body.reviewData;
             const review_date = moment().format('YYYY-MM-DD HH:mm:ss');
