@@ -183,7 +183,6 @@ const popupModel = {
             const result = await new Promise((resolve, reject) => {
                 db.query('SELECT * FROM store_review WHERE review_id = ?', review_id, (err, result) => {
                     if (err) reject(err);
-                    console.log(result);
                     resolve(result[0]);
                 });
             });

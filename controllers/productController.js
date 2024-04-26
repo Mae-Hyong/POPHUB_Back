@@ -11,18 +11,22 @@ const productController = {
         }
     },
 
-    createProduct: async (req, res) => {
+    createProduct: async (req, res) => { // 상품 등록
         try {
-            const store_id = req.params.store_id; // 로그인 정보로 수정할 예정
-            const { productData } = req.body;
-            const data = {
-                store_id: store_id,
+            const store_id = req.body.store_id;
+            const user_id = req.body.user_id;
+            const productData = req.body.productData;
+            if (!user_id) {
+                return res.status(400).send("로그인 후 사용해주세요");
+            }
+            const productdata = {
+                store_id,
                 product_name: productData.product_name,
                 product_price: productData.product_price,
                 product_description: productData.product_description
             };
-            const productDataResult = await productModel.createProduct(data);
-            const product_id = productDataResult.product_id;
+            const result = await productModel.createProduct(productdata);
+            const product_id = result.product_id;
             res.status(201).json(` ${product_id} 해당 상품이 등록되었습니다.`);
         } catch (err) {
             console.log(err);
@@ -30,12 +34,22 @@ const productController = {
         }
     },
 
-    getProduct: async (req, res) => {
+    storeProduct: async (req, res) => { // 스토어별 product
         try {
             const store_name = req.body.store_name;
             const products = await productModel.getProduct(store_name);
 
-            res.status(200).json({ products: products });
+            res.status(200).json(products);
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    storeProductDetail: async (req, res) => { // 상품 상세 조회
+        try {
+            const product_id = req.params.product_id;    
+            const productDetail = await productModel.storeProductDetail(product_id);
+            res.status(200).json(productDetail);
         } catch (err) {
             throw err;
         }
