@@ -8,6 +8,9 @@ router.get('/:store_id', popupController.getPopup);
 router.put('/:store_id', popupController.updatePopup);
 router.delete('/:store_id', popupController.deletePopup);
 router.post('/like', popupController.likePopup);
+router.get('/reviews/:store_id', popupController.storeReview);
+router.get('/review/:review_id', popupController.storeReviewDetail);
 router.post('/review/create/:store_id', popupController.createReview);
+router.put('/review/:review_id', popupController.updateReview);
 
 module.exports = router;

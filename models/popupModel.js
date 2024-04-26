@@ -164,20 +164,63 @@ const popupModel = {
         }
     },
     
-    createReview: async (reviewData) => { // 리뷰 작성
+    storeReview: async (store_id) => {
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query('SELECT * FROM store_review WHERE store_id = ?', store_id, (err, results) => {
+                    if(err) reject(err);
+                    resolve(results);
+                });
+            });
+            return results;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    storeReviewDetail: async (review_id) => { // 리뷰 상세 페이지
         try {
             const result = await new Promise((resolve, reject) => {
-                db.query('INSERT INTO store_review SET ?', reviewData,(err,result) => {
+                db.query('SELECT * FROM store_review WHERE review_id = ?', review_id, (err,result) => {
+                    if(err) reject(err);
+                    console.log(result);
+                    resolve(result[0]);
+                });
+            });
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    createReview: async (reviewdata) => { // 리뷰 작성
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query('INSERT INTO store_review SET ?', reviewdata,(err,result) => {
                     if (err) reject(err);
                     else resolve(result);
                 });
             });
             const review_id = result.insertId;
-            return { ...reviewData, review_id};
+            return { ...reviewdata, review_id};
         } catch (err) {
             throw err;
         }
     },
+
+    updateReview: async(reviewdata, review_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query('UPDATE store_review SET? WHERE review_id = ?', [reviewdata, review_id], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+            return reviewdata;
+        } catch (err) {
+            throw err;
+        }
+    }
 };
 
 module.exports = popupModel;
