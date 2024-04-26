@@ -141,6 +141,20 @@ const productModel = {
         } catch (err) {
             throw err;
         }
+    },
+
+    updateReview: async (reviewdata, review_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query('UPDATE product_review SET ?  WHERE review_id = ?', [reviewdata, review_id], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+            return reviewdata;
+        } catch (err) {
+            throw err;
+        }
     }
 }
 

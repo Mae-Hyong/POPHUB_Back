@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {productController} = require('../controllers/productController');
+const { productController } = require('../controllers/productController');
 
 
 router.get('/', productController.allProducts);
@@ -12,4 +12,5 @@ router.delete('/:product_id', productController.deleteProduct);
 router.get('/reviews/:product_id', productController.productReview);
 router.get('/review/:review_id', productController.productReviewDetail);
 router.post('/review/create/:product_id', productController.createReview);
+router.put('/review/:review_id', productController.updateReview);
 module.exports = router;
