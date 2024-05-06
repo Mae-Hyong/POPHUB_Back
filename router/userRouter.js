@@ -23,16 +23,7 @@ router.post("/change_password", userController.changePassword);
 router.post("/create_Profile", upload.single("file"), userController.createProfile);
 router.post("/update_profile", upload.single("file"), userController.updateProfile);
 
-
-// route GET
-router.get("/inquiry_data_search", async (req, res) => {
-  userService.inquiryDataSearch(req, res);
-})
-
-
-// route POST
-router.post("/inquiry_add", async (req, res) => {
-  userService.inquiryDataAdded(req, res);
-});
+router.get("/search_inquiry", userController.searchInquiry);
+router.post("/create_inquiry", userController.createInquiry);
 
 module.exports = router;
