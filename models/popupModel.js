@@ -127,9 +127,6 @@ const popupModel = {
         });
     },
     
-    
-    
-    
 };
 
 module.exports = popupModel;

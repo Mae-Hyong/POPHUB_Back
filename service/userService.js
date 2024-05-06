@@ -2,8 +2,8 @@ const bcrypt = require("bcrypt");
 
 const db = require('../config/mysqlDatabase');
 
-const sendMessage = require('../message');
-const generateToken = require('../jwt');
+const sendMessage = require('../function/message');
+const generateToken = require('../function/jwt');
 
 // ------- GET Query -------
 const user_search_query = 'SELECT * FROM user_info WHERE user_id = ?';
@@ -166,6 +166,7 @@ const inquiryDataSearch = async (req, res) => {
 };
 
 // ------- POST Service -------
+
 const signUp = async (req, res) =>{
   const { userId, userPassword, userRole } = req.body;
   const hashedPassword = await bcrypt.hash(userPassword, 10);
