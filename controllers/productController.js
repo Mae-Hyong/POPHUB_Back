@@ -83,7 +83,7 @@ const productController = {
         }
     },
 
-    // 하나의 굿즈 리뷰
+    // 특정 굿즈 리뷰
     productReview: async (req, res) => {
         try {
             const product_id = req.params.product_id;
