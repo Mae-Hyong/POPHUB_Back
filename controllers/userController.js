@@ -1,5 +1,6 @@
 const signModel = require('../models/signModel');
 const userModel = require('../models/userModel');
+
 const generateToken = require('../function/jwt');
 const sendMessage = require('../function/message');
 
@@ -70,7 +71,7 @@ const authController = {
 const userController = {
     searchUser : async (req, res) => {
         try {
-            const userId = req.body.userId;
+            const userId = req.params.userId;
 
             // 아이디가 안담겨 왔을때
             if (!userId) {
@@ -103,8 +104,8 @@ const userController = {
 
     doubleCheck : async (req, res) => {
         try {
-            const userId = req.body.userId;
-            const userName = req.body.userName;
+            const userId = req.params.userId;
+            const userName = req.params.userName;
 
             // 아이디 혹은 유저 네임이 안담겨 왔을때
             if (!userId && !userName) {
@@ -138,7 +139,7 @@ const userController = {
 
     searchId : async (req, res) => {
         try {
-            const phoneNumber = req.body.phoneNumber;
+            const phoneNumber = req.params.phoneNumber;
             if(!phoneNumber) return res.send('사용자의 Phone Number을 제공해야 합니다.').status(400);
             
             const result = await userModel.searchUser(phoneNumber);
@@ -237,7 +238,7 @@ const userController = {
     },
 
     searchInquiry : async (req, res) => {
-        const userName = req.body.userName;
+        const userName = req.params.userName;
 
         if (!userName) {
             return res.status(400).json({
@@ -259,14 +260,44 @@ const userController = {
                 inquiryId : result[0].inquiry_id,
                 userName : result[0].user_name,
                 categoryId : result[0].category_id,
-                title : result[0].title,
-                content : result[0].content,
+                title : result[0].title
             })
         } catch (err) {
             console.log(err);
             res.status(500).send("문의 검색 중 오류가 발생했습니다.")
         }
-    }
+    },
+
+    selectInquiry : async (req, res) => {
+        const inquiryId = req.params.inquiryId;
+
+        if(!inquiryId) {
+            return res.status(400).json({
+                resultCode: 400,
+                resultMsg: "문의 Id를 제공해야합니다."
+            })
+        }
+        const result = await userModel.searchInquiry(userName);
+
+        try {
+
+            if (result.length === 0) {
+                res.status(404).send('User not found');
+                return;
+            }
+            
+            return res.status(200).json({
+                inquiryId : result[0].inquiry_id,
+                userName : result[0].user_name,
+                categoryId : result[0].category_id,
+                title : result[0].title,
+                content : result[0].content,
+            })
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("문의 내역을 가져오는 중 오류가 발생했습니다.")
+        }
+    },
 }
 
 module.exports = {

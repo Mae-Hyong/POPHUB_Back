@@ -1,12 +1,12 @@
 const db = require('../config/mysqlDatabase');
 const { search } = require('../router/userRouter');
-const { userDoubleCheck } = require('../service/userService');
 
 // ------- GET Query -------
 const user_search_query = 'SELECT * FROM user_info WHERE user_id = ?';
 const name_search_query = 'SELECT * FROM user_info WHERE user_name = ? OR user_id = ?';
-const inquiry_search_query = 'SELECT * FROM inquiry WHERE user_name = ?';
 const id_search_query = 'SELECT user_id From user_info WHERE phone_number = ?';
+const inquiry_search_query = 'SELECT * FROM inquiry WHERE user_name = ? OR user_id = ?';
+
 
 // ------- POST Query -------
 const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE user_id = ?';
@@ -108,6 +108,18 @@ const userModel = {
                     resolve(result[0]);
                 }
             });
+        })
+    },
+
+    selectInquiry : (inquiry_id) => {
+        return new Promise((resolve, reject) => {
+            db.query(inquiry_search_query, [inquiry_id], (err, result) => {
+                if(err) {
+                    reject(err);
+                } else {
+                    resolve(result[0]);
+                }
+            })
         })
     },
 }
