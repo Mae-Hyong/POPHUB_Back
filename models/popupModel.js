@@ -22,10 +22,10 @@ const likePopupUpdateMinus_query = 'UPDATE popup_stores SET store_mark_number = 
 const likePopupUpdatePlus_query = 'UPDATE popup_stores SET store_mark_number = store_mark_number + 1 WHERE store_id = ?';
 
 // ------- DELETE Query -------
-const deletePopup_query = `SELECT COUNT(*) AS count FROM ${tableName} WHERE store_id = ?`;
+const deletePopupCheck_query = `SELECT COUNT(*) AS count FROM ${tableName} WHERE store_id = ?`;
 const deleteReview_query = 'DELETE FROM store_review WHERE review_id = ?';
 const likePopupDelete_query = 'DELETE FROM BookMark WHERE user_id = ? AND store_id = ?';
-
+const deletePopup_query = `DELETE FROM ${tableName} WHERE store_id = ?`;
 const popupModel = {
     allPopups: async () => { // 모든 팝업 스토어 정보 확인
         try {
@@ -110,7 +110,7 @@ const popupModel = {
         try {
             for (const tableName of tables) { // 해당 테이블에 store_id값 확인
                 const yes = await new Promise((resolve, reject) => {
-                    db.query(deletePopup_query, [store_id], (err, result) => {
+                    db.query(deletePopupCheck_query, [store_id], (err, result) => {
                         if (err) reject(err);
                         else resolve(result[0].count > 0); // 값 존재 여부 반환
                     });
@@ -118,7 +118,7 @@ const popupModel = {
 
                 if (yes) {
                     await new Promise((resolve, reject) => {
-                        db.query(`DELETE FROM ${tableName} WHERE store_id = ?`, [store_id], (err, result) => {
+                        db.query(deletePopup_query, [store_id], (err, result) => {
                             if (err) reject(err);
                             else resolve();
                         });
