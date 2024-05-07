@@ -3,7 +3,8 @@ const express = require('express');
 const router = express.Router();
 
 // Service
-//const userService = require('../service/userService');
+// const userService = require('../service/userService');
+
 const { signController, authController, userController } = require('../controllers/userController');
 
 
