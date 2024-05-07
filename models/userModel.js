@@ -1,6 +1,8 @@
 const db = require('../config/mysqlDatabase');
 const { search } = require('../router/userRouter');
-//const { userDoubleCheck } = require('../service/userService');
+
+// const { userDoubleCheck } = require('../service/userService');
+
 
 // ------- GET Query -------
 const user_search_query = 'SELECT * FROM user_info WHERE user_id = ?';
