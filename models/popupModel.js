@@ -65,7 +65,7 @@ const popupModel = {
         }
     },
 
-    updatePopup: async (store_id, popupData) => { // 팝업 정보 업데이트
+    updatePopup: async (store_id, popupData) => { // 팝업 정보 수정
         try {
             await new Promise((resolve, reject) => {
                 db.query('UPDATE popup_stores SET ? WHERE store_id = ?', [popupData, store_id], (err, result) => {
@@ -79,7 +79,7 @@ const popupModel = {
         }
     },
 
-    deletePopup: async (store_id) => {
+    deletePopup: async (store_id) => { // 팝업 정보 삭제
         const tables = ['BookMark', 'products', 'store_review', 'store_schedules', 'popup_stores'];
         try {
             for (const tableName of tables) { // 해당 테이블에 store_id값 확인
@@ -107,7 +107,7 @@ const popupModel = {
     },
 
 
-    likePopup: async (user_id, store_id) => {
+    likePopup: async (user_id, store_id) => { // 팝업 찜
         try {
 
             const bookmarks = await new Promise((resolve, reject) => {
@@ -164,7 +164,7 @@ const popupModel = {
         }
     },
 
-    storeReview: async (store_id) => {
+    storeReview: async (store_id) => { // 팝업 스토어 리뷰
         try {
             const results = await new Promise((resolve, reject) => {
                 db.query('SELECT * FROM store_review WHERE store_id = ?', store_id, (err, results) => {

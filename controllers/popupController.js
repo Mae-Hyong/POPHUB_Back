@@ -2,6 +2,7 @@ const popupModel = require('../models/popupModel');
 const moment = require('moment');
 
 const popupController = {
+    // 모든 팝업 조회
     allPopups: async (req, res) => {
         try {
             const result = await popupModel.allPopups();
@@ -11,7 +12,8 @@ const popupController = {
         }
     },
 
-    createPopup: async (req, res) => {
+    // 팝업 스토어 생성
+    createPopup: async (req, res) => { 
         try {
             const popupData = req.body.popupData;
             const popupSchedules = req.body.popupSchedules;
@@ -26,6 +28,7 @@ const popupController = {
         }
     },
 
+    // 팝업 스토어 상세 조회
     getPopup: async (req, res) => {
         try {
             const store_id = req.params.store_id;
@@ -36,6 +39,7 @@ const popupController = {
         }
     },
 
+    // 팝업 스토어 수정
     updatePopup: async (req, res) => {
         try {
             const store_id = req.params.store_id;
@@ -47,6 +51,7 @@ const popupController = {
         }
     },
 
+    // 팝업 스토어 삭제
     deletePopup: async (req, res) => {
         try {
             const store_id = req.params.store_id;
@@ -58,6 +63,7 @@ const popupController = {
         }
     },
 
+    // 팝업 스토어 찜
     likePopup: async (req, res) => {
         try {
             const { user_id, store_id } = req.body;
@@ -68,7 +74,8 @@ const popupController = {
         }
     },
 
-    storeReview: async (req, res) => { // 스토어 리뷰
+    // 팝업 스토어 리뷰
+    storeReview: async (req, res) => { 
         try {
             const store_id = req.params.store_id;
             const review = await popupModel.storeReview(store_id);
@@ -78,6 +85,8 @@ const popupController = {
         }
     },
 
+
+    // 팝업 스토어 리뷰 상세 조회
     storeReviewDetail: async (req, res) => {
         try {
             const review_id = req.params.review_id;
@@ -88,7 +97,7 @@ const popupController = {
         }
     },
 
-
+    // 팝업 스토어 리뷰 생성
     createReview: async (req, res) => {
         try {
             const user_id = req.body.user_id;
@@ -114,6 +123,7 @@ const popupController = {
         }
     },
 
+    // 팝업 스토어 리뷰 수정
     updateReview: async (req, res) => {
         try {
             const user_id = req.body.user_id;
@@ -137,6 +147,7 @@ const popupController = {
         }
     },
 
+    // 팝업 스토어 리뷰 삭제
     deleteReview: async (req, res) => {
         try {
             const review_id = req.params.review_id;

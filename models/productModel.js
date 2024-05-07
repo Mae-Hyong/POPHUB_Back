@@ -31,7 +31,7 @@ const productModel = {
         }
     },
 
-    storeProduct: async (store_name) => {
+    getProduct: async (store_name) => { // 특정 팝업 스토어 굿즈 조회
         try {
             const result = await new Promise((resolve, reject) => {
                 db.query('SELECT store_id FROM popup_stores WHERE store_name = ?', store_name, (err, result) => {
@@ -58,7 +58,7 @@ const productModel = {
         }
     },
 
-    storeProductDetail: async (product_id) => {
+    storeProductDetail: async (product_id) => { // 굿즈 상세 조회
         try {
             const result = await new Promise((resolve, reject) => {
                 db.query('SELECT * FROM products WHERE product_id = ?', product_id, (err, result) => {
@@ -73,7 +73,7 @@ const productModel = {
     },
 
 
-    updateProduct: async (product_id, productData) => {
+    updateProduct: async (product_id, productData) => { // 굿즈 수정
         try {
             await new Promise((resolve, reject) => {
                 db.query('UPDATE products SET ? WHERE product_id = ?', [productData, product_id], (err, result) => {
@@ -86,7 +86,7 @@ const productModel = {
         }
     },
 
-    deleteProduct: async (product_id) => {
+    deleteProduct: async (product_id) => { // 굿즈 삭제
         try {
             await new Promise((resolve, reject) => {
                 db.query('DELETE FROM products WHERE product_id = ?', product_id, (err, result) => {
@@ -99,7 +99,7 @@ const productModel = {
         }
     },
 
-    productReview: async (product_id) => {
+    productReview: async (product_id) => { // 특정 굿즈 조회
         try {
             const results = await new Promise((resolve, reject) => {
                 db.query('SELECT * FROM product_review WHERE product_id = ?', product_id, (err, results) => {
@@ -113,7 +113,7 @@ const productModel = {
         }
     },
 
-    productReviewDetail: async (review_id) => {
+    productReviewDetail: async (review_id) => { // 특정 굿즈 리뷰 상세 조회
         try {
             const result = await new Promise((resolve, reject) => {
                 db.query('SELECT * FROM product_review WHERE review_id = ?', review_id, (err, result) => {
@@ -127,7 +127,7 @@ const productModel = {
         }
     },
 
-    createReview: async (reviewdata) => {
+    createReview: async (reviewdata) => { // 굿즈 리뷰 생성
         try {
             const result = await new Promise((resolve, reject) => {
                 db.query('INSERT INTO product_review SET ?', reviewdata, (err, result) => {
@@ -143,7 +143,7 @@ const productModel = {
         }
     },
 
-    updateReview: async (reviewdata, review_id) => {
+    updateReview: async (reviewdata, review_id) => { // 굿즈 리뷰 수정
         try {
             await new Promise((resolve, reject) => {
                 db.query('UPDATE product_review SET ?  WHERE review_id = ?', [reviewdata, review_id], (err, result) => {
@@ -157,7 +157,7 @@ const productModel = {
         }
     },
 
-    deleteReview: async (review_id) => {
+    deleteReview: async (review_id) => { // 굿즈 리뷰 삭제
         try {
             await new Promise((resolve, reject) => {
                 db.query('DELETE FROM product_review WHERE review_id = ?', review_id, (err, result) => {
