@@ -2,6 +2,7 @@ const productModel = require('../models/productModel');
 const moment = require('moment');
 
 const productController = {
+    // 모든 굿즈 조회
     allProducts: async (req, res) => {
         try {
             const result = await productModel.allProducts();
@@ -12,7 +13,8 @@ const productController = {
         }
     },
 
-    createProduct: async (req, res) => { // 상품 등록
+    // 굿즈 생성
+    createProduct: async (req, res) => {
         try {
             const store_id = req.body.store_id;
             const user_id = req.body.user_id;
@@ -35,7 +37,8 @@ const productController = {
         }
     },
 
-    storeProduct: async (req, res) => { // 스토어별 product
+    // 굿즈 조회
+    getProduct: async (req, res) => {
         try {
             const store_name = req.body.store_name;
             const products = await productModel.getProduct(store_name);
@@ -46,7 +49,8 @@ const productController = {
         }
     },
 
-    storeProductDetail: async (req, res) => { // 상품 상세 조회
+    // 굿즈 상세 조회
+    storeProductDetail: async (req, res) => {
         try {
             const product_id = req.params.product_id;    
             const productDetail = await productModel.storeProductDetail(product_id);
@@ -56,6 +60,7 @@ const productController = {
         }
     },
 
+    // 굿즈 수정
     updateProduct: async (req, res) => {
         try {
             const product_id = req.params.product_id;
@@ -67,6 +72,7 @@ const productController = {
         }
     },
 
+    // 굿즈 삭제
     deleteProduct: async (req, res) => {
         try {
             const product_id = req. params.product_id;
@@ -77,6 +83,7 @@ const productController = {
         }
     },
 
+    // 특정 굿즈 리뷰
     productReview: async (req, res) => {
         try {
             const product_id = req.params.product_id;
@@ -87,6 +94,7 @@ const productController = {
         }
     },
 
+    // 굿즈 리뷰 상세 조회
     productReviewDetail: async (req, res) => {
         try {
             const review_id = req.params.review_id;
@@ -97,6 +105,7 @@ const productController = {
         }
     },
 
+    // 굿즈 리뷰 생성
     createReview: async (req, res) => {
         try {
             const user_id = req.body.user_id;
@@ -122,6 +131,7 @@ const productController = {
         }
     },
 
+    // 굿즈 리뷰 수정
     updateReview: async (req, res) => {
         try {
             const user_id = req.body.user_id;
@@ -145,6 +155,7 @@ const productController = {
         }
     },
 
+    // 굿즈 리뷰 삭제
     deleteReview: async (req, res) => {
         try {
             const review_id = req.params.review_id;
