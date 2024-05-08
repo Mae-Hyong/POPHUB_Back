@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require("cors");
 
 // Routes
-const userRoute = require('./router/userRouter');
+const userRouter = require('./router/userRouter');
 const popupRouter = require('./router/popup');
 
 app.use(bodyParser.json());
@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 
 // 인증 라우터
 app.use('/popup', popupRouter); // popup 라우터 사용
-app.use("/user", userRoute);
+app.use("/user", userRouter);
 
 app.listen(PORT, () =>{
     console.log(`${PORT}번 실행 중`)
