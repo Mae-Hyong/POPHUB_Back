@@ -7,6 +7,7 @@ const cors = require("cors");
 // Routes
 const userRouter = require('./router/userRouter');
 const popupRouter = require('./router/popup');
+const productRouter = require('./router/product');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -25,8 +26,9 @@ app.get("/", (req, res) => {
 });
 
 // 인증 라우터
-app.use('/popup', popupRouter); // popup 라우터 사용
 app.use("/user", userRouter);
+app.use('/popup', popupRouter); // popup 라우터 사용
+app.use('/product', productRouter);
 
 app.listen(PORT, () =>{
     console.log(`${PORT}번 실행 중`)

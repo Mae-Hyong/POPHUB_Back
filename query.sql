@@ -56,3 +56,38 @@ CREATE TABLE BookMark (
     FOREIGN KEY (user_id) REFERENCES user_info(user_id),
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
 );
+
+CREATE TABLE store_review (
+    review_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    store_id INT NOT NULL,
+    user_id VARCHAR(50) NOT NULL,
+    review_rating INT NOT NULL,
+    review_content LONGTEXT,
+    review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    review_modified_date TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
+    FOREIGN KEY (user_id) REFERENCES user_info(user_id)
+);
+
+CREATE TABLE products (
+    product_id INT NOT NULL AUTO_INCREMENT,
+    store_id INT,
+    product_name VARCHAR(255) NOT NULL,
+    product_price FLOAT NOT NULL,
+    product_description LONGTEXT NOT NULL,
+    product_mark_number INT DEFAULT 0, -- 찜 수
+    PRIMARY KEY (product_id),
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
+);
+
+CREATE TABLE product_review (
+    review_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    product_id INT NOT NULL,
+    user_id VARCHAR(50) NOT NULL,
+    review_rating INT NOT NULL,
+    review_content LONGTEXT,
+    review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    review_modified_date TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (product_id) REFERENCES products(product_id),
+    FOREIGN KEY (user_id) REFERENCES user_info(user_id)
+);
