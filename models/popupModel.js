@@ -226,8 +226,6 @@ const popupModel = {
             throw err;
         }
     },
-<<<<<<< HEAD
-=======
 
     createReview: async (reviewdata) => { // 리뷰 생성
         try {
@@ -270,7 +268,6 @@ const popupModel = {
             throw err;
         }
     },
->>>>>>> 841ca09168e2e0d1af2e4b0366e1cd85e316a0ed
     
 };
 
