@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-const PORT = 3000;
 const bodyParser = require('body-parser');
 const cors = require("cors");
 
@@ -30,6 +29,6 @@ app.use("/user", userRouter);
 app.use('/popup', popupRouter); // popup 라우터 사용
 app.use('/product', productRouter);
 
-app.listen(PORT, () =>{
-    console.log(`${PORT}번 실행 중`)
+app.listen(process.env.PORT, () =>{
+    console.log(`${process.env.PORT}번 실행 중`)
 })
