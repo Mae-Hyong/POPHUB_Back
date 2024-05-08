@@ -1,7 +1,7 @@
 const signModel = require('../models/signModel');
 const userModel = require('../models/userModel');
 
-const generateToken = require('../function/jwt');
+const Token = require('../function/jwt');
 const sendMessage = require('../function/message');
 
 const bcrypt = require('bcrypt');
@@ -28,7 +28,7 @@ const signController = {
             const isPasswordValid = await bcrypt.compare(authPassword, userPassword);
 
             if (isPasswordValid) {
-                const token = generateToken(userId);
+                const token = Token.generateToken(userId);
                 return res.status(200).json({user_id : userId, token });
             } else {
                 res.status(401).send('Invalid password');
@@ -47,7 +47,7 @@ const authController = {
             const Number = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
 
             sendMessage(phoneNumber, Number);
-            res.status(200).send(phoneNumber, Number);
+            res.status(200).send('Certification success');
         } catch (err) {
             console.log(err);
             res.status(500).send("메세지 전송 중 오류가 발생했습니다.");
@@ -69,10 +69,10 @@ const authController = {
 };
 
 const userController = {
-    searchUser : async (req, res) => {
+    searchUser: async (req, res) => {
         try {
             const userId = req.params.userId;
-
+    
             // 아이디가 안담겨 왔을때
             if (!userId) {
                 return res.status(400).json({
@@ -80,27 +80,28 @@ const userController = {
                     resultMsg: "사용자 ID를 제공해야 합니다.",
                 });
             } 
-
+    
             const result = await userModel.searchUser(userId);
-
-            if (result.length === 0) {
+    
+            if (!result || result.length === 0) {
                 res.status(404).send('User not found');
                 return;
             }
             return res.status(200).json({
-                userId : result[0].user_id,
-                userName : result[0].user_name,
-                phoneNumber : result[0].phone_number,
-                pointScore : result[0].point_score,
-                gender : result[0].gender,
-                age : result[0].age,
-                userImage : result[0].user_image,
-            })
+                userId: result.user_id,
+                userName: result.user_name,
+                phoneNumber: result.phone_number,
+                pointScore: result.point_score,
+                gender: result.gender,
+                age: result.age,
+                userImage: result.user_image,
+            });
         } catch (err) {
             console.log(err);
             res.status(500).send("데이터 검색 중 오류가 발생했습니다.");
         }
     },
+    
 
     doubleCheck : async (req, res) => {
         try {

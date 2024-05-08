@@ -1,8 +1,9 @@
 const upload = require('../function/multer');
+const token = require('../function/jwt');
+
 const express = require('express');
 const router = express.Router();
 
-// Service
 const { signController, authController, userController } = require('../controllers/userController');
 
 
@@ -15,7 +16,7 @@ router.post("/certification", authController.certification);
 router.post("/verify", authController.verifyCertification);
 
 // user route
-router.get("/searh_user/:userId", userController.searchUser);
+router.get("/searh_user/:userId", token.verifyToken, userController.searchUser);
 router.get("/check/:userId", userController.doubleCheck);
 router.get("/check/:userName", userController.doubleCheck);
 router.get("/searh_id/:phoneNumber", userController.searchId);
