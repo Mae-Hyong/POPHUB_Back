@@ -56,10 +56,10 @@ const popupModel = {
         }
     },
 
-    createSchedule: async (store_id, popupSchedules) => { // 스케줄 생성
+    createSchedule: async (store_id, popupSchedule) => { // 스케줄 생성
         try {
             const promises = [];
-            const schedules = popupSchedules.map(schedule => ({ store_id, ...schedule }));
+            const schedules = popupSchedule.map(schedule => ({ store_id, ...schedule }));
             schedules.forEach(schedule => {
                 promises.push(new Promise((resolve, reject) => {
                     db.query(createSchedule_query, schedule, (err, results) => {

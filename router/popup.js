@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { popupController } = require('../controllers/popupController');
+const upload = require('../function/multer');
 
 router.get('/', popupController.allPopups); // 모든 팝업 조회
-router.post('/', popupController.createPopup); // 팝업 생성
+router.post('/', upload.single("file"), popupController.createPopup); // 팝업 생성
 router.get('/:store_id', popupController.getPopup); // 특정 팝업 조회
 router.put('/:store_id', popupController.updatePopup); // 팝업 수정
 router.delete('/:store_id', popupController.deletePopup); // 팝업 삭제
