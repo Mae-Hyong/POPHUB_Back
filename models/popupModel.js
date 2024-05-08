@@ -189,7 +189,7 @@ const popupModel = {
                 });
             });
 
-            if (bookmarkResults.length > 0) {
+            if (bookmarks.length > 0) {
                 return { message: '찜이 취소되었습니다.', mark_number: store_mark_number };
             } else {
                 return { message: '찜이 추가되었습니다.', mark_number: store_mark_number };
