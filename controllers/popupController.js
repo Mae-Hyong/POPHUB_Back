@@ -15,12 +15,41 @@ const popupController = {
     // 팝업 스토어 생성
     createPopup: async (req, res) => { 
         try {
-            const popupData = req.body.popupData;
-            const popupSchedules = req.body.popupSchedules;
+            let userImage = null;
+            if (req.file) userImage = req.file.path;
+            const body = req.body;
+
+            const popupData = { // 팝업 스토어 생성에 들어갈 객체
+                category_id: body.category_id,
+                store_name: body.store_name,
+                store_location: body.store_location,
+                store_contact_info: body.store_contact_info,
+                store_description: body.store_description,
+                store_status: body.store_status,
+                store_image: userImage,
+                store_artist_name: body.store_artist_name,
+                store_start_date: body.store_start_date,
+                store_end_date: body.store_end_date,
+            };
+
+            const popupSchedule = { schedule: [] };
+
+            for (let i = 0; i < body.schedule.length; i++) {
+                const daySchedule = body.schedule[i];
+                const dayOfWeek = daySchedule.day_of_week;
+                const openTime = daySchedule.open_time;
+                const closeTime = daySchedule.close_time;
+            
+                popupSchedule.schedule.push({
+                    day_of_week: dayOfWeek,
+                    open_time: openTime,
+                    close_time: closeTime
+                });
+            }
 
             const popupDataResult = await popupModel.createPopup(popupData); // 팝업 정보
             const store_id = popupDataResult.store_id;
-            await popupModel.createSchedule(store_id, popupSchedules); // 팝업 스케줄 정보
+            await popupModel.createSchedule(store_id, popupSchedule.schedule); // 팝업 스케줄 정보
 
             res.status(201).json(`${store_id}가 등록되었습니다.`);
         } catch (err) {

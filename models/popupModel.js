@@ -56,10 +56,10 @@ const popupModel = {
         }
     },
 
-    createSchedule: async (store_id, popupSchedules) => { // 스케줄 생성
+    createSchedule: async (store_id, popupSchedule) => { // 스케줄 생성
         try {
             const promises = [];
-            const schedules = popupSchedules.map(schedule => ({ store_id, ...schedule }));
+            const schedules = popupSchedule.map(schedule => ({ store_id, ...schedule }));
             schedules.forEach(schedule => {
                 promises.push(new Promise((resolve, reject) => {
                     db.query(createSchedule_query, schedule, (err, results) => {
@@ -189,7 +189,7 @@ const popupModel = {
                 });
             });
 
-            if (bookmarkResults.length > 0) {
+            if (bookmarks.length > 0) {
                 return { message: '찜이 취소되었습니다.', mark_number: store_mark_number };
             } else {
                 return { message: '찜이 추가되었습니다.', mark_number: store_mark_number };
