@@ -47,7 +47,10 @@ const authController = {
             const Number = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
 
             sendMessage(phoneNumber, Number);
-            res.status(200).send('Certification success');
+            return res.status(200).json({
+                phoneNumber : phoneNumber,
+                Number : Number
+            });
         } catch (err) {
             console.log(err);
             res.status(500).send("메세지 전송 중 오류가 발생했습니다.");
