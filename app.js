@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require("cors");
 
 // Routes
+const adminRouter = require('./router/adminRouter');
 const userRouter = require('./router/userRouter');
 const popupRouter = require('./router/popup');
 const productRouter = require('./router/product');
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 });
 
 // 인증 라우터
+app.use("/admin", adminRouter);
 app.use("/user", userRouter);
 app.use('/popup', popupRouter); // popup 라우터 사용
 app.use('/product', productRouter);
