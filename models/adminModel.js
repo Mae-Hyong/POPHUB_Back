@@ -2,7 +2,7 @@ const db = require('../config/mysqlDatabase');
 
 // ------- POST Query -------
 const create_answer_query = 'INSERT INTO answer(inquiry_id, user_name, content) VALUES (?, ?, ?)'
-const update_inquiry_query = 'UPDATE inquiry SET status WHERE inquiry_id = ?'
+const update_inquiry_query = 'UPDATE inquiry SET status = ? WHERE inquiry_id = ?'
 
 const adminModel = {
     createAnswer : (inquiry_id, user_name, content) => {
@@ -30,4 +30,4 @@ const adminModel = {
     },
 }
 
-module.export = adminModel;
+module.exports = adminModel;

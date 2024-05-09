@@ -57,7 +57,6 @@ const authController = {
     verifyCertification : async (req, res) => {
         try {
             const { authCode, expectedCode } = req.body;
-            const Number = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
 
             if ( authCode === expectedCode ) res.status(200).send('Successful !');
             else res.status(401).send('Failed. Invalid code.');
@@ -101,7 +100,6 @@ const userController = {
             res.status(500).send("데이터 검색 중 오류가 발생했습니다.");
         }
     },
-    
 
     doubleCheck : async (req, res) => {
         try {
@@ -150,7 +148,7 @@ const userController = {
                 return;
             }
             return res.status(200).json({
-                userId : result[0].user_id
+                userId : result.user_id
             })
         } catch (err) {
             console.log(err);
@@ -258,10 +256,10 @@ const userController = {
             }
             
             return res.status(200).json({
-                inquiryId : result[0].inquiry_id,
-                userName : result[0].user_name,
-                categoryId : result[0].category_id,
-                title : result[0].title
+                inquiryId : result.inquiry_id,
+                userName : result.user_name,
+                categoryId : result.category_id,
+                title : result.title
             })
         } catch (err) {
             console.log(err);
@@ -288,17 +286,48 @@ const userController = {
             }
             
             return res.status(200).json({
-                inquiryId : result[0].inquiry_id,
-                userName : result[0].user_name,
-                categoryId : result[0].category_id,
-                title : result[0].title,
-                content : result[0].content,
+                inquiryId : result.inquiry_id,
+                userName : result.user_name,
+                categoryId : result.category_id,
+                title : result.title,
+                content : result.content,
+                writeDate : result.write_date,
+                answerStatus : result.status
             })
         } catch (err) {
             console.log(err);
             res.status(500).send("문의 내역을 가져오는 중 오류가 발생했습니다.")
         }
     },
+
+    searchAnswer : async (req, res) => {
+        const inquiryId = req.params.inquiryId;
+        if(!inquiryId) {
+            return res.status(400).json({
+                resultCode: 400,
+                resultMsg: "문의 Id를 제공해야합니다."
+            })
+        }
+        const result = await userModel.searchAnswer(inquiryId);
+        try {
+
+            if (result.length === 0) {
+                res.status(404).send('User not found');
+                return;
+            }
+            
+            return res.status(200).json({
+                answerId : result.answer_id,
+                inquiryId : result.inquiry_id,
+                userName : result.user_name,
+                content : result.content,
+                writeDate : result.write_date
+            })
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("문의 내역을 가져오는 중 오류가 발생했습니다.")
+        }
+    }
 }
 
 module.exports = {

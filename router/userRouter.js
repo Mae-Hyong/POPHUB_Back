@@ -24,8 +24,9 @@ router.post("/change_password", userController.changePassword);
 router.post("/create_Profile", token.verifyToken, upload.single("file"), userController.createProfile);
 router.post("/update_profile", token.verifyToken, upload.single("file"), userController.updateProfile);
 
-router.get("/search_inquiry", token.verifyToken, userController.searchInquiry);
+router.get("/search_inquiry/:userName", token.verifyToken, userController.searchInquiry);
 router.post("/create_inquiry", token.verifyToken, userController.createInquiry);
-router.get("/select_inquiry/:inquiry_id", token.verifyToken, userController.selectInquiry);
+router.get("/select_inquiry/:inquiryId", token.verifyToken, userController.selectInquiry);
+router.get("/search_answer/:inquiryId", token.verifyToken, userController.searchAnswer);
 
 module.exports = router;

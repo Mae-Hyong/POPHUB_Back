@@ -4,13 +4,14 @@ const db = require('../config/mysqlDatabase');
 const user_search_query = 'SELECT * FROM user_info WHERE user_id = ?';
 const name_search_query = 'SELECT * FROM user_info WHERE user_name = ? OR user_id = ?';
 const id_search_query = 'SELECT user_id From user_info WHERE phone_number = ?';
-const inquiry_search_query = 'SELECT * FROM inquiry WHERE user_name = ? OR user_id = ?';
-
+const inquiry_search_query = 'SELECT * FROM inquiry WHERE user_name = ?';
+const inquiry_select_query = 'SELECT * FROM inquiry WHERE inquiry_id = ?';
+const answer_search_query = 'SELECT * FROM answer WHERE inquiry_id = ?';
 
 // ------- POST Query -------
 const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE user_id = ?';
 const profile_add_query = 'INSERT INTO user_info (user_id, user_name, phone_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
-const profile_change_query = 'UPDATE user_info SET user_name, user_image  WHERE user_id = ?';
+const profile_change_query = 'UPDATE user_info SET user_name = ?, user_image = ?  WHERE user_id = ?';
 const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content) VALUES (?, ?, ?, ?)';
 
 const userModel = {
@@ -100,7 +101,7 @@ const userModel = {
 
     searchInquiry : (userName) => {
         return new Promise((resolve, reject) => {
-            db.query(inquiry_search_query, [userName], (err, result) => {
+            db.query(inquiry_search_query, userName, (err, result) => {
                 if(err) {
                     reject(err);
                 } else {
@@ -112,7 +113,19 @@ const userModel = {
 
     selectInquiry : (inquiry_id) => {
         return new Promise((resolve, reject) => {
-            db.query(inquiry_search_query, [inquiry_id], (err, result) => {
+            db.query(inquiry_select_query, inquiry_id, (err, result) => {
+                if(err) {
+                    reject(err);
+                } else {
+                    resolve(result[0]);
+                }
+            })
+        })
+    },
+
+    searchAnswer : (inquiry_id) => {
+        return new Promise((resolve, reject) => {
+            db.query(answer_search_query, inquiry_id, (err, result) => {
                 if(err) {
                     reject(err);
                 } else {
