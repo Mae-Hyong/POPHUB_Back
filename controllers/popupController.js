@@ -187,16 +187,37 @@ const popupController = {
         }
     },
 
+    // 관리자 대기 상태 변경
     adminWait: async (req, res) => {
         try {
-            const user_id = req.user_id;
+            const user_id = req.body.user_id;
             const store_id = req.params.store_id;
-            const status = await popupModel.adminWait(user_id, store_id);
-            res.status(200).json(`대기 상태가 ${status}로 변경되었습니다.`);
+            const status = await popupModel.adminWait(store_id);
+            res.status(200).json({status});
         } catch (err) {
             throw err;
         }
     },
+
+    waitReservation: async (req, res) => {
+        try {
+            const { user_id, wait_visitor_name, wait_visitor_number } = req.body;
+            const store_id = req.params.store_id;
+            const wait_reservation_time = moment().format('HH:mm:ss');
+            const waitReservation = {
+                store_id,
+                user_id,
+                wait_visitor_name,
+                wait_visitor_number,
+                wait_reservation_time
+            }
+
+            const status = await popupModel.waitReservation(waitReservation);
+            res.status(201).json(status);
+        } catch (err) {
+            throw err;
+        }
+    }
 };
 
 module.exports = { popupController }

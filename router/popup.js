@@ -15,5 +15,5 @@ router.post('/review/create/:store_id', popupController.createReview); // 팝업
 router.put('/review/:review_id', popupController.updateReview);  // 팝업 리뷰 수정
 router.delete('/review/:review_id', popupController.deleteReview); // 팝업 리뷰 삭제
 router.put('/adminWait/:store_id', popupController.adminWait); // 예약 대기 값 변경
-
+router.post('/reservation/:store_id', popupController.waitReservation); // 예약
 module.exports = router;

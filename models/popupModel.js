@@ -8,12 +8,14 @@ const storeReview_query = 'SELECT * FROM store_review WHERE store_id = ?';
 const storeReviewDetail_query = 'SELECT * FROM store_review WHERE review_id = ?';
 const likePopupSelect_query = 'SELECT * FROM BookMark WHERE user_id = ? AND store_id = ?';
 const likePopupCheck_query = 'SELECT store_mark_number FROM popup_stores WHERE store_id = ?';
-
+const waitList_query = 'SELECT * FROM wait_list WHERE store_id = ?';
+const waitOrder_query = 'SELECT COUNT(*) AS waitOrder FROM wait_list WHERE store_id = ? AND wait_reservation_time <= (SELECT wait_reservation_time FROM wait_list WHERE store_id = ? AND user_id = ?)';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
 const createPopup_query = 'INSERT INTO popup_stores SET ?';
 const likePopupInsert_query = 'INSERT INTO BookMark (user_id, store_id) VALUES (?, ?)';
+const createWaitReservation_query = 'INSERT INTO wait_list SET ?';
 
 // ------- PUT Query -------
 const updatePopup_query = 'UPDATE popup_stores SET ? WHERE store_id = ?';
@@ -269,7 +271,7 @@ const popupModel = {
         }
     },
 
-    adminWait: async (user_id, store_id) => { // 대기 상태 변경
+    adminWait: async (store_id) => { // 대기 상태 변경
         try {
             const result = await new Promise((resolve, reject) => {
                 db.query(getPopup_query, store_id, (err, result) => {
@@ -286,9 +288,58 @@ const popupModel = {
                     else resolve();
                 });
             });
-            
-            return newWaitStatus;
 
+            const waitList = await new Promise((resolve, reject) => {
+                db.query(waitList_query, store_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                })
+            })
+
+            if (waitList.length > 0) {
+                return { newWaitStatus, waitList };
+            } else {
+                return '현재 대기 목록이 없습니다.';
+            }
+
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    waitReservation: async (waitReservation) => { // 대기 등록
+        try {
+            const { store_id, user_id } = waitReservation;
+
+            const waitStatus = await new Promise((resolve, reject) => {
+                db.query('SELECT store_wait_status FROM popup_stores WHERE store_id = ?', store_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result[0].store_wait_status);
+                })
+            });
+
+            if(waitStatus == 'true') {
+                await new Promise((resolve, reject) => {
+                    db.query(createWaitReservation_query, waitReservation, (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    })
+                });
+
+                const waitOrder = await new Promise((resolve, reject) => {
+                    db.query(waitOrder_query, [store_id, store_id, user_id], (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    });
+                });
+
+                return waitOrder;
+            } else {
+                return '지금 바로 입장해주세요';
+            }
+
+
+            
         } catch (err) {
             throw err;
         }
