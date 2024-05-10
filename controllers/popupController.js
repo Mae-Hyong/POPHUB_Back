@@ -13,7 +13,7 @@ const popupController = {
     },
 
     // 팝업 스토어 생성
-    createPopup: async (req, res) => { 
+    createPopup: async (req, res) => {
         try {
             let userImage = null;
             if (req.file) userImage = req.file.path;
@@ -21,11 +21,11 @@ const popupController = {
 
             const popupData = { // 팝업 스토어 생성에 들어갈 객체
                 category_id: body.category_id,
+                user_id: body.user_id,
                 store_name: body.store_name,
                 store_location: body.store_location,
                 store_contact_info: body.store_contact_info,
                 store_description: body.store_description,
-                store_status: body.store_status,
                 store_image: userImage,
                 store_artist_name: body.store_artist_name,
                 store_start_date: body.store_start_date,
@@ -39,7 +39,7 @@ const popupController = {
                 const dayOfWeek = daySchedule.day_of_week;
                 const openTime = daySchedule.open_time;
                 const closeTime = daySchedule.close_time;
-            
+
                 popupSchedule.schedule.push({
                     day_of_week: dayOfWeek,
                     open_time: openTime,
@@ -104,7 +104,7 @@ const popupController = {
     },
 
     // 팝업 스토어 리뷰
-    storeReview: async (req, res) => { 
+    storeReview: async (req, res) => {
         try {
             const store_id = req.params.store_id;
             const review = await popupModel.storeReview(store_id);
@@ -182,6 +182,72 @@ const popupController = {
             const review_id = req.params.review_id;
             await popupModel.deleteReview(review_id);
             res.status(200).json('삭제가 완료되었습니다.');
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 팝업 대기 상태 변경
+    adminWait: async (req, res) => {
+        try {
+            const user_id = req.body.user_id;
+            const store_id = req.params.store_id;
+            const status = await popupModel.adminWait(store_id);
+            res.status(200).json({ status });
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 예약자 대기 상태 변경
+    adminWaitAccept: async (req, res) => {
+        try {
+            // 로그인 유무 판단
+            const user_id = req.body.user_id; // 예약자 아이디
+            const store_id = req.params.store_id;
+            const status = await popupModel.adminWaitAccept(user_id, store_id);
+            res.status(200).json({ status });
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    adminCompleted: async (req, res) => {
+        try {
+            const store_id = req.params.store_id;
+            await popupModel.adminCompleted(store_id);
+            res.status(200).json('전체 삭제되었습니다.');
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    waitReservation: async (req, res) => { // 대기 등록
+        try {
+            const { user_id, wait_visitor_name, wait_visitor_number } = req.body;
+            const store_id = req.params.store_id;
+            const wait_reservation_time = moment().format('HH:mm:ss');
+            const waitReservation = {
+                store_id,
+                user_id,
+                wait_visitor_name,
+                wait_visitor_number,
+                wait_reservation_time
+            }
+
+            const status = await popupModel.waitReservation(waitReservation);
+            res.status(201).json(status);
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    getWaitOrder: async (req, res) => { // 예약자 대기 순서 조회
+        try {
+            const { user_id } = req.body;
+            const store_id = req.params.store_id;
+            const waitOrder = await popupModel.getWaitOrder(store_id, user_id);
+            res.status(200).json(waitOrder);
         } catch (err) {
             throw err;
         }
