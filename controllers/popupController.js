@@ -21,11 +21,11 @@ const popupController = {
 
             const popupData = { // 팝업 스토어 생성에 들어갈 객체
                 category_id: body.category_id,
+                user_id: body.user_id,
                 store_name: body.store_name,
                 store_location: body.store_location,
                 store_contact_info: body.store_contact_info,
                 store_description: body.store_description,
-                store_status: body.store_status,
                 store_image: userImage,
                 store_artist_name: body.store_artist_name,
                 store_start_date: body.store_start_date,

@@ -27,17 +27,21 @@ CREATE TABLE category (
 CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     store_id INT AUTO_INCREMENT PRIMARY KEY, -- 고유 식별자
     category_id INT, -- 카테고리 ID
+    user_id VARCHAR(50), -- 팝업 등록자
     store_name VARCHAR(255), -- 팝업 스토어 이름
     store_location VARCHAR(255), -- 위치
     store_contact_info VARCHAR(255), -- 팝업 연락처
-    store_description TEXT, -- 팝업 소개
-    store_status VARCHAR(50), -- 진행 예정 or 진행중 or 마감 상태 확인
+    store_description LONGTEXT, -- 팝업 소개
+    store_status ENUM('오픈 예정', '오픈 중', '마감') DEFAULT '오픈 예정', -- 진행 예정 or 진행중 or 마감 상태 확인
     store_image LONGTEXT, -- 팝업 이미지
     store_artist_name VARCHAR(255), -- 작가 이름
     store_start_date DATE, -- 팝업 오픈 날짜
     store_end_date DATE, -- 팝업 종료 날짜
     store_mark_number INT DEFAULT 0, -- 찜 수
-    FOREIGN KEY (category_id) REFERENCES category(category_id)
+    store_view_count INT DEFAULT 0, -- 조회수
+    store_wait_status ENUM('false', 'true') DEFAULT 'false', -- 대기 상태
+    FOREIGN KEY (category_id) REFERENCES category(category_id),
+    FOREIGN KEY (user_id) REFERENCES user_info(user_id)
 );
 
 CREATE TABLE store_schedules ( -- 요일별 시간
