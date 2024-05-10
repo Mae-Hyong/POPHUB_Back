@@ -14,5 +14,6 @@ router.get('/review/:review_id', popupController.storeReviewDetail); // 특정 �
 router.post('/review/create/:store_id', popupController.createReview); // 팝업 리뷰 생성
 router.put('/review/:review_id', popupController.updateReview);  // 팝업 리뷰 수정
 router.delete('/review/:review_id', popupController.deleteReview); // 팝업 리뷰 삭제
+router.put('/adminWait/:store_id', popupController.adminWait); // 예약 대기 값 변경
 
 module.exports = router;

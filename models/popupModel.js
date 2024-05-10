@@ -21,7 +21,7 @@ const updateReview_query = 'UPDATE store_review SET ? WHERE review_id = ?';
 const likePopupUpdateMinus_query = 'UPDATE popup_stores SET store_mark_number = store_mark_number - 1 WHERE store_id = ?';
 const likePopupUpdatePlus_query = 'UPDATE popup_stores SET store_mark_number = store_mark_number + 1 WHERE store_id = ?';
 const updateViewCount_query = 'UPDATE popup_stores SET store_view_count = store_view_count + 1 WHERE store_id = ?';
-
+const updateWaitStatus_query = 'UPDATE popup_stores SET store_wait_status = ? WHERE store_id = ?';
 // ------- DELETE Query -------
 const deleteReview_query = 'DELETE FROM store_review WHERE review_id = ?';
 const likePopupDelete_query = 'DELETE FROM BookMark WHERE user_id = ? AND store_id = ?';
@@ -92,7 +92,7 @@ const popupModel = {
                             }
                         });
                     }
-                });                
+                });
             });
             return result;
         } catch (err) {
@@ -268,7 +268,32 @@ const popupModel = {
             throw err;
         }
     },
-    
+
+    adminWait: async (user_id, store_id) => { // 대기 상태 변경
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query(getPopup_query, store_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result[0]);
+
+                });
+            });
+            const newWaitStatus = result.store_wait_status === 'false' ? 'true' : 'false';
+
+            await new Promise((resolve, reject) => {
+                db.query(updateWaitStatus_query, [newWaitStatus, store_id], (err, result) => {
+                    if (err) reject(err);
+                    else resolve();
+                });
+            });
+            
+            return newWaitStatus;
+
+        } catch (err) {
+            throw err;
+        }
+    }
+
 };
 
 module.exports = popupModel;

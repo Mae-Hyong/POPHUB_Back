@@ -185,7 +185,18 @@ const popupController = {
         } catch (err) {
             throw err;
         }
-    }
+    },
+
+    adminWait: async (req, res) => {
+        try {
+            const user_id = req.user_id;
+            const store_id = req.params.store_id;
+            const status = await popupModel.adminWait(user_id, store_id);
+            res.status(200).json(`대기 상태가 ${status}로 변경되었습니다.`);
+        } catch (err) {
+            throw err;
+        }
+    },
 };
 
 module.exports = { popupController }
