@@ -199,7 +199,7 @@ const popupController = {
         }
     },
 
-    waitReservation: async (req, res) => {
+    waitReservation: async (req, res) => { // 대기 등록
         try {
             const { user_id, wait_visitor_name, wait_visitor_number } = req.body;
             const store_id = req.params.store_id;
@@ -214,6 +214,17 @@ const popupController = {
 
             const status = await popupModel.waitReservation(waitReservation);
             res.status(201).json(status);
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    getWaitOrder: async (req, res) => { // 현재 대기 조회
+        try {
+            const { user_id } = req.body;
+            const store_id = req.params.store_id;
+            const waitOrder = await popupModel.getWaitOrder(store_id, user_id);
+            res.status(200).json(waitOrder);
         } catch (err) {
             throw err;
         }

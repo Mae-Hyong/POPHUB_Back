@@ -28,6 +28,16 @@ const updateWaitStatus_query = 'UPDATE popup_stores SET store_wait_status = ? WH
 const deleteReview_query = 'DELETE FROM store_review WHERE review_id = ?';
 const likePopupDelete_query = 'DELETE FROM BookMark WHERE user_id = ? AND store_id = ?';
 
+const getWaitOrder = (store_id, user_id) => {
+    return new Promise((resolve, reject) => {
+        db.query(waitOrder_query, [store_id, store_id, user_id], (err, result) => {
+            if (err) reject(err);
+            else resolve(result[0].waitOrder);
+        });
+    });
+};
+
+
 const popupModel = {
     allPopups: async () => { // 모든 팝업 스토어 정보 확인
         try {
@@ -326,24 +336,26 @@ const popupModel = {
                     })
                 });
 
-                const waitOrder = await new Promise((resolve, reject) => {
-                    db.query(waitOrder_query, [store_id, store_id, user_id], (err, result) => {
-                        if (err) reject(err);
-                        else resolve(result);
-                    });
-                });
+                const waitOrder = await getWaitOrder(store_id, user_id);
 
                 return waitOrder;
             } else {
                 return '지금 바로 입장해주세요';
             }
 
-
-            
         } catch (err) {
             throw err;
         }
-    }
+    },
+
+    getWaitOrder: async (store_id, user_id) => { // 대기 조회
+        try {
+            const waitOrder = await getWaitOrder(store_id, user_id);
+            return waitOrder;
+        } catch (err) {
+            throw err;
+        }
+    },
 
 };
 
