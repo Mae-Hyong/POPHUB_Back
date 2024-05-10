@@ -13,7 +13,7 @@ const popupController = {
     },
 
     // 팝업 스토어 생성
-    createPopup: async (req, res) => { 
+    createPopup: async (req, res) => {
         try {
             let userImage = null;
             if (req.file) userImage = req.file.path;
@@ -39,7 +39,7 @@ const popupController = {
                 const dayOfWeek = daySchedule.day_of_week;
                 const openTime = daySchedule.open_time;
                 const closeTime = daySchedule.close_time;
-            
+
                 popupSchedule.schedule.push({
                     day_of_week: dayOfWeek,
                     open_time: openTime,
@@ -104,7 +104,7 @@ const popupController = {
     },
 
     // 팝업 스토어 리뷰
-    storeReview: async (req, res) => { 
+    storeReview: async (req, res) => {
         try {
             const store_id = req.params.store_id;
             const review = await popupModel.storeReview(store_id);
@@ -187,13 +187,36 @@ const popupController = {
         }
     },
 
-    // 관리자 대기 상태 변경
+    // 팝업 대기 상태 변경
     adminWait: async (req, res) => {
         try {
             const user_id = req.body.user_id;
             const store_id = req.params.store_id;
             const status = await popupModel.adminWait(store_id);
-            res.status(200).json({status});
+            res.status(200).json({ status });
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 예약자 대기 상태 변경
+    adminWaitAccept: async (req, res) => {
+        try {
+            // 로그인 유무 판단
+            const user_id = req.body.user_id; // 예약자 아이디
+            const store_id = req.params.store_id;
+            const status = await popupModel.adminWaitAccept(user_id, store_id);
+            res.status(200).json({ status });
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    adminCompleted: async (req, res) => {
+        try {
+            const store_id = req.params.store_id;
+            await popupModel.adminCompleted(store_id);
+            res.status(200).json('전체 삭제되었습니다.');
         } catch (err) {
             throw err;
         }
@@ -219,7 +242,7 @@ const popupController = {
         }
     },
 
-    getWaitOrder: async (req, res) => { // 현재 대기 조회
+    getWaitOrder: async (req, res) => { // 예약자 대기 순서 조회
         try {
             const { user_id } = req.body;
             const store_id = req.params.store_id;

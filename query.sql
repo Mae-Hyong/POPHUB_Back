@@ -97,6 +97,7 @@ CREATE TABLE product_review (
 );
 
 CREATE TABLE wait_list ( -- 대기 상태
+	wait_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	store_id INT NOT NULL,
     user_id VARCHAR(50) NOT NULL,
     wait_visitor_name VARCHAR(50) NOT NULL,

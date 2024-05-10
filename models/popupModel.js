@@ -9,13 +9,14 @@ const storeReviewDetail_query = 'SELECT * FROM store_review WHERE review_id = ?'
 const likePopupSelect_query = 'SELECT * FROM BookMark WHERE user_id = ? AND store_id = ?';
 const likePopupCheck_query = 'SELECT store_mark_number FROM popup_stores WHERE store_id = ?';
 const waitList_query = 'SELECT * FROM wait_list WHERE store_id = ?';
-const waitOrder_query = 'SELECT COUNT(*) AS waitOrder FROM wait_list WHERE store_id = ? AND wait_reservation_time <= (SELECT wait_reservation_time FROM wait_list WHERE store_id = ? AND user_id = ?)';
+const waitOrder_query = 'SELECT COUNT(*) AS waitOrder FROM wait_list WHERE store_id = ? AND wait_status = "wait" AND wait_reservation_time <= (SELECT wait_reservation_time FROM wait_list WHERE store_id = ? AND user_id = ?)';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
 const createPopup_query = 'INSERT INTO popup_stores SET ?';
 const likePopupInsert_query = 'INSERT INTO BookMark (user_id, store_id) VALUES (?, ?)';
 const createWaitReservation_query = 'INSERT INTO wait_list SET ?';
+const waitReservation_query = 'SELECT store_wait_status FROM popup_stores WHERE store_id = ?';
 
 // ------- PUT Query -------
 const updatePopup_query = 'UPDATE popup_stores SET ? WHERE store_id = ?';
@@ -24,9 +25,12 @@ const likePopupUpdateMinus_query = 'UPDATE popup_stores SET store_mark_number = 
 const likePopupUpdatePlus_query = 'UPDATE popup_stores SET store_mark_number = store_mark_number + 1 WHERE store_id = ?';
 const updateViewCount_query = 'UPDATE popup_stores SET store_view_count = store_view_count + 1 WHERE store_id = ?';
 const updateWaitStatus_query = 'UPDATE popup_stores SET store_wait_status = ? WHERE store_id = ?';
+const updateWaitListStatus_query = 'UPDATE wait_list SET wait_status = "completed" WHERE store_id = ? AND user_id = ?';
+
 // ------- DELETE Query -------
 const deleteReview_query = 'DELETE FROM store_review WHERE review_id = ?';
 const likePopupDelete_query = 'DELETE FROM BookMark WHERE user_id = ? AND store_id = ?';
+const adminCompleted_query = 'DELETE FROM wait_list WHERE wait_status ="completed" AND store_id = ?';
 
 const getWaitOrder = (store_id, user_id) => {
     return new Promise((resolve, reject) => {
@@ -317,18 +321,46 @@ const popupModel = {
         }
     },
 
+    // 예약자 status 변경
+    adminWaitAccept: async (user_id, store_id) => {
+        try {
+            const waitStatus = await new Promise((resolve, reject) => {
+                db.query(updateWaitListStatus_query, [store_id, user_id], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                })
+            })
+            return waitStatus;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    adminCompleted: async (store_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query(adminCompleted_query, [store_id], (err, result) => {
+                    if (err) reject(err);
+                    else resolve();
+                })
+            })
+        } catch (err) {
+            throw err;
+        }
+    },
+
     waitReservation: async (waitReservation) => { // 대기 등록
         try {
             const { store_id, user_id } = waitReservation;
 
             const waitStatus = await new Promise((resolve, reject) => {
-                db.query('SELECT store_wait_status FROM popup_stores WHERE store_id = ?', store_id, (err, result) => {
+                db.query(waitReservation_query, store_id, (err, result) => {
                     if (err) reject(err);
                     else resolve(result[0].store_wait_status);
                 })
             });
 
-            if(waitStatus == 'true') {
+            if (waitStatus == 'true') {
                 await new Promise((resolve, reject) => {
                     db.query(createWaitReservation_query, waitReservation, (err, result) => {
                         if (err) reject(err);
@@ -350,8 +382,20 @@ const popupModel = {
 
     getWaitOrder: async (store_id, user_id) => { // 대기 조회
         try {
-            const waitOrder = await getWaitOrder(store_id, user_id);
-            return waitOrder;
+            const wait_status = await new Promise((resolve, reject) => {
+                db.query('SELECT wait_status FROM wait_list WHERE store_id = ? AND user_id = ?', [store_id, user_id], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result[0].wait_status);
+                })
+            });
+
+            if (wait_status == 'wait') {
+                const waitOrder = await getWaitOrder(store_id, user_id);
+                return waitOrder;
+            } else {
+                return '지금 바로 입장해주세요';
+            }
+
         } catch (err) {
             throw err;
         }

@@ -14,7 +14,9 @@ router.get('/review/:review_id', popupController.storeReviewDetail); // 특정 �
 router.post('/review/create/:store_id', popupController.createReview); // 팝업 리뷰 생성
 router.put('/review/:review_id', popupController.updateReview);  // 팝업 리뷰 수정
 router.delete('/review/:review_id', popupController.deleteReview); // 팝업 리뷰 삭제
-router.put('/adminWait/:store_id', popupController.adminWait); // 팝업 관리자 예약 대기 값 변경
+router.put('/adminWait/:store_id', popupController.adminWait); // 팝업 관리자 예약 대기 상태 변경
+router.put('/adminWaitAccept/:store_id', popupController.adminWaitAccept); // 예약자 대기 상태 변경
+router.delete('/adminCompleted/:store_id', popupController.adminCompleted); // 예약 완료 전체 삭제
 router.post('/reservation/:store_id', popupController.waitReservation); // 예약
-router.get('/reservation/:store_id', popupController.getWaitOrder); // 예약 조회
+router.get('/reservation/:store_id', popupController.getWaitOrder); // 예약자 대기 순서 조회
 module.exports = router;
