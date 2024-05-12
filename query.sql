@@ -32,7 +32,7 @@ CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     store_location VARCHAR(255), -- 위치
     store_contact_info VARCHAR(255), -- 팝업 연락처
     store_description LONGTEXT, -- 팝업 소개
-    store_status ENUM('오픈 예정', '오픈 중', '마감') DEFAULT '오픈 예정', -- 진행 예정 or 진행중 or 마감 상태 확인
+    store_status ENUM('오픈 예정', '오픈', '마감') DEFAULT '오픈 예정', -- 진행 예정 or 진행중 or 마감 상태 확인
     store_image LONGTEXT, -- 팝업 이미지
     store_artist_name VARCHAR(255), -- 작가 이름
     store_start_date DATE, -- 팝업 오픈 날짜
