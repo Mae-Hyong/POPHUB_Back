@@ -1,8 +1,8 @@
 app.post("/save-token", async (req, res) => {
   const { userId, fcmToken } = req.body;
-  const expiresIn = 30; // 토큰 유효 기간 (30일)
+  const expiresIn = 14; // 토큰 유효 기간 (14일)
   const expirationDate = new Date();
-  expirationDate.setDate(expirationDate.getDate() + expiresIn); // 현재 날짜에 + 30일
+  expirationDate.setDate(expirationDate.getDate() + expiresIn); // 현재 날짜에 + 14일
 
   try {
     await db.collection("users").doc(userId).set({
