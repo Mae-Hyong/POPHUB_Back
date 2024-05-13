@@ -42,12 +42,21 @@ const getWaitOrder = (store_id, user_id) => {
 };
 
 
-const popupModel = {
-    allPopups: async () => { // 모든 팝업 스토어 정보 확인
+const popupModel = { // 모든 팝업 스토어 정보 확인
+    allPopups: async () => {
         try {
             const results = await new Promise((resolve, reject) => {
-                db.query(allPopups_query, (err, results) => {
+                db.query('SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id GROUP BY ps.store_id', (err, results) => {
                     if (err) reject(err);
+                    // 각 image_urls을 배열로 변환
+                    results.forEach(result => {
+                        if (result.image_urls) {
+                            result.imageUrls = result.image_urls.split(',');
+                            delete result.image_urls;
+                        } else {
+                            result.imageUrls = [];
+                        }
+                    });
                     resolve(results);
                 });
             });
@@ -55,6 +64,18 @@ const popupModel = {
         } catch (err) {
             throw err;
         }
+    },
+
+    createImage: (store_id, imagePath) => {
+        return new Promise((resolve, reject) => {
+            db.query('INSERT INTO images (store_id, image_url) VALUES (?, ?)', [store_id, imagePath], (err, result) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
     },
 
     createPopup: async (popupData) => { // 팝업 스토어 생성
@@ -100,11 +121,15 @@ const popupModel = {
                     if (err) {
                         reject(err);
                     } else {
-                        db.query(getPopup_query, store_id, (err, popupResult) => {
+                        db.query('SELECT ps.*, i.image_url FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_id = ?', store_id, (err, popupResult) => {
                             if (err) {
                                 reject(err);
                             } else {
-                                resolve(popupResult[0]);
+                                const popupInfo = { ...popupResult[0] }; // 복사하여 새로운 객체 생성
+                                delete popupInfo.image_url; // 이미지 URL 속성 삭제
+                                const imageUrls = popupResult.map(row => row.image_url).filter(url => url !== null);
+                                popupInfo.imageUrls = imageUrls;
+                                resolve(popupInfo);
                             }
                         });
                     }
@@ -115,6 +140,7 @@ const popupModel = {
             throw err;
         }
     },
+
 
     updatePopup: async (store_id, popupData) => { // 팝업 정보 수정
         try {
@@ -131,7 +157,7 @@ const popupModel = {
     },
 
     deletePopup: async (store_id) => { // 팝업 정보 삭제
-        const tables = ['BookMark', 'products', 'store_review', 'store_schedules', 'popup_stores'];
+        const tables = ['BookMark', 'products', 'store_review', 'store_schedules', 'wait_list', 'images', 'popup_stores'];
         try {
             for (const tableName of tables) { // 해당 테이블에 store_id값 확인
                 const yes = await new Promise((resolve, reject) => {
