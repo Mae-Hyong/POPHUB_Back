@@ -15,19 +15,15 @@ const popupController = {
     // 팝업 스토어 생성
     createPopup: async (req, res) => {
         try {
-            let userImage = null;
-            if (req.file) userImage = req.file.path;
             const body = req.body;
 
             const popupData = { // 팝업 스토어 생성에 들어갈 객체
                 category_id: body.category_id,
-                user_id: body.user_id,
+                user_name: body.user_name,
                 store_name: body.store_name,
                 store_location: body.store_location,
                 store_contact_info: body.store_contact_info,
                 store_description: body.store_description,
-                store_image: userImage,
-                store_artist_name: body.store_artist_name,
                 store_start_date: body.store_start_date,
                 store_end_date: body.store_end_date,
             };
@@ -50,6 +46,15 @@ const popupController = {
             const popupDataResult = await popupModel.createPopup(popupData); // 팝업 정보
             const store_id = popupDataResult.store_id;
             await popupModel.createSchedule(store_id, popupSchedule.schedule); // 팝업 스케줄 정보
+
+            let userImages = [];
+            if (req.files) {
+                await Promise.all(req.files.map(async (file) => {
+                    userImages.push(file.path);
+                    await popupModel.createImage(store_id, file.path);
+                    console.log(file.path);
+                }));
+            }
 
             res.status(201).json(`${store_id}가 등록되었습니다.`);
         } catch (err) {
