@@ -1,22 +1,27 @@
 const db = require('../config/mysqlDatabase');
 
 // ------- GET Query -------
-const allPopups_query = 'SELECT * FROM popup_stores';
-const getPopup_query = 'SELECT * FROM popup_stores WHERE store_id = ?';
-const createSchedule_query = 'INSERT INTO store_schedules SET ?';
+const allPopups_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id GROUP BY ps.store_id';
+const popularPopups_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id GROUP BY ps.store_id ORDER BY ps.store_view_count DESC LIMIT 3';
+
+const getImagePopup_query = 'SELECT ps.*, i.image_url FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_id = ?';
 const storeReview_query = 'SELECT * FROM store_review WHERE store_id = ?';
 const storeReviewDetail_query = 'SELECT * FROM store_review WHERE review_id = ?';
 const likePopupSelect_query = 'SELECT * FROM BookMark WHERE user_id = ? AND store_id = ?';
 const likePopupCheck_query = 'SELECT store_mark_number FROM popup_stores WHERE store_id = ?';
+const adminwait_query = 'SELECT * FROM popup_stores WHERE store_id = ?';
 const waitList_query = 'SELECT * FROM wait_list WHERE store_id = ?';
 const waitOrder_query = 'SELECT COUNT(*) AS waitOrder FROM wait_list WHERE store_id = ? AND wait_status = "wait" AND wait_reservation_time <= (SELECT wait_reservation_time FROM wait_list WHERE store_id = ? AND user_id = ?)';
+const waitReservation_query = 'SELECT store_wait_status FROM popup_stores WHERE store_id = ?';
+const getWaitOrder_query = 'SELECT wait_status FROM wait_list WHERE store_id = ? AND user_id = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
 const createPopup_query = 'INSERT INTO popup_stores SET ?';
+const createSchedule_query = 'INSERT INTO store_schedules SET ?';
 const likePopupInsert_query = 'INSERT INTO BookMark (user_id, store_id) VALUES (?, ?)';
 const createWaitReservation_query = 'INSERT INTO wait_list SET ?';
-const waitReservation_query = 'SELECT store_wait_status FROM popup_stores WHERE store_id = ?';
+const createImage_query = 'INSERT INTO images (store_id, image_url) VALUES (?, ?)';
 
 // ------- PUT Query -------
 const updatePopup_query = 'UPDATE popup_stores SET ? WHERE store_id = ?';
@@ -46,9 +51,31 @@ const popupModel = { // 모든 팝업 스토어 정보 확인
     allPopups: async () => {
         try {
             const results = await new Promise((resolve, reject) => {
-                db.query('SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id GROUP BY ps.store_id', (err, results) => {
+                db.query(allPopups_query, (err, results) => {
                     if (err) reject(err);
-                    // 각 image_urls을 배열로 변환
+
+                    results.forEach(result => {
+                        if (result.image_urls) {
+                            result.imageUrls = result.image_urls.split(',');
+                            delete result.image_urls;
+                        } else {
+                            result.imageUrls = [];
+                        }
+                    });
+                    resolve(results);
+                });
+            });
+            return results;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    popularPopups: async() => {
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query(popularPopups_query, (err, results) => {
+                    if (err) reject(err);
                     results.forEach(result => {
                         if (result.image_urls) {
                             result.imageUrls = result.image_urls.split(',');
@@ -68,7 +95,7 @@ const popupModel = { // 모든 팝업 스토어 정보 확인
 
     createImage: (store_id, imagePath) => {
         return new Promise((resolve, reject) => {
-            db.query('INSERT INTO images (store_id, image_url) VALUES (?, ?)', [store_id, imagePath], (err, result) => {
+            db.query(createImage_query, [store_id, imagePath], (err, result) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -121,7 +148,7 @@ const popupModel = { // 모든 팝업 스토어 정보 확인
                     if (err) {
                         reject(err);
                     } else {
-                        db.query('SELECT ps.*, i.image_url FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_id = ?', store_id, (err, popupResult) => {
+                        db.query(getImagePopup_query, store_id, (err, popupResult) => {
                             if (err) {
                                 reject(err);
                             } else {
@@ -314,7 +341,7 @@ const popupModel = { // 모든 팝업 스토어 정보 확인
     adminWait: async (store_id) => { // 대기 상태 변경
         try {
             const result = await new Promise((resolve, reject) => {
-                db.query(getPopup_query, store_id, (err, result) => {
+                db.query(adminwait_query, store_id, (err, result) => {
                     if (err) reject(err);
                     else resolve(result[0]);
 
@@ -409,7 +436,7 @@ const popupModel = { // 모든 팝업 스토어 정보 확인
     getWaitOrder: async (store_id, user_id) => { // 대기 조회
         try {
             const wait_status = await new Promise((resolve, reject) => {
-                db.query('SELECT wait_status FROM wait_list WHERE store_id = ? AND user_id = ?', [store_id, user_id], (err, result) => {
+                db.query(getWaitOrder_query, [store_id, user_id], (err, result) => {
                     if (err) reject(err);
                     else resolve(result[0].wait_status);
                 })
