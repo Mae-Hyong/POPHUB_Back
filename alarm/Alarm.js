@@ -22,18 +22,26 @@ app.get("/", (req, res) => {
   res.send("Alarm server on");
 });
 
-// 문서 조회 API
-app.get("/fetch-documents", async (req, res) => {
+// user_id 추가, alarm, order alarm, wait alarm 자동으로 생성
+async function addUserAndInitializeAlarms(userId) {
   try {
-    const documents = await fetchDocuments(); // 문서 조회 함수 실행 및 문서 데이터 반환
-    res.status(200).json(documents); // 문서 데이터를 JSON 형태로 클라이언트에 응답
+    await db.collection("users").doc(userId).set({
+      alarms: [],
+      orderAlarms: [],
+      waitAlarms: [],
+      fcmToken:
+        "fjv14SOYS7aKtFd7m6vH8k:APA91bFbhHpwXFC4g1CjGRIQ_c8HX0G5Ez26-Sq4cjr0gi17UWMXk8eFr6qDNXu492fg_67E3nx68Ls8Tmw6urEh5WG0JoB7F8C-xoPYpeZWAF3lcZURp88gDsssfL27WCsZK_29cLZU",
+    });
+    console.log(`사용자 ${userId} 초기 알람이 성공적으로 추가되었습니다.`);
   } catch (error) {
-    console.error("Error fetching documents:", error);
-    res.status(500).send("Error fetching documents");
+    console.error(
+      "사용자 추가 및 Firestore에 알람 초기화 중 오류 발생:",
+      error
+    );
   }
-});
+}
 
-// FCM 토큰 업데이트 API (MySQL DB 연동해야 할 듯)
+// FCM 토큰 업데이트 API
 app.post("/update-token", async (req, res) => {
   const { userId, newToken } = req.body;
 
@@ -41,17 +49,25 @@ app.post("/update-token", async (req, res) => {
     await db.collection("users").doc(userId).update({
       fcmToken: newToken,
     });
-    res.status(200).send("Token updated successfully");
+    res.status(200).send("토큰이 업데이트됨");
   } catch (error) {
-    console.error("Error updating token:", error);
-    res.status(500).send("Error updating token");
+    console.error("토큰 업데이트 오류:", error);
+    res.status(500).send("토큰 업데이트 오류");
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// 문서 조회 API
+app.get("/fetch-documents", async (req, res) => {
+  try {
+    const documents = await fetchDocuments();
+    res.status(200).json(documents);
+  } catch (error) {
+    console.error("문서 가져오는 도중 오류 발생:", error);
+    res.status(500).send("문서 가져오는 도중 오류 발생");
+  }
 });
 
+// 문서 조회 함수
 async function fetchDocuments() {
   const documentPaths = [
     { collection: "alarm", document: "GRcvz7Q2pFweB49KrsZA" },
@@ -74,7 +90,7 @@ async function fetchDocuments() {
           data: doc.data(),
         });
       } else {
-        console.log(`[${path.collection}] The document does not exist!`);
+        console.log(`[${path.collection}] Document가 존재하지 않습니다`);
         documents.push({
           collection: path.collection,
           documentId: path.document,
@@ -84,13 +100,17 @@ async function fetchDocuments() {
     }
     return documents;
   } catch (error) {
-    console.error("Error getting documents:", error);
-    throw error; // 에러 발생 시 에러를 상위 호출자에게 전파
+    console.error("문서를 가져오는 도중 오류 발생:", error);
+    throw error;
   }
 }
 
 // node-cron을 사용하여 주기적인 작업 설정
 cron.schedule("0 0 * * *", async () => {
-  console.log("Midnight task running...");
-  fetchDocuments(); // 문서 조회 함수 실행
+  console.log("자정 작업 실행 중...");
+  await fetchDocuments();
+});
+
+app.listen(port, () => {
+  console.log(`${port}번으로 실행 중`);
 });

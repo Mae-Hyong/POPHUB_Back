@@ -9,10 +9,10 @@ app.post("/save-token", async (req, res) => {
       fcmToken: fcmToken,
       expirationDate: expirationDate,
     });
-    res.status(200).send("Token saved successfully");
+    res.status(200).send("토큰이 성공적으로 저장됨");
   } catch (error) {
-    console.error("Error saving token:", error);
-    res.status(500).send("Error saving token");
+    console.error("토큰 저장 오류:", error);
+    res.status(500).send("토큰 저장 오류");
   }
 });
 
@@ -23,7 +23,7 @@ cron.schedule("0 0 * * *", async () => {
   const now = new Date();
   const expiredTokens = await db
     .collection("users")
-    .where("expirationDate", "<=", now)
+    .where("expirationDate", "<=", now) //만료일
     .get();
   const batch = db.batch();
 

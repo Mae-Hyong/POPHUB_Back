@@ -16,7 +16,7 @@ async function saveUserFcmToken(userId, fcmToken) {
       fcmToken: fcmToken,
     },
     { merge: true }
-  ); // 기존 데이터를 유지, fcmToken만 업데이트
+  ); // 기존 데이터 유지, fcmToken만 업데이트
 }
 
 // 사용 임시 예
