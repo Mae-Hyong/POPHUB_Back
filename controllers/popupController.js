@@ -12,6 +12,15 @@ const popupController = {
         }
     },
 
+    popularPopups: async (req, res) => {
+        try {
+            const popular = await popupModel.popularPopups();
+            res.status(200).json(popular);
+        } catch (err) {
+            throw err;
+        }
+    },
+
     // 팝업 스토어 생성
     createPopup: async (req, res) => {
         try {

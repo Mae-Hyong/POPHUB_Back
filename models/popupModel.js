@@ -1,7 +1,9 @@
 const db = require('../config/mysqlDatabase');
 
 // ------- GET Query -------
-const allPopups_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id GROUP BY ps.store_id'
+const allPopups_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id GROUP BY ps.store_id';
+const popularPopups_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id GROUP BY ps.store_id ORDER BY ps.store_view_count DESC LIMIT 3';
+
 const getImagePopup_query = 'SELECT ps.*, i.image_url FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_id = ?';
 const storeReview_query = 'SELECT * FROM store_review WHERE store_id = ?';
 const storeReviewDetail_query = 'SELECT * FROM store_review WHERE review_id = ?';
@@ -51,7 +53,29 @@ const popupModel = { // 모든 팝업 스토어 정보 확인
             const results = await new Promise((resolve, reject) => {
                 db.query(allPopups_query, (err, results) => {
                     if (err) reject(err);
-                    // 각 image_urls을 배열로 변환
+
+                    results.forEach(result => {
+                        if (result.image_urls) {
+                            result.imageUrls = result.image_urls.split(',');
+                            delete result.image_urls;
+                        } else {
+                            result.imageUrls = [];
+                        }
+                    });
+                    resolve(results);
+                });
+            });
+            return results;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    popularPopups: async() => {
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query(popularPopups_query, (err, results) => {
+                    if (err) reject(err);
                     results.forEach(result => {
                         if (result.image_urls) {
                             result.imageUrls = result.image_urls.split(',');

@@ -4,6 +4,7 @@ const { popupController } = require('../controllers/popupController');
 const upload = require('../function/multer');
 
 router.get('/', popupController.allPopups); // 모든 팝업 조회
+router.get('/popular',popupController.popularPopups); // 인기 팝업 조회
 router.post('/', upload.array("files", 5), popupController.createPopup); // 팝업 생성
 router.get('/:store_id', popupController.getPopup); // 특정 팝업 조회
 router.put('/:store_id', popupController.updatePopup); // 팝업 수정
