@@ -12,6 +12,7 @@ const popupController = {
         }
     },
 
+    // 인기 팝업 조회
     popularPopups: async (req, res) => {
         try {
             const popular = await popupModel.popularPopups();
