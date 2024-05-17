@@ -10,28 +10,38 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
-// Firestore 인스턴스 가져오기
 const db = admin.firestore();
 
 app.use(bodyParser.json());
 
-// 사용자 추가 및 FCM 토큰과 알람 배열 초기화
-app.post("/add-alarm", async (req, res) => {
+// 사용자 및 FCM 토큰 초기화
+app.post("/add-user", async (req, res) => {
   const { userId, fcmToken } = req.body;
   try {
-    await db.collection("users").doc(userId).set(
-      {
-        fcmToken: fcmToken,
-        alarms: [],
-        orderAlarms: [],
-        waitAlarms: [],
-      },
-      { merge: true }
-    );
+    await db
+      .collection("users")
+      .doc(userId)
+      .set({ fcmToken: fcmToken }, { merge: true });
     res.status(200).send(`사용자 ${userId} 및 FCM 토큰 저장 성공`);
   } catch (error) {
-    console.error("사용자 추가 및 FCM 토큰 저장 오류:", error);
-    res.status(500).send("사용자 추가 및 FCM 토큰 저장 오류");
+    console.error("사용자 추가 오류:", error);
+    res.status(500).send("사용자 추가 오류");
+  }
+});
+
+// 알람 추가
+app.post("/add-alarm", async (req, res) => {
+  const { userId, type, alarmDetails } = req.body; // type: 'alarms', 'orderAlarms', or 'waitAlarms'
+  try {
+    const alarmRef = await db
+      .collection("users")
+      .doc(userId)
+      .collection(type)
+      .add(alarmDetails);
+    res.status(200).send(`알람이 성공적으로 추가되었습니다: ${alarmRef.id}`);
+  } catch (error) {
+    console.error("알람 추가 오류:", error);
+    res.status(500).send("알람 추가 오류");
   }
 });
 
@@ -54,20 +64,6 @@ app.post("/save-token", async (req, res) => {
   } catch (error) {
     console.error("토큰 저장 오류:", error);
     res.status(500).send("토큰 저장 오류");
-  }
-});
-
-// FCM 토큰 갱신
-app.post("/update-token", async (req, res) => {
-  const { userId, newToken } = req.body;
-
-  try {
-    const userRef = db.collection("users").doc(userId);
-    await userRef.update({ fcmToken: newToken });
-    res.status(200).send("FCM 토큰이 성공적으로 업데이트되었습니다.");
-  } catch (error) {
-    console.error("FCM 토큰 업데이트 오류:", error);
-    res.status(500).send("FCM 토큰 업데이트 오류");
   }
 });
 
