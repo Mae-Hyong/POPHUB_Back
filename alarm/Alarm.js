@@ -8,7 +8,7 @@ const cron = require("node-cron");
 var serviceAccount = require("./PopHub_Key.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://pophub-aeb56.firebaseio.com", // 실제 프로젝트 URL로 변경해야 합니다.
+  databaseURL: "https://pophub-aeb56.firebaseio.com",
 });
 
 // Firestore 인스턴스 가져오기
