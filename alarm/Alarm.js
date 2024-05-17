@@ -8,7 +8,6 @@ const cron = require("node-cron");
 var serviceAccount = require("./PopHub_Key.json");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://pophub-aeb56.firebaseio.com",
 });
 
 // Firestore 인스턴스 가져오기
@@ -17,7 +16,7 @@ const db = admin.firestore();
 app.use(bodyParser.json());
 
 // 사용자 추가 및 FCM 토큰과 알람 배열 초기화
-app.post("/add-user", async (req, res) => {
+app.post("/add-alarm", async (req, res) => {
   const { userId, fcmToken } = req.body;
   try {
     await db.collection("users").doc(userId).set(
