@@ -23,13 +23,15 @@ cron.schedule("0 0 * * *", async () => {
   const now = new Date();
   const expiredTokens = await db
     .collection("users")
-    .where("expirationDate", "<=", now) //만료일
+    .where("expirationDate", "<=", now)
     .get();
   const batch = db.batch();
 
   expiredTokens.forEach((doc) => {
-    // 만료된 토큰 삭제 혹은 표시
-    // ex) batch.delete(doc.ref); 혹은 batch.update(doc.ref, { isActive: false });
+    // 선택: 만료된 토큰 삭제
+    batch.delete(doc.ref);
+    // 혹은 선택: 토큰 비활성화
+    // batch.update(doc.ref, { isActive: false });
   });
 
   await batch.commit();
