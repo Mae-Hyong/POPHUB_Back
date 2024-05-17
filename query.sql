@@ -19,13 +19,22 @@ create table user_info(
     foreign key (user_id) REFERENCES user_join_info(user_id) ON UPDATE CASCADE
 );
 
-CREATE TABLE category (
+CREATE TABLE category ( -- 카테고리 테이블
     category_id INT AUTO_INCREMENT PRIMARY KEY,
     category_name VARCHAR(25)
-); -- 카테고리 테이블
+);
+
+CREATE TABLE popup_denial_logs ( -- 팝업 스토어 등록 거부 이유
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    store_id VARCHAR(50),
+    denial_reason TEXT,
+    denial_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
+);
+
 
 CREATE TABLE popup_stores ( -- 팝업 스토어 정보
-    store_id INT AUTO_INCREMENT PRIMARY KEY, -- 고유 식별자
+    store_id VARCHAR(50) PRIMARY KEY, -- 고유 식별자
     category_id INT, -- 카테고리 ID
     user_name VARCHAR(50), -- 팝업 등록자
     store_name VARCHAR(255), -- 팝업 스토어 이름
@@ -33,7 +42,6 @@ CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     store_contact_info VARCHAR(255), -- 팝업 연락처
     store_description LONGTEXT, -- 팝업 소개
     store_status ENUM('오픈 예정', '오픈', '마감') DEFAULT '오픈 예정', -- 진행 예정 or 진행중 or 마감 상태 확인
-    store_image LONGTEXT, -- 팝업 이미지
     store_start_date DATE, -- 팝업 오픈 날짜
     store_end_date DATE, -- 팝업 종료 날짜
     store_mark_number INT DEFAULT 0, -- 찜 수
@@ -45,19 +53,48 @@ CREATE TABLE popup_stores ( -- 팝업 스토어 정보
 
 CREATE TABLE store_schedules ( -- 요일별 시간
     schedule_id INT AUTO_INCREMENT PRIMARY KEY,
-    store_id INT,
+    store_id VARCHAR(50) NOT NULL,
     day_of_week ENUM('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'),
     open_time TIME,
     close_time TIME,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id) ON DELETE CASCADE
 );
 
+CREATE TABLE products (
+    product_id VARCHAR(50) NOT NULL, -- 상품 아이디
+    store_id VARCHAR(50) NOT NULL, -- 스토어 아이디
+    product_name VARCHAR(255) NOT NULL, -- 상품 이름 
+    product_price FLOAT NOT NULL, -- 상품 가격
+    product_description LONGTEXT NOT NULL, -- 상품 설명
+    remaining_quantity INT, -- 잔여 수량
+    product_mark_number INT DEFAULT 0, -- 찜 수
+    PRIMARY KEY (product_id, store_id),
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
+);
+
+CREATE TABLE images (
+    store_id VARCHAR(50) NOT NULL,
+    image_url LONGTEXT NOT NULL,
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
+);
+
 CREATE TABLE BookMark (
     user_id VARCHAR(50) NOT NULL,
-    store_id INT NOT NULL,
+    store_id VARCHAR(50) NOT NULL,
     PRIMARY KEY (user_id, store_id),
     FOREIGN KEY (user_id) REFERENCES user_info(user_id),
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
+);
+
+CREATE TABLE wait_list ( -- 대기 상태
+	store_id VARCHAR(50) NOT NULL,
+    user_id VARCHAR(50) NOT NULL,
+    wait_visitor_name VARCHAR(50) NOT NULL,
+    wait_visitor_number INT NOT NULL,
+    wait_reservation_time TIME,
+    wait_status ENUM('wait','completed') DEFAULT 'wait',
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
+    FOREIGN KEY (user_id) REFERENCES user_info(user_id)
 );
 
 CREATE TABLE store_review (
@@ -72,17 +109,6 @@ CREATE TABLE store_review (
     FOREIGN KEY (user_id) REFERENCES user_info(user_id)
 );
 
-CREATE TABLE products (
-    product_id INT NOT NULL AUTO_INCREMENT,
-    store_id INT,
-    product_name VARCHAR(255) NOT NULL,
-    product_price FLOAT NOT NULL,
-    product_description LONGTEXT NOT NULL,
-    product_mark_number INT DEFAULT 0, -- 찜 수
-    PRIMARY KEY (product_id),
-    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
-);
-
 CREATE TABLE product_review (
     review_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     product_id INT NOT NULL,
@@ -95,14 +121,3 @@ CREATE TABLE product_review (
     FOREIGN KEY (user_id) REFERENCES user_info(user_id)
 );
 
-CREATE TABLE wait_list ( -- 대기 상태
-	wait_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	store_id INT NOT NULL,
-    user_id VARCHAR(50) NOT NULL,
-    wait_visitor_name VARCHAR(50) NOT NULL,
-    wait_visitor_number INT NOT NULL,
-    wait_reservation_time TIME,
-    wait_status ENUM('wait','completed') DEFAULT 'wait',
-    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-    FOREIGN KEY (user_id) REFERENCES user_info(user_id)
-);
