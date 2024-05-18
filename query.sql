@@ -9,12 +9,14 @@ create table user_join_info(
 );
 
 create table user_info(
-	user_id varchar(50) primary key,
-    user_nickname varchar(10) unique,
-    user_image longtext,
-    phone_number varchar(15),
-    point_score int,
-    app_version varchar(20),
+	user_id	varchar(50) primary key,
+	user_name	varchar(10)	NOT NULL unique,
+	phone_number	varchar(15)	NOT NULL,
+	point_score	int	NULL	DEFAULT 0,
+	app_version	varchar(20),
+	gender	enum('M', 'F'),
+	age	int,
+	user_image	longtext,
     
     foreign key (user_id) REFERENCES user_join_info(user_id) ON UPDATE CASCADE
 );
@@ -23,6 +25,29 @@ CREATE TABLE category (
     category_id INT AUTO_INCREMENT PRIMARY KEY,
     category_name VARCHAR(25)
 ); -- 카테고리 테이블
+
+REATE TABLE inquiry (
+	inquiry_id	int AUTO_INCREMENT primary key,
+	user_name	varchar(10)	NOT NULL,
+	category_id	int	NOT NULL,
+	title	varchar(100)	NOT NULL,
+	content	text	NOT NULL,
+    write_date datetime default now(),
+	status	enum("pending", "complete")	NOT NULL DEFAULT "pending",
+		
+    foreign key (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
+    foreign key (category_id) REFERENCES category(category_id) ON UPDATE CASCADE
+);
+
+CREATE TABLE answer (
+	answer_id int auto_increment primary key,
+    inquiry_id	int NOT NULL,
+    user_name varchar(10) NOT NULL,
+    content text NOT NULL,
+    write_date datetime default now(),
+    
+    foreign key (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
+);
 
 CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     store_id INT AUTO_INCREMENT PRIMARY KEY, -- 고유 식별자
