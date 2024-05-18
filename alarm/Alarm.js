@@ -15,7 +15,7 @@ const db = admin.firestore();
 app.use(bodyParser.json());
 
 // 사용자 및 FCM 토큰 초기화
-app.post("/add-user", async (req, res) => {
+app.post("/token_reset", async (req, res) => {
   const { userId, fcmToken } = req.body;
   try {
     await db
@@ -30,7 +30,7 @@ app.post("/add-user", async (req, res) => {
 });
 
 // 알람 추가
-app.post("/add-alarm", async (req, res) => {
+app.post("/alarm_add", async (req, res) => {
   const { userId, type, alarmDetails } = req.body; // type: 'alarms', 'orderAlarms', or 'waitAlarms'
   try {
     const alarmRef = await db
@@ -46,7 +46,7 @@ app.post("/add-alarm", async (req, res) => {
 });
 
 // FCM 토큰 저장 및 만료일 설정
-app.post("/save-token", async (req, res) => {
+app.post("/token_save", async (req, res) => {
   const { userId, fcmToken } = req.body;
   const expiresIn = 14; // 토큰 유효 기간 (14일)
   const expirationDate = new Date();
