@@ -10,11 +10,13 @@ const likePopupSelect_query = 'SELECT * FROM BookMark WHERE user_id = ? AND stor
 const likePopupCheck_query = 'SELECT store_mark_number FROM popup_stores WHERE store_id = ?';
 const adminwait_query = 'SELECT * FROM popup_stores WHERE store_id = ?';
 const waitList_query = 'SELECT * FROM wait_list WHERE store_id = ?';
-const waitOrder_query = 'SELECT COUNT(*) AS waitOrder FROM wait_list WHERE store_id = ? AND wait_status = "wait" AND wait_reservation_time <= (SELECT wait_reservation_time FROM wait_list WHERE store_id = ? AND user_id = ?)';
+const waitOrder_query = 'SELECT COUNT(*) AS waitOrder FROM wait_list WHERE store_id = ? AND wait_status = "waiting" AND wait_reservation_time <= (SELECT wait_reservation_time FROM wait_list WHERE store_id = ? AND user_id = ? AND wait_status = "waiting")';
 const waitReservation_query = 'SELECT store_wait_status FROM popup_stores WHERE store_id = ?';
 const getWaitOrder_query = 'SELECT wait_status FROM wait_list WHERE store_id = ? AND user_id = ?';
 const pending_query = 'SELECT * FROM popup_stores WHERE approval_status = "pending"';
 const viewDenialReason_query = 'SELECT * FROM popup_denial_logs WHERE store_id = ?';
+const userIdSelect_query = 'SELECT user_name FROM user_info WHERE user_id = ?';
+const popupStoreUser_query = 'SELECT store_id, store_name FROM popup_stores WHERE user_name = ? AND store_status = "오픈"';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -23,6 +25,7 @@ const createSchedule_query = 'INSERT INTO store_schedules SET ?';
 const likePopupInsert_query = 'INSERT INTO BookMark (user_id, store_id) VALUES (?, ?)';
 const createWaitReservation_query = 'INSERT INTO wait_list SET ?';
 const createImage_query = 'INSERT INTO images (store_id, image_url) VALUES (?, ?)';
+const insertDeny_query = 'INSERT INTO popup_denial_logs SET ?';
 
 // ------- PUT Query -------
 const updatePopup_query = 'UPDATE popup_stores SET ? WHERE store_id = ?';
@@ -31,7 +34,7 @@ const likePopupUpdateMinus_query = 'UPDATE popup_stores SET store_mark_number = 
 const likePopupUpdatePlus_query = 'UPDATE popup_stores SET store_mark_number = store_mark_number + 1 WHERE store_id = ?';
 const updateViewCount_query = 'UPDATE popup_stores SET store_view_count = store_view_count + 1 WHERE store_id = ?';
 const updateWaitStatus_query = 'UPDATE popup_stores SET store_wait_status = ? WHERE store_id = ?';
-const updateWaitListStatus_query = 'UPDATE wait_list SET wait_status = "completed" WHERE store_id = ? AND user_id = ?';
+const updateWaitListStatus_query = 'UPDATE wait_list SET wait_status = ? WHERE wait_id = ?';
 const pendingCheck_query = 'UPDATE popup_stores SET approval_status = "check" WHERE store_id = ?';
 const pendingDeny_query = 'UPDATE popup_stores SET approval_status = "deny" WHERE store_id = ?';
 
@@ -40,7 +43,7 @@ const deleteImage_query = 'DELETE FROM images WHERE store_id = ?';
 const deleteSchedule_query = 'DELETE FROM store_schedules WHERE store_id = ?';
 const deleteReview_query = 'DELETE FROM store_review WHERE review_id = ?';
 const likePopupDelete_query = 'DELETE FROM BookMark WHERE user_id = ? AND store_id = ?';
-const adminCompleted_query = 'DELETE FROM wait_list WHERE wait_status ="completed" AND store_id = ?';
+const adminReservationDelete_query = 'DELETE FROM wait_list WHERE wait_id = ?';
 
 const getWaitOrder = (store_id, user_id) => {
     return new Promise((resolve, reject) => {
@@ -275,7 +278,7 @@ const popupModel = {
     // 관리자 거부 및 거부 사유 등록
     adminPendingDeny: async (denyData) => {
         try {
-            
+
             await new Promise((resolve, reject) => {
                 db.query(pendingDeny_query, [denyData.store_id], (err, result) => {
                     if (err) reject(err);
@@ -283,7 +286,6 @@ const popupModel = {
                 });
             });
 
-            const insertDeny_query = 'INSERT INTO popup_denial_logs SET ?';
             await new Promise((resolve, reject) => {
                 db.query(insertDeny_query, denyData, (err, result) => {
                     if (err) reject(err);
@@ -300,7 +302,7 @@ const popupModel = {
         try {
             const check = await new Promise((resolve, reject) => {
                 db.query(viewDenialReason_query, store_id, (err, result) => {
-                    if (err) reject (err);
+                    if (err) reject(err);
                     else resolve(result);
                 })
             })
@@ -437,7 +439,114 @@ const popupModel = {
         }
     },
 
-    adminWait: async (store_id) => { // 대기 상태 변경
+    // 대기 등록
+    waitReservation: async (waitReservation) => {
+        try {
+            const { store_id, user_id } = waitReservation;
+
+            const waitStatus = await new Promise((resolve, reject) => { // 현재 팝업스토어 대기 상태 파악
+                db.query(waitReservation_query, store_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result[0].store_wait_status);
+                })
+            });
+
+            waitReservation.wait_status = waitStatus === 'true' ? 'waiting' : 'queued';
+
+            await new Promise((resolve, reject) => {
+                db.query(createWaitReservation_query, waitReservation, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                })
+            });
+
+            if (waitReservation.wait_status == 'waiting') {
+                const waitOrder = await getWaitOrder(store_id, user_id); // 대기 순번 반환
+                return waitOrder;
+            } else {
+                return '지금 바로 입장해주세요';
+            }
+
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 예약자 대기 순서 조회
+    getWaitOrder: async (store_id, user_id) => {
+        try {
+            const wait_status = await new Promise((resolve, reject) => {
+                db.query(getWaitOrder_query, [store_id, user_id], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result[0].wait_status);
+                })
+            });
+
+            if (wait_status == 'waiting') {
+                const waitOrder = await getWaitOrder(store_id, user_id);
+                return waitOrder;
+            } else if (wait_status == 'queued') {
+                return '지금 바로 입장해주세요';
+            } else if (wait_status == 'skipped') {
+                return '대기 순서가 지났습니다. 다시 예약해주세요.';
+            }
+
+        } catch (err) {
+            throw err;
+        }
+    }, 
+
+    // 해당 관리자 waitList 확인
+    adminWaitList: async (user_id) => {
+        try {
+            const userInfoResult = await new Promise((resolve, reject) => {
+                db.query(userIdSelect_query, user_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+            const user_name = userInfoResult[0].user_name;
+
+            const popupStoreResult = await new Promise((resolve, reject) => {
+                db.query(popupStoreUser_query, [user_name], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+
+            const stores = popupStoreResult.map(store => ({
+                store_id: store.store_id,
+                store_name: store.store_name
+            }));
+
+            const waitListPromises = stores.map(store =>
+                new Promise((resolve, reject) => {
+                    db.query(waitList_query, store.store_id, (err, result) => {
+                        if (err) reject(err);
+                        else resolve({
+                            store_id: store.store_id,
+                            store_name: store.store_name,
+                            waitList: result
+                        });
+                    });
+                })
+            );
+
+            const waitList = await Promise.all(waitListPromises);
+            const waitListEmpty = waitList.every(store => store.waitList.length === 0);
+            if (waitListEmpty) {
+                return '현재 대기 목록이 없습니다.';
+            } else {
+                return waitList;
+            }
+        } catch (err) {
+            throw err;
+        }
+    },
+
+
+    // 팝업 관리자 팝업 대기 상태 변경 (오픈 중인 스토어에 대해서만)
+    adminPopupStatus: async (store_id) => {
         try {
             const result = await new Promise((resolve, reject) => {
                 db.query(adminwait_query, store_id, (err, result) => {
@@ -446,6 +555,7 @@ const popupModel = {
 
                 });
             });
+
             const newWaitStatus = result.store_wait_status === 'false' ? 'true' : 'false';
 
             await new Promise((resolve, reject) => {
@@ -455,99 +565,37 @@ const popupModel = {
                 });
             });
 
-            const waitList = await new Promise((resolve, reject) => {
-                db.query(waitList_query, store_id, (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result);
-                })
-            })
-
-            if (waitList.length > 0) {
-                return { newWaitStatus, waitList };
-            } else {
-                return '현재 대기 목록이 없습니다.';
-            }
+            return newWaitStatus;
 
         } catch (err) {
             throw err;
         }
     },
+
 
     // 예약자 status 변경
-    adminWaitAccept: async (user_id, store_id) => {
+    adminWaitStatus: async (wait_id, new_status) => {
         try {
-            const waitStatus = await new Promise((resolve, reject) => {
-                db.query(updateWaitListStatus_query, [store_id, user_id], (err, result) => {
+            await new Promise((resolve, reject) => {
+                db.query(updateWaitListStatus_query, [new_status, wait_id], (err, result) => {
                     if (err) reject(err);
                     else resolve(result);
-                })
-            })
-            return waitStatus;
+                });
+            });
         } catch (err) {
             throw err;
         }
     },
 
-    adminCompleted: async (store_id) => {
+    // 예약자 삭제
+    adminReservationDelete: async (wait_id) => {
         try {
             await new Promise((resolve, reject) => {
-                db.query(adminCompleted_query, [store_id], (err, result) => {
+                db.query(adminReservationDelete_query, wait_id, (err, result) => {
                     if (err) reject(err);
                     else resolve();
                 })
             })
-        } catch (err) {
-            throw err;
-        }
-    },
-
-    waitReservation: async (waitReservation) => { // 대기 등록
-        try {
-            const { store_id, user_id } = waitReservation;
-
-            const waitStatus = await new Promise((resolve, reject) => {
-                db.query(waitReservation_query, store_id, (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result[0].store_wait_status);
-                })
-            });
-
-            if (waitStatus == 'true') {
-                await new Promise((resolve, reject) => {
-                    db.query(createWaitReservation_query, waitReservation, (err, result) => {
-                        if (err) reject(err);
-                        else resolve(result);
-                    })
-                });
-
-                const waitOrder = await getWaitOrder(store_id, user_id);
-
-                return waitOrder;
-            } else {
-                return '지금 바로 입장해주세요';
-            }
-
-        } catch (err) {
-            throw err;
-        }
-    },
-
-    getWaitOrder: async (store_id, user_id) => { // 대기 조회
-        try {
-            const wait_status = await new Promise((resolve, reject) => {
-                db.query(getWaitOrder_query, [store_id, user_id], (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result[0].wait_status);
-                })
-            });
-
-            if (wait_status == 'wait') {
-                const waitOrder = await getWaitOrder(store_id, user_id);
-                return waitOrder;
-            } else {
-                return '지금 바로 입장해주세요';
-            }
-
         } catch (err) {
             throw err;
         }

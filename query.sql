@@ -32,7 +32,6 @@ CREATE TABLE popup_denial_logs ( -- 팝업 스토어 등록 거부 이유
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
 );
 
-
 CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     store_id VARCHAR(50) PRIMARY KEY, -- 고유 식별자
     category_id INT, -- 카테고리 ID
@@ -87,12 +86,13 @@ CREATE TABLE BookMark (
 );
 
 CREATE TABLE wait_list ( -- 대기 상태
+	wait_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	store_id VARCHAR(50) NOT NULL,
     user_id VARCHAR(50) NOT NULL,
     wait_visitor_name VARCHAR(50) NOT NULL,
     wait_visitor_number INT NOT NULL,
-    wait_reservation_time TIME,
-    wait_status ENUM('wait','completed') DEFAULT 'wait',
+    wait_reservation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    wait_status ENUM('waiting', 'queued', 'entered', 'skipped') DEFAULT 'queued', -- 대기 / 입장 대기 / 입장 완료 / 입장 X
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
     FOREIGN KEY (user_id) REFERENCES user_info(user_id)
 );
