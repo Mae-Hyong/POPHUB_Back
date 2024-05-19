@@ -3,7 +3,7 @@ const payModel = require('../models/payModel')
 const axios = require('axios');
 const { v4 } = require('uuid');
 
-const SERVER_URL = "http://localhost:3000/";
+const SERVER_URL = "https://pophub-fa05bf3eabc0.herokuapp.com/";
 const MY_ADMIN_KEY = process.env.KAKAO_KEY;
 const CID = "TC0ONETIME";
 let tid;
