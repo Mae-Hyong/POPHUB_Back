@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require("cors");
+const cron = require('./function/cron');
 
 // Routes
 const adminRouter = require('./router/adminRouter');
@@ -32,6 +33,8 @@ app.use("/user", userRouter);
 app.use("/pay", payRouter);
 app.use('/popup', popupRouter); // popup 라우터 사용
 app.use('/product', productRouter);
+
+cron.scheduleDatabaseUpdate();
 
 app.listen(process.env.PORT, () =>{
     console.log(`${process.env.PORT}번 실행 중`)
