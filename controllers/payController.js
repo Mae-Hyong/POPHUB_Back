@@ -41,7 +41,7 @@ const payController = {
             if (!req.body.storeId) delete payRequestData.store_id;
             if (!req.body.productId) delete payRequestData.product_id;
 
-            await payModel.payRequest(payRequestData)
+            await payModel.payRequest(payRequestData);
 
             const response = await $axios.post("/v1/payment/ready", {
                 cid: CID,
@@ -60,6 +60,15 @@ const payController = {
             console.log(response);
             tid = response.data.tid;
 
+            const paymentsData = {
+                payment_id : payment_id,
+                order_id : orderId,
+                tid : tid,                
+            }
+
+            
+            await payModel.payments(paymentsData)
+
             res.send(response.data.next_redirect_mobile_url);
         } catch (error) {
             console.error("카카오페이 결제 요청 실패:", error.message);
@@ -69,6 +78,7 @@ const payController = {
 
     success : async(req, res) => {
         try {
+            const paymentId = req.body.paymentId
             const param = req.query;
     
             const response = await $axios.post("/v1/payment/approve", {
@@ -78,9 +88,9 @@ const payController = {
                 partner_user_id: param.partner_user_id,
                 pg_token: param.pg_token,
             });
-    
-            console.log('kakaopay :: approve done');
-            console.log(`kakaopay :: aid : ${response.data.aid}`);
+
+            const aid = response.data.aid;
+            await payModel.updatePayments(aid, paymentId);
     
             res.send("CLOSE THE POPUP");
         } catch (error) {
