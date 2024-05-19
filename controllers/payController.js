@@ -3,7 +3,7 @@ const payModel = require('../models/payModel')
 const axios = require('axios');
 const { v4 } = require('uuid');
 
-const SERVER_URL = "https://pophub-fa05bf3eabc0.herokuapp.com/";
+const SERVER_URL = "http://localhost:3000/";
 const MY_ADMIN_KEY = process.env.KAKAO_KEY;
 const CID = "TC0ONETIME";
 let tid;
@@ -53,15 +53,17 @@ const payController = {
                 vat_amount: vatAmount, // 부가세
                 tax_free_amount: taxFreeAmount, // 비과세
                 approval_url: `${SERVER_URL}pay/success?partner_order_id=${PARTNER_ORDER_ID}&partner_user_id=${PARTNER_USER_ID}&cid=${CID}`,
-                fail_url: `${SERVER_URL}fail`, // 결제 실패 시 리디렉션될 URL
-                cancel_url: `${SERVER_URL}cancel`, // 결제 취소 시 리디렉션될 URL
+                fail_url: `${SERVER_URL}pay/fail`, // 결제 실패 시 리디렉션될 URL
+                cancel_url: `${SERVER_URL}pay/cancel`, // 결제 취소 시 리디렉션될 URL
             });
 
             console.log(response);
             tid = response.data.tid;
 
+            const paymentId = v4();
+
             const paymentsData = {
-                payment_id : payment_id,
+                payment_id : paymentId,
                 order_id : orderId,
                 tid : tid,                
             }
