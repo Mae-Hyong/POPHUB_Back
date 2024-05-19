@@ -52,7 +52,7 @@ const payController = {
                 total_amount: totalAmount, // 결제 금액
                 vat_amount: vatAmount, // 부가세
                 tax_free_amount: taxFreeAmount, // 비과세
-                approval_url: `${SERVER_URL}paysuccess?partner_order_id=${PARTNER_ORDER_ID}&partner_user_id=${PARTNER_USER_ID}&cid=${CID}`,
+                approval_url: `${SERVER_URL}pay/success?partner_order_id=${PARTNER_ORDER_ID}&partner_user_id=${PARTNER_USER_ID}&cid=${CID}`,
                 fail_url: `${SERVER_URL}fail`, // 결제 실패 시 리디렉션될 URL
                 cancel_url: `${SERVER_URL}cancel`, // 결제 취소 시 리디렉션될 URL
             });
