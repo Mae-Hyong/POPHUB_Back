@@ -9,21 +9,21 @@ create table user_join_info(
 );
 
 create table user_info(
-	user_id	varchar(50) primary key,
-	user_name	varchar(10)	NOT NULL unique,
+	user_id	varchar(50),
+	user_name	varchar(50)	NOT NULL primary key, -- 50글자로 변경
 	phone_number	varchar(15)	NOT NULL,
 	point_score	int	NULL	DEFAULT 0,
 	app_version	varchar(20),
 	gender	enum('M', 'F'),
 	age	int,
 	user_image	longtext,
+    withdrawal bool default False,
     
-    foreign key (user_id) REFERENCES user_join_info(user_id) ON UPDATE CASCADE
+    foreign key (user_id) REFERENCES user_join_info(user_id) ON UPDATE CASCADE ON DELETE SET NULL
 );
-
-CREATE TABLE category ( -- 카테고리 테이블
-    category_id INT AUTO_INCREMENT PRIMARY KEY,
-    category_name VARCHAR(25)
+CREATE TABLE category (
+	category_id	int AUTO_INCREMENT primary key,
+	category_name	VARCHAR(25)	NOT NULL
 );
 
 CREATE TABLE popup_denial_logs ( -- 팝업 스토어 등록 거부 이유
@@ -34,9 +34,9 @@ CREATE TABLE popup_denial_logs ( -- 팝업 스토어 등록 거부 이유
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
 );
 
-REATE TABLE inquiry (
+CREATE TABLE inquiry (
 	inquiry_id	int AUTO_INCREMENT primary key,
-	user_name	varchar(10)	NOT NULL,
+	user_name	varchar(50)	NOT NULL,
 	category_id	int	NOT NULL,
 	title	varchar(100)	NOT NULL,
 	content	text	NOT NULL,
@@ -50,11 +50,46 @@ REATE TABLE inquiry (
 CREATE TABLE answer (
 	answer_id int auto_increment primary key,
     inquiry_id	int NOT NULL,
-    user_name varchar(10) NOT NULL,
+    user_name varchar(50) NOT NULL,
     content text NOT NULL,
     write_date datetime default now(),
     
     foreign key (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
+);
+
+CREATE TABLE payment_details (
+    order_id varchar(50) primary key, -- 주문 아이디
+    store_id varchar(50),
+    product_id varchar(50),
+    partner_order_id VARCHAR(255) NOT NULL UNIQUE, -- 가맹점 주문 ID(카카오페이에서 제공)
+    user_id varchar(50),
+    item_name VARCHAR(255), -- 물품 명
+    quantity INT, -- 상품 수량
+    total_amount INT, -- 결제 금액
+    vat_amount DECIMAL(10, 2), -- 부가세 (총자릿수, 소수점 이하 자릿수)
+    tax_free_amount DECIMAL(10, 2), -- 비과세 금액
+    status ENUM('pending', 'canceled', 'complete') DEFAULT 'pending', -- 주문 상태의 기본값 설정
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 주문 시간
+    FOREIGN KEY (user_id) REFERENCES user_join_info(user_id),
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
+    FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+CREATE TABLE payments ( -- 결제 정보
+    payment_id varchar(50) PRIMARY KEY, -- 결제 ID (고유 식별자)
+    order_id varchar(50), -- 주문 ID (Orders 테이블의 외래키)
+    tid VARCHAR(255) NOT NULL UNIQUE, -- 결제 고유 번호 (카카오페이에서 제공)
+    status ENUM("ready", "approved") DEFAULT "ready", -- 결제 상태
+    aid VARCHAR(255), -- 승인 ID (카카오페이에서 제공)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 결제 생성 시간
+    aid_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES payment_details(order_id) -- Orders 테이블의 외래키
+);
+
+CREATE TABLE user_delete (
+    user_id VARCHAR(50) PRIMARY KEY,
+    phone_number	varchar(15)	NOT NULL,
+    delete_date DATETIME DEFAULT NOW()
 );
 
 CREATE TABLE popup_stores ( -- 팝업 스토어 정보
