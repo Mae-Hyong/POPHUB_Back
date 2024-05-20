@@ -9,12 +9,12 @@ router.get('/', popupController.allPopups); // 모든 팝업 조회
 router.get('/view/:store_id', popupController.getPopup); // 특정 팝업 조회
 router.get('/popular',popupController.popularPopups); // 인기 팝업 조회
 
-
-router.get('/reviews/:store_id', popupController.storeReview); // 특정 팝업 리뷰 조회
-router.get('/review/:review_id', popupController.storeReviewDetail); // 특정 팝업 리뷰 상세 조회
 router.post('/review/create/:store_id', popupController.createReview); // 팝업 리뷰 생성
-router.put('/review/:review_id', popupController.updateReview);  // 팝업 리뷰 수정
-router.delete('/review/:review_id', popupController.deleteReview); // 팝업 리뷰 삭제
+router.get('/reviews/store/:store_id', popupController.storeReview); // 특정 팝업 리뷰 조회
+router.get('/reviews/user', popupController.storeUserReview); // 특정 아이디별 리뷰 조회
+router.get('/review/storeReview/:review_id', popupController.storeReviewDetail); // 특정 팝업 리뷰 상세 조회
+router.put('/review/update/:review_id', popupController.updateReview);  // 팝업 리뷰 수정
+router.delete('/review/delete/:review_id', popupController.deleteReview); // 팝업 리뷰 삭제
 
 
 router.post('/', upload.array("files", 5), popupController.createPopup); // 팝업 생성

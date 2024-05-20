@@ -203,11 +203,22 @@ const popupController = {
         }
     },
 
-    // 팝업 스토어 리뷰
+    // 특정 팝업 스토어 리뷰
     storeReview: async (req, res) => {
         try {
             const store_id = req.params.store_id;
             const review = await popupModel.storeReview(store_id);
+            res.status(200).json(review);
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 아이디별 팝업 스토어 리뷰
+    storeUserReview: async (req, res) => {
+        try {
+            const user_id = req.body.user_id;
+            const review = await popupModel.storeUserReview(user_id);
             res.status(200).json(review);
         } catch (err) {
             throw err;
@@ -232,7 +243,7 @@ const popupController = {
             const user_id = req.body.user_id;
 
             if (!user_id) {
-                return res.status(400).send("로그인 후 사용해주세요");
+                return res.status(400).json("로그인 후 사용해주세요");
             }
 
             const store_id = req.params.store_id;
@@ -245,8 +256,8 @@ const popupController = {
                 review_content: reviewData.review_content,
                 review_date,
             }
-            const allreview = await popupModel.createReview(reviewdata);
-            res.status(201).json(allreview);
+            const createReview = await popupModel.createReview(reviewdata, user_id);
+            res.status(201).json('리뷰가 등록되었습니다.');
         } catch (err) {
             throw err;
         }
@@ -257,9 +268,9 @@ const popupController = {
         try {
             const user_id = req.body.user_id;
             if (!user_id) {
-                return res.status(400).send("로그인 후 사용해주세요");
+                return res.status(400).json("로그인 후 사용해주세요");
             }
-
+            
             const review_id = req.params.review_id;
             const reviewData = req.body.reviewData;
             const review_modified_date = moment().format('YYYY-MM-DD HH:mm:ss');
