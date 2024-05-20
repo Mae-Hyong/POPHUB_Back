@@ -25,7 +25,7 @@ const payModel = {
 
     updatePayments : (paymentId, aid) => {
         return new Promise((resolve, reject) => {
-            db.query(update_payments_query, ["approved", aid, paymentId], (err, result) => {
+            db.query(update_payments_query, ['approved', aid, paymentId], (err, result) => {
                 if(err) reject(err); 
                 else resolve(result[0]);
             });
