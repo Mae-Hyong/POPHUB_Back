@@ -78,8 +78,8 @@ const payController = {
     success : async(req, res) => {
         try {
             const param = req.query;
-            const paymentId = param.payment_id
-            console.log(tid);
+            const paymentId = param.payment_id;
+            
             const response = await $axios.post("/v1/payment/approve", {
                 cid: param.cid,
                 tid: tid,
@@ -89,7 +89,6 @@ const payController = {
             });
 
             const aid = response.data.aid;
-            console.log(response.data.aid);
             await payModel.updatePayments(paymentId, aid);
     
             res.send("CLOSE THE POPUP");
