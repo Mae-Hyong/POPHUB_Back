@@ -5,6 +5,8 @@ const allPopups_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FR
 const popularPopups_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_status = "오픈" GROUP BY ps.store_id ORDER BY ps.store_view_count DESC LIMIT 3';
 const getImagePopup_query = 'SELECT ps.*, i.image_url FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_id = ?';
 const storeReview_query = 'SELECT * FROM store_review WHERE store_id = ?';
+const storeUserReview_query = 'SELECT * FROM store_review WHERE user_id = ?';
+const reviewCheck_query = 'SELECT COUNT(*) AS count FROM wait_list WHERE store_id = ? AND user_id = ? AND wait_status = "entered"';
 const storeReviewDetail_query = 'SELECT * FROM store_review WHERE review_id = ?';
 const likePopupSelect_query = 'SELECT * FROM BookMark WHERE user_id = ? AND store_id = ?';
 const likePopupCheck_query = 'SELECT store_mark_number FROM popup_stores WHERE store_id = ?';
@@ -369,7 +371,8 @@ const popupModel = {
         }
     },
 
-    storeReview: async (store_id) => { // 팝업 스토어 리뷰
+    // 특정 팝업 스토어 리뷰
+    storeReview: async (store_id) => {
         try {
             const results = await new Promise((resolve, reject) => {
                 db.query(storeReview_query, store_id, (err, results) => {
@@ -377,6 +380,31 @@ const popupModel = {
                     resolve(results);
                 });
             });
+
+            if (results.length === 0) {
+                return "현재 작성된 리뷰가 없습니다. 예약 후 작성해보세요!";
+            }
+
+            return results;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 아이디별 팝업 스토어 리뷰
+    storeUserReview: async (user_id) => {
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query(storeUserReview_query, user_id, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                });
+            });
+            
+            if (results.length === 0) {
+                return "현재 작성된 리뷰가 없습니다. 예약 후 작성해보세요!";
+            }
+
             return results;
         } catch (err) {
             throw err;
@@ -391,20 +419,34 @@ const popupModel = {
                     resolve(result[0]);
                 });
             });
+
+
             return result;
         } catch (err) {
             throw err;
         }
     },
 
-    createReview: async (reviewdata) => { // 리뷰 생성
+    createReview: async (reviewdata, user_id) => { // 리뷰 생성
         try {
+            const [checkResult] = await new Promise((resolve, reject) => {
+                db.query(reviewCheck_query, [reviewdata.store_id, user_id], (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                });
+            });
+
+            if (checkResult.count === 0) {
+                return '리뷰 작성 권한이 없습니다.';
+            }
+
             const result = await new Promise((resolve, reject) => {
                 db.query(createReview_query, reviewdata, (err, result) => {
                     if (err) reject(err);
                     else resolve(result);
                 });
             });
+            
             const review_id = result.insertId;
             return { ...reviewdata, review_id };
         } catch (err) {
@@ -487,6 +529,8 @@ const popupModel = {
                 return waitOrder;
             } else if (wait_status == 'queued') {
                 return '지금 바로 입장해주세요';
+            } else if (wait_status == 'entered') {
+                return '입장이 완료되었습니다.';
             } else if (wait_status == 'skipped') {
                 return '대기 순서가 지났습니다. 다시 예약해주세요.';
             }
@@ -494,7 +538,7 @@ const popupModel = {
         } catch (err) {
             throw err;
         }
-    }, 
+    },
 
     // 해당 관리자 waitList 확인
     adminWaitList: async (user_id) => {
