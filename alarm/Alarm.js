@@ -33,11 +33,20 @@ app.post("/token_reset", async (req, res) => {
 app.post("/alarm_add", async (req, res) => {
   const { userId, type, alarmDetails } = req.body; // type: 'alarms', 'orderAlarms', or 'waitAlarms'
   try {
-    const alarmRef = await db
-      .collection("users")
-      .doc(userId)
-      .collection(type)
-      .add(alarmDetails);
+    const userRef = db.collection("users").doc(userId).collection(type);
+
+    // 중복 알람 확인
+    const existingAlarms = await userRef
+      .where("title", "==", alarmDetails.title)
+      .where("message", "==", alarmDetails.message)
+      .get();
+
+    if (!existingAlarms.empty) {
+      return res.status(200).send("동일한 알람이 이미 존재합니다.");
+    }
+
+    // 새로운 알람 추가
+    const alarmRef = await userRef.add(alarmDetails);
     res.status(200).send(`알람이 성공적으로 추가되었습니다: ${alarmRef.id}`);
   } catch (error) {
     console.error("알람 추가 오류:", error);
