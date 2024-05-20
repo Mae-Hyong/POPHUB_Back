@@ -31,14 +31,27 @@ app.post("/token_reset", async (req, res) => {
 
 // 알람 추가
 app.post("/alarm_add", async (req, res) => {
-  const { userId, type, alarmDetails } = req.body; // type: 'alarms', 'orderAlarms', or 'waitAlarms'
+  const { userId, type, alarmDetails } = req.body; // type: 'alarms', 'orderAlarms', 'waitAlarms'
+
+  // 'alarmDetails' 내의 필수 필드 확인
+  if (
+    !userId ||
+    !type ||
+    !alarmDetails ||
+    !alarmDetails.time ||
+    !alarmDetails.label ||
+    alarmDetails.active === undefined
+  ) {
+    return res.status(400).send("필수 필드가 누락되었습니다.");
+  }
+
   try {
     const userRef = db.collection("users").doc(userId).collection(type);
 
-    // 중복 알람 확인
+    // 중복 알람 확인, 'time'과 'label' 기준
     const existingAlarms = await userRef
-      .where("title", "==", alarmDetails.title)
-      .where("message", "==", alarmDetails.message)
+      .where("time", "==", alarmDetails.time)
+      .where("label", "==", alarmDetails.label)
       .get();
 
     if (!existingAlarms.empty) {
@@ -46,7 +59,11 @@ app.post("/alarm_add", async (req, res) => {
     }
 
     // 새로운 알람 추가
-    const alarmRef = await userRef.add(alarmDetails);
+    const alarmRef = await userRef.add({
+      time: alarmDetails.time,
+      label: alarmDetails.label,
+      active: alarmDetails.active,
+    });
     res.status(200).send(`알람이 성공적으로 추가되었습니다: ${alarmRef.id}`);
   } catch (error) {
     console.error("알람 추가 오류:", error);
