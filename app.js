@@ -7,6 +7,7 @@ const cron = require('./function/cron');
 // Routes
 const adminRouter = require('./router/adminRouter');
 const userRouter = require('./router/userRouter');
+const payRouter = require('./router/payRouter');
 const popupRouter = require('./router/popup');
 const productRouter = require('./router/product');
 
@@ -29,6 +30,7 @@ app.get("/", (req, res) => {
 // 인증 라우터
 app.use("/admin", adminRouter);
 app.use("/user", userRouter);
+app.use("/pay", payRouter);
 app.use('/popup', popupRouter);
 app.use('/product', productRouter);
 

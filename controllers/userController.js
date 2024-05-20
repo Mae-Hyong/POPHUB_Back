@@ -106,8 +106,8 @@ const userController = {
 
     doubleCheck : async (req, res) => {
         try {
-            const userId = req.params.userId;
-            const userName = req.params.userName;
+            const userId = req.query.userId;
+            const userName = req.query.userName;
 
             // 아이디 혹은 유저 네임이 안담겨 왔을때
             if (!userId && !userName) {
