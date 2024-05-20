@@ -15,7 +15,7 @@ const profile_add_query = 'INSERT INTO user_info (user_id, user_name, phone_numb
 const profile_change_query = 'UPDATE user_info SET user_name = ?, user_image = ?  WHERE user_id = ?';
 const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content) VALUES (?, ?, ?, ?)';
 const delete_add_query = 'INSERT INTO user_delete SET ?'
-const delete_change_query = 'UPDATE user_info SER user_id = ?, user_name = ?, withdrawal = ? WHERE user_id = ?'
+const delete_change_query = 'UPDATE user_info SET user_id = ?, user_name = ?, withdrawal = ? WHERE user_id = ?'
 
 // ------- DELETE Query -------
 const user_delete_query = 'DELET FROM user_join_info WHERE user_id = ?'
