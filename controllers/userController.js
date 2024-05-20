@@ -5,6 +5,7 @@ const Token = require('../function/jwt');
 const sendMessage = require('../function/message');
 
 const bcrypt = require('bcrypt');
+const { v1 } = require('uuid');
 
 const signController = {
     signUp : async (req, res) => {
@@ -118,15 +119,14 @@ const userController = {
             } 
 
             if (userId){
-                const result = await userModel.searchUser(userId);
-                if(result.length === 0) {
+                const result = await userModel.userDoubleCheck(userId, null);
+                if(!result) {
                   return res.status(200).send('User ID not found');
-                  
                 }
                 return res.status(200).send('User ID Exists');
               } else {
-                const result = await searchUser(userName);
-                if(result.length === 0) {
+                const result = await userModel.userDoubleCheck(null, userName);
+                if(!result) {
                   console.log('User Name not found');
                   return res.status(200).send('User Name not found');
                 }
@@ -224,6 +224,32 @@ const userController = {
             console.log(err);
             res.status(500).send("프로필 생성 중 오류가 발생했습니다.")
         }
+    },
+
+    deleteUser : async (req, res) => {
+        try {
+            const body = req.body;
+            const addData = {
+                user_id : body.userId,
+                phone_number : body.phoneNumber,
+            }
+            const changeData = {
+                user_id : body.userId,
+                user_id : v1(),
+                user_name : v1(),
+                withdrawal : true,
+            }
+            const deleteData = {
+                user_id : body.userId,
+            }
+
+            await userModel.deleteUser(addData, changeData, deleteData);
+
+            res.status(200).send("user Delete succeddfully")
+        } catch (err) {
+            res.status(500).send("유저 삭제 중 오류가 발생했습니다.")
+        }
+        
     },
 
     createInquiry : async (req, res) => {
