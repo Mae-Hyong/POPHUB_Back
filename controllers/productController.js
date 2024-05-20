@@ -1,5 +1,6 @@
 const productModel = require('../models/productModel');
 const moment = require('moment');
+const { v4: uuidv4 } = require("uuid");
 
 const productController = {
     // 모든 굿즈 조회
@@ -7,8 +8,18 @@ const productController = {
         try {
             const result = await productModel.allProducts();
             res.status(200).json(result);
+        } catch (err) {W
+            throw err;
+        }
+    },
+
+    // 스토어별 굿즈 조회
+    storeProducts: async (req, res) => {
+        try {
+            const store_id = req.params.store_id;
+            const result = await productModel.storeProducts(store_id);
+            res.status(200).json(result);
         } catch (err) {
-            console.log(err);
             throw err;
         }
     },
@@ -16,45 +27,46 @@ const productController = {
     // 굿즈 생성
     createProduct: async (req, res) => {
         try {
-            const store_id = req.body.store_id;
-            const user_id = req.body.user_id;
-            const productData = req.body.productData;
-            if (!user_id) {
-                return res.status(400).send("로그인 후 사용해주세요");
-            }
-            const productdata = {
+
+            const product_id = uuidv4();
+            const body = req.body;
+            const store_id = req.params.store_id;
+
+            const productData = {
+                product_id,
                 store_id,
-                product_name: productData.product_name,
-                product_price: productData.product_price,
-                product_description: productData.product_description
-            };
-            const result = await productModel.createProduct(productdata);
-            const product_id = result.product_id;
-            res.status(201).json(` ${product_id} 해당 상품이 등록되었습니다.`);
+                product_name: body.product_name,
+                product_price: body.product_price,
+                product_description: body.product_description,
+                remaining_quantity: body.remaining_quantity,
+            }
+
+            const check = await productModel.createProduct(productData, body.user_name);
+
+            if (check === false) {
+                res.status(400).json({ error: '유저 닉네임이 일치하지 않습니다.' });
+            } else {
+                let productImages = [];
+                if (req.files) {
+                    await Promise.all(req.files.map(async (file) => {
+                        productImages.push(file.path);
+                        await productModel.uploadImage(product_id, file.path);
+                    }));
+                }
+                res.status(201).json('해당 상품이 등록되었습니다.');
+            }
+
         } catch (err) {
-            console.log(err);
             throw err;
         }
     },
 
-    // 굿즈 조회
+    // 특정 굿즈 상세 조회 및 수정시 기본 정보 보내기
     getProduct: async (req, res) => {
         try {
-            const store_name = req.body.store_name;
-            const products = await productModel.getProduct(store_name);
-
-            res.status(200).json(products);
-        } catch (err) {
-            throw err;
-        }
-    },
-
-    // 굿즈 상세 조회
-    storeProductDetail: async (req, res) => {
-        try {
-            const product_id = req.params.product_id;    
-            const productDetail = await productModel.storeProductDetail(product_id);
-            res.status(200).json(productDetail);
+            const product_id = req.params.product_id;
+            const result = await productModel.getProduct(product_id);
+            res.status(200).json(result);
         } catch (err) {
             throw err;
         }
@@ -64,9 +76,30 @@ const productController = {
     updateProduct: async (req, res) => {
         try {
             const product_id = req.params.product_id;
-            const productData = req.body.productData;
-            await productModel.updateProduct(product_id, productData);
-            res.status(200).json(`${product_id} 수정되었습니다.`);
+            const body = req.body;
+            const updateData = {
+                product_id,
+                store_id: body.store_id,
+                product_name: body.product_name,
+                product_price: body.product_price,
+                product_description: body.product_description,
+                remaining_quantity: body.remaining_quantity,
+            }
+            const check = await productModel.updateProduct(updateData, body.user_name);
+
+            if (check === false) {
+                res.status(400).json({ error: '유저 닉네임이 일치하지 않습니다.' });
+            } else {
+                await productModel.deleteImage(product_id);
+                let productImages = [];
+                if (req.files) {
+                    await Promise.all(req.files.map(async (file) => {
+                        productImages.push(file.path);
+                        await productModel.uploadImage(product_id, file.path);
+                    }));
+                }
+                res.status(200).json('해당 상품이 수정되었습니다.');
+            }
         } catch (err) {
             throw err;
         }
@@ -75,9 +108,22 @@ const productController = {
     // 굿즈 삭제
     deleteProduct: async (req, res) => {
         try {
-            const product_id = req. params.product_id;
+            const product_id = req.params.product_id;
+            await productModel.deleteImage(product_id);
             await productModel.deleteProduct(product_id);
-            res.status(200).json(`${product_id}가 삭제되었습니다.`);
+            res.status(200).json('해당 상품이 삭제되었습니다.');
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 주문
+    orderProduct: async (req, res) => {
+        try {
+            const product_id = req.params.product_id;
+            const user_name = req.body.user_name;
+            await productModel.orderProduct(product_id);
+            res.status(200).json('주문이 완료되었습니다.');
         } catch (err) {
             throw err;
         }
@@ -87,7 +133,7 @@ const productController = {
     productReview: async (req, res) => {
         try {
             const product_id = req.params.product_id;
-            const review = await(productModel.productReview(product_id));
+            const review = await (productModel.productReview(product_id));
             res.status(200).json(review);
         } catch (err) {
             throw err;
