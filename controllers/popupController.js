@@ -247,13 +247,13 @@ const popupController = {
             }
 
             const store_id = req.params.store_id;
-            const reviewData = req.body.reviewData;
+            const body = req.body;
             const review_date = moment().format('YYYY-MM-DD HH:mm:ss');
             const reviewdata = {
                 user_id,
                 store_id,
-                review_rating: reviewData.review_rating,
-                review_content: reviewData.review_content,
+                review_rating: body.review_rating,
+                review_content: body.review_content,
                 review_date,
             }
             const createReview = await popupModel.createReview(reviewdata, user_id);
@@ -272,12 +272,12 @@ const popupController = {
             }
 
             const review_id = req.params.review_id;
-            const reviewData = req.body.reviewData;
+            const body = req.body;
             const review_modified_date = moment().format('YYYY-MM-DD HH:mm:ss');
             const reviewdata = {
                 user_id: req.body.user_id,
-                review_rating: reviewData.review_rating,
-                review_content: reviewData.review_content,
+                review_rating: body.review_rating,
+                review_content: body.review_content,
                 review_modified_date,
             }
             await popupModel.updateReview(reviewdata, review_id);
