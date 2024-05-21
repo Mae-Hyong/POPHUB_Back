@@ -24,6 +24,7 @@ const payController = {
             const orderId = v4()
             const PARTNER_ORDER_ID = v4();
             const PARTNER_USER_ID = v4();
+            const paymentId = v4();
 
             const payRequestData = {
                 order_id: orderId,
@@ -52,15 +53,11 @@ const payController = {
                 total_amount: totalAmount, // 결제 금액
                 vat_amount: vatAmount, // 부가세
                 tax_free_amount: taxFreeAmount, // 비과세
-                approval_url: `${SERVER_URL}pay/success?partner_order_id=${PARTNER_ORDER_ID}&partner_user_id=${PARTNER_USER_ID}&cid=${CID}`,
+                approval_url: `${SERVER_URL}pay/success?partner_order_id=${PARTNER_ORDER_ID}&partner_user_id=${PARTNER_USER_ID}&cid=${CID}&payment_id=${paymentId};`,
                 fail_url: `${SERVER_URL}pay/fail`, // 결제 실패 시 리디렉션될 URL
                 cancel_url: `${SERVER_URL}pay/cancel`, // 결제 취소 시 리디렉션될 URL
             });
-
-            console.log(response);
             tid = response.data.tid;
-
-            const paymentId = v4();
 
             const paymentsData = {
                 payment_id : paymentId,
@@ -80,9 +77,9 @@ const payController = {
 
     success : async(req, res) => {
         try {
-            const paymentId = req.body.paymentId
             const param = req.query;
-    
+            const paymentId = param.payment_id;
+            
             const response = await $axios.post("/v1/payment/approve", {
                 cid: param.cid,
                 tid: tid,
@@ -92,7 +89,7 @@ const payController = {
             });
 
             const aid = response.data.aid;
-            await payModel.updatePayments(aid, paymentId);
+            await payModel.updatePayments(paymentId, aid);
     
             res.send("CLOSE THE POPUP");
         } catch (error) {
