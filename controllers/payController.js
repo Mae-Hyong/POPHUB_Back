@@ -65,7 +65,7 @@ const payController = {
             
             await payModel.payments(paymentsData)
 
-            res.send(response.data.next_redirect_pc_url);
+            res.send(response.data.next_redirect_app_url);
         } catch (error) {
             console.error("카카오페이 결제 요청 실패:", error.message);
             res.status(500).send("카카오페이 결제 요청 실패");
