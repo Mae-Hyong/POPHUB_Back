@@ -1,14 +1,14 @@
 const db = require('../config/mysqlDatabase');
 
 // ------- GET Query -------
-const allProducts_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN product_images pi ON p.product_id = pi.product_id GROUP BY p.product_id';
+const allProducts_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN images pi ON p.product_id = pi.product_id GROUP BY p.product_id';
 const userNameCheck_query = 'SELECT user_name FROM popup_stores WHERE store_id = ?';
-const storeProducts_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN product_images pi ON p.product_id = pi.product_id WHERE p.store_id = ? GROUP BY p.product_id';
-const getProduct_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN product_images pi ON p.product_id = pi.product_id WHERE p.product_id = ? GROUP BY p.product_id';
+const storeProducts_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN images pi ON p.product_id = pi.product_id WHERE p.store_id = ? GROUP BY p.product_id';
+const getProduct_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN images pi ON p.product_id = pi.product_id WHERE p.product_id = ? GROUP BY p.product_id';
 
 // ------- POST Query -------
 const createProduct_query = 'INSERT INTO products SET ?';
-const createImage_query = 'INSERT INTO product_images (product_id, image_url) VALUES (?, ?)';
+const createImage_query = 'INSERT INTO images (product_id, image_url) VALUES (?, ?)';
 
 // ------- PUT Query -------
 const updateViewCount_query = 'UPDATE products SET product_view_count = product_view_count + 1 WHERE product_id = ?';
@@ -16,7 +16,7 @@ const updateProduct_query = 'UPDATE products SET ? WHERE product_id = ?'
 const updateOrder_query = 'UPDATE products SET remaining_quantity = remaining_quantity - 1 WHERE product_id = ?';
 
 // ------- DELETE Query -------
-const deleteImage_query = 'DELETE FROM product_images WHERE product_id = ?';
+const deleteImage_query = 'DELETE FROM images WHERE product_id = ?';
 const deleteProduct_query = 'DELETE FROM products WHERE product_id = ?';
 
 const productModel = {
