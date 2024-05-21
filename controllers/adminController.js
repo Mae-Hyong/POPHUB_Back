@@ -15,6 +15,40 @@ const adminController = {
         }
     },
 
+    createNotice : async (req, res) => {
+        try {
+            const noticeData = {
+                title : title,
+                content : content,
+                usesr_name : userName
+            }
+
+            await adminModel.createNotice(noticeData);
+            res.status(201).send("공지사항 작성 완료")
+        } catch (err) {
+            res.status(500).send("공지사항 작성 중 오류가 발생했습니다.");
+        }
+    },
+
+    searchNotice : async(req, res) => {
+        try {
+
+            const noticeId = req.query.notice_id;
+            if(!noticeId){
+                const searchResult = await adminModel.searchNotice();
+                return res.status(200).json(searchResult);
+            }
+            else {
+                const result = await adminModel.selectNotice(noticeId);
+                return res.status(200).json(result);
+
+            }
+            
+        } catch (err) {
+            
+        }
+    },
+
     // 관리자 pending List 조회
     popupPendingList: async(req, res) => {
         try {

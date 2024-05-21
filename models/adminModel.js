@@ -2,10 +2,11 @@ const db = require('../config/mysqlDatabase');
 
 // ------- GET Query -------
 const pending_query = 'SELECT * FROM popup_stores WHERE approval_status = "pending"';
-
+const search_notice_query = 'SELECT * FROM notice'
+const select_notice_query = 'SELECT * FROM notice WHERE notice_id = ?'
 // ------- POST Query -------
 const create_answer_query = 'INSERT INTO answer(inquiry_id, user_name, content) VALUES (?, ?, ?)'
-
+const create_notice_query = 'INSERT INTO notice SET ?'
 // ------- PUT Query -------
 const update_inquiry_query = 'UPDATE inquiry SET status = ? WHERE inquiry_id = ?'
 const pendingCheck_query = 'UPDATE popup_stores SET approval_status = "check" WHERE store_id = ?';
@@ -29,12 +30,36 @@ const adminModel = {
     updateInquiry : (inquiry_id) => {
         return new Promise((resolve, reject) => {
             db.query(update_inquiry_query, ['complete', inquiry_id], (err, result) => {
-                if(err) {
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
+                if(err) reject(err);
+                else resolve(result[0]);
             });
+        })
+    },
+
+    searchNotice : () => {
+        return new Promise((resolve, reject) => {
+            db.query(search_notice_query, (err, result) => {
+                if(err) reject(err);
+                else resolve(result[0]);
+            })
+        })
+    },
+
+    selectNotice : (noticeId) => {
+        return new Promise((resolve, reject) => {
+            db.query(select_notice_query, noticeId, (err, result) => {
+                if(err) reject(err);
+                else resolve(result[0]);
+            })
+        })
+    },
+
+    createNotice : (noticeData) => {
+        return new Promise((resolve, reject) => {
+            db.query(create_notice_query, noticeData, (err, result) => {
+                if(err) reject(err);
+                else resolve(result);
+            })
         })
     },
 
