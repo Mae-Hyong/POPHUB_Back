@@ -77,6 +77,7 @@ const payController = {
             const param = req.query;
             const partnerOrderId = param.partner_order_id;
             const result = await payModel.searchOrder(partnerOrderId)
+            console.log(result.tid)
             const response = await $axios.post("/v1/payment/approve", {
                 cid: param.cid,
                 tid: result.tid,
@@ -86,7 +87,7 @@ const payController = {
             });
 
             const aid = response.data.aid;
-            await payModel.updatePayments(partnerOrderId, aid);
+            // await payModel.updatePayments(partnerOrderId, aid);
     
             res.send("CLOSE THE POPUP");
         } catch (error) {
