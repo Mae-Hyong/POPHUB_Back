@@ -79,7 +79,7 @@ const payController = {
             const result = await payModel.searchOrder(partnerOrderId)
             const response = await $axios.post("/v1/payment/approve", {
                 cid: param.cid,
-                tid: tid,
+                tid: result.tid,
                 partner_order_id: partnerOrderId,
                 partner_user_id: param.partner_user_id,
                 pg_token: param.pg_token,
