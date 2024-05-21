@@ -154,9 +154,9 @@ const productController = {
     // 굿즈 리뷰 생성
     createReview: async (req, res) => {
         try {
-            const user_id = req.body.user_id;
+            const user_name = req.body.user_name;
 
-            if (!user_id) {
+            if (!user_name) {
                 return res.status(400).send("로그인 후 사용해주세요");
             }
 
@@ -164,7 +164,7 @@ const productController = {
             const reviewData = req.body.reviewData;
             const review_date = moment().format('YYYY-MM-DD HH:mm:ss');
             const reviewdata = {
-                user_id,
+                user_name,
                 product_id,
                 review_rating: reviewData.review_rating,
                 review_content: reviewData.review_content,
@@ -180,8 +180,8 @@ const productController = {
     // 굿즈 리뷰 수정
     updateReview: async (req, res) => {
         try {
-            const user_id = req.body.user_id;
-            if (!user_id) {
+            const user_name = req.body.user_name;
+            if (!user_name) {
                 return res.status(400).send("로그인 후 사용해주세요");
             }
 
@@ -189,7 +189,7 @@ const productController = {
             const reviewData = req.body.reviewData;
             const review_modified_date = moment().format('YYYY-MM-DD HH:mm:ss');
             const reviewdata = {
-                user_id: req.body.user_id,
+                user_name,
                 review_rating: reviewData.review_rating,
                 review_content: reviewData.review_content,
                 review_modified_date,
