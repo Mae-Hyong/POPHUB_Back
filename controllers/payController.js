@@ -3,7 +3,7 @@ const payModel = require('../models/payModel')
 const axios = require('axios');
 const { v4 } = require('uuid');
 
-const SERVER_URL = "https://pophub-fa05bf3eabc0.herokuapp.com/";
+const SERVER_URL = "http://localhost:3000/";
 const MY_ADMIN_KEY = process.env.KAKAO_KEY;
 const CID = "TC0ONETIME";
 
@@ -51,7 +51,7 @@ const payController = {
                 total_amount: totalAmount, // 결제 금액
                 vat_amount: vatAmount, // 부가세
                 tax_free_amount: taxFreeAmount, // 비과세
-                approval_url: `${SERVER_URL}pay/success?partner_order_id=${PARTNER_ORDER_ID}&partner_user_id=${PARTNER_USER_ID}&cid=${CID};`,
+                approval_url: `${SERVER_URL}pay/success?partner_order_id=${PARTNER_ORDER_ID}&partner_user_id=${PARTNER_USER_ID}&cid=${CID}`,
                 fail_url: `${SERVER_URL}pay/fail`, // 결제 실패 시 리디렉션될 URL
                 cancel_url: `${SERVER_URL}pay/cancel`, // 결제 취소 시 리디렉션될 URL
             });
@@ -59,13 +59,13 @@ const payController = {
             const paymentsData = {
                 partner_order_id : PARTNER_ORDER_ID,
                 order_id : orderId,
-                tid : response.data.tid,                
+                tid : response.data.tid,              
             }
 
             
             await payModel.payments(paymentsData)
 
-            res.send(response.data.next_redirect_mobile_url);
+            res.send(response.data.next_redirect_pc_url);
         } catch (error) {
             console.error("카카오페이 결제 요청 실패:", error.message);
             res.status(500).send("카카오페이 결제 요청 실패");
@@ -77,18 +77,18 @@ const payController = {
             const param = req.query;
             const partnerOrderId = param.partner_order_id;
             const result = await payModel.searchOrder(partnerOrderId)
-
+            console.log(`result : ${result.tid}`)
             const response = await $axios.post("/v1/payment/approve", {
                 cid: param.cid,
                 tid: result.tid,
-                partner_order_id: partnerOrderId,
+                partner_order_id: param.partner_order_id,
                 partner_user_id: param.partner_user_id,
                 pg_token: param.pg_token,
             });
 
             const aid = response.data.aid;
             console.log(response)
-            // await payModel.updatePayments(partnerOrderId, aid);
+            await payModel.updatePayments(partnerOrderId, aid);
     
             res.send("CLOSE THE POPUP");
         } catch (error) {
