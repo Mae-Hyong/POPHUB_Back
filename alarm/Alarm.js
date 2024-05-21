@@ -39,6 +39,7 @@ app.post("/alarm_add", async (req, res) => {
     !type ||
     !alarmDetails ||
     !alarmDetails.time ||
+    !alarmDetails.title ||
     !alarmDetails.label ||
     alarmDetails.active === undefined
   ) {
@@ -62,6 +63,7 @@ app.post("/alarm_add", async (req, res) => {
     const alarmRef = await userRef.add({
       time: alarmDetails.time,
       label: alarmDetails.label,
+      title: alarmDetails.title,
       active: alarmDetails.active,
     });
     res.status(200).send(`알람이 성공적으로 추가되었습니다: ${alarmRef.id}`);
