@@ -14,11 +14,11 @@ const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE
 const profile_add_query = 'INSERT INTO user_info (user_id, user_name, phone_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
 const profile_change_query = 'UPDATE user_info SET user_name = ?, user_image = ?  WHERE user_id = ?';
 const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content) VALUES (?, ?, ?, ?)';
-const delete_add_query = 'INSERT INTO user_delete SET ?'
+const delete_add_query = 'INSERT INTO user_delete(user_id, phone_number) VALUES (?, ?)'
 const delete_change_query = 'UPDATE user_info SET user_name = ?, withdrawal = ? WHERE user_id = ?'
 
 // ------- DELETE Query -------
-const user_delete_query = 'DELET FROM user_join_info WHERE user_id = ?'
+const user_delete_query = 'DELETE FROM user_join_info WHERE user_id = ?'
 
 const userModel = {
     searchUser : (userId) => {
@@ -101,17 +101,27 @@ const userModel = {
         })
     },
 
-    deleteUser : (addData, changeData, deleteData) => {
+    deleteData : (userId, phoneNumber) => {
         return new Promise((resolve, reject) => {
-            db.query(delete_add_query, addData, (err, result) => {
+            db.query(delete_add_query, [ userId, phoneNumber ], (err, result) => {
                 if(err) reject(err);
                 else resolve(result[0]);
             })
-            db.query(delete_change_query, changeData, (err, changeResult) => {
+        })
+    },
+
+    deleteChange : (userName, status, userId) => {
+        return new Promise((resolve, reject) => {
+            db.query(delete_change_query, [ userName, status, userId ], (err, changeResult) => {
                 if(err) reject(err);
                 else resolve(changeResult[0]);
             })
-            db.query(user_delete_query, deleteData, (err, deleteResult) => {
+        })
+    },
+
+    deleteUser : (userId) => {
+        return new Promise((resolve, reject) => {
+            db.query(user_delete_query, userId, (err, deleteResult) => {
                 if(err) reject(err);
                 else resolve(deleteResult[0]);
             })

@@ -228,24 +228,16 @@ const userController = {
 
     deleteUser : async (req, res) => {
         try {
-            const body = req.body;
-            const addData = {
-                user_id : body.userId,
-                phone_number : body.phoneNumber,
-            }
-            const changeData = {
-                user_name : v1(),
-                withdrawal : true,
-                user_id : body.userId,
-            }
-            const deleteData = {
-                user_id : body.userId,
-            }
-
-            await userModel.deleteUser(addData, changeData, deleteData);
+            const { userId, phoneNumber } = req.body;
+            const userName = v1();
+            
+            await userModel.deleteData(userId, phoneNumber);
+            await userModel.deleteChange(userName, true, userId);
+            await userModel.deleteUser(userId);
 
             res.status(200).send("user Delete succeddfully")
         } catch (err) {
+            console.error("유저 삭제 실패:", err.message);
             res.status(500).send("유저 삭제 중 오류가 발생했습니다.")
         }
         
