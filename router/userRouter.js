@@ -28,4 +28,6 @@ router.get("/search_inquiry/:inquiryId", token.verifyToken, userController.selec
 router.get("/search_answer/:inquiryId", token.verifyToken, userController.searchAnswer);
 router.post("/create_inquiry", token.verifyToken, userController.createInquiry);
 
+router.delete("/user_delete", token.verifyToken, userController.deleteUser);
+
 module.exports = router;

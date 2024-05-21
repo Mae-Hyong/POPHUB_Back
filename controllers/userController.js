@@ -234,10 +234,9 @@ const userController = {
                 phone_number : body.phoneNumber,
             }
             const changeData = {
-                user_id : body.userId,
-                user_id : v1(),
                 user_name : v1(),
                 withdrawal : true,
+                user_id : body.userId,
             }
             const deleteData = {
                 user_id : body.userId,

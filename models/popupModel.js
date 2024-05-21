@@ -118,11 +118,8 @@ const popupModel = {
             await db.query(deleteImage_query, [store_id]);
             const result = await new Promise((resolve, reject) => {
                 db.query(createImage_query, [store_id, imagePath], (err, result) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(result);
-                    }
+                    if (err) reject(err);
+                    else resolve(result);
                 });
             });
             return result;
@@ -174,13 +171,11 @@ const popupModel = {
         try {
             const result = await new Promise((resolve, reject) => {
                 db.query(updateViewCount_query, store_id, (err, updateResult) => {
-                    if (err) {
-                        reject(err);
-                    } else {
+                    if (err) reject(err);
+                    else {
                         db.query(getImagePopup_query, store_id, (err, popupResult) => {
-                            if (err) {
-                                reject(err);
-                            } else {
+                            if (err) reject(err);
+                            else {
                                 const popupInfo = { ...popupResult[0] }; // 복사하여 새로운 객체 생성
                                 delete popupInfo.image_url; // 이미지 URL 속성 삭제
                                 const imageUrls = popupResult.map(row => row.image_url).filter(url => url !== null);
@@ -216,7 +211,7 @@ const popupModel = {
 
     // 팝업 정보 삭제
     deletePopup: async (store_id) => {
-        const tables = ['BookMark', 'products', 'store_review', 'store_schedules', 'wait_list', 'images', 'popup_stores'];
+        const tables = ['BookMark', 'products', 'store_review', 'store_schedules', 'wait_list', 'images', 'payment_details', 'popup_stores'];
         try {
             for (const tableName of tables) { // 해당 테이블에 store_id값 확인
                 const yes = await new Promise((resolve, reject) => {
@@ -400,7 +395,7 @@ const popupModel = {
                     resolve(results);
                 });
             });
-            
+
             if (results.length === 0) {
                 return "현재 작성된 리뷰가 없습니다. 예약 후 작성해보세요!";
             }
@@ -446,7 +441,7 @@ const popupModel = {
                     else resolve(result);
                 });
             });
-            
+
             const review_id = result.insertId;
             return { ...reviewdata, review_id };
         } catch (err) {
