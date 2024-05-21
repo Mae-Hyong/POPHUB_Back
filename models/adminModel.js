@@ -1,8 +1,17 @@
 const db = require('../config/mysqlDatabase');
 
+// ------- GET Query -------
+const pending_query = 'SELECT * FROM popup_stores WHERE approval_status = "pending"';
+
 // ------- POST Query -------
 const create_answer_query = 'INSERT INTO answer(inquiry_id, user_name, content) VALUES (?, ?, ?)'
+
+// ------- PUT Query -------
 const update_inquiry_query = 'UPDATE inquiry SET status = ? WHERE inquiry_id = ?'
+const pendingCheck_query = 'UPDATE popup_stores SET approval_status = "check" WHERE store_id = ?';
+const pendingDeny_query = 'UPDATE popup_stores SET approval_status = "deny" WHERE store_id = ?';
+const insertDeny_query = 'INSERT INTO popup_denial_logs SET ?';
+
 
 const adminModel = {
     createAnswer : (inquiry_id, user_name, content) => {
@@ -28,6 +37,57 @@ const adminModel = {
             });
         })
     },
+
+    // 관리자 pending List 출력
+    popupPendingList: async (user_name) => {
+        try {
+            const pendingList = await new Promise((resolve, reject) => {
+                db.query(pending_query, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+            return pendingList;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 관리자 승인 check
+    popupPendingCheck: async (store_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query(pendingCheck_query, store_id, (err, result) => {
+                    if (err)reject(err);
+                    else resolve(result);
+                });
+            });
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 관리자 거부 및 거부 사유 등록
+    popupPendingDeny: async (denyData) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query(pendingDeny_query, denyData.store_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+
+            await new Promise((resolve, reject) => {
+                db.query(insertDeny_query, denyData, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+        } catch (err) {
+            throw err;
+        }
+    },
+
 }
 
 module.exports = adminModel;

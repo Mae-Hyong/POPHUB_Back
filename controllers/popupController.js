@@ -27,11 +27,12 @@ const popupController = {
     createPopup: async (req, res) => {
         try {
             const body = req.body;
+            const user_name = body.user_name;
             const store_id = uuidv4(); // uuid 생성
             const popupData = { // 팝업 스토어 생성에 들어갈 객체
                 store_id,
                 category_id: body.category_id,
-                user_name: body.user_name, //
+                user_name, //
                 store_name: body.store_name,
                 store_location: body.store_location,
                 store_contact_info: body.store_contact_info,
@@ -142,49 +143,10 @@ const popupController = {
         }
     },
 
-    // 관리자 pending List 조회
-    adminPendingList: async(req, res) => {
-        try { // 관리자로 로그인 한 경우
-            const user_id = req.body.user_id;
-            const pendingList = await popupModel.adminPendingList(user_id);
-            res.status(200).json(pendingList);
-        }  catch (err) {
-            throw err;
-        }
-    },
-
-    // 관리자 pending List에서 check값 부여 (승인)
-    adminPendingCheck: async(req, res) => {
-        try {
-            const { user_id, store_id } = req.body;
-            await popupModel.adminPendingCheck(store_id);
-            res.status(200).json('check 되었습니다.');
-        } catch (err) {
-            throw err;
-        }
-    },
-
-    // 관리자 pending List에서 deny값 부여 (거부)
-    adminPendingDeny: async(req, res) => {
-        try {
-            const { user_id, store_id, denial_reason } = req.body;
-            const denial_date = moment().format('YYYY-MM-DD HH:mm:ss');
-            const denialData = {
-                store_id,
-                denial_reason,
-                denial_date
-            }
-            await popupModel.adminPendingDeny(denialData);
-            res.status(201).json('deny 되었습니다.');
-        } catch (err) {
-            throw err;
-        }
-    },
-
     // 거부 사유 확인
     viewDenialReason: async(req, res) => {
         try {
-            const { user_id, store_id } = req.body;
+            const store_id = req.body.store_id;
             const check = await popupModel.viewDenialReason(store_id);
             res.status(200).json(check);
         } catch (err) {

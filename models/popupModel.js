@@ -5,29 +5,27 @@ const allPopups_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FR
 const popularPopups_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_status = "오픈" GROUP BY ps.store_id ORDER BY ps.store_view_count DESC LIMIT 3';
 const getImagePopup_query = 'SELECT ps.*, i.image_url FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_id = ?';
 const storeReview_query = 'SELECT * FROM store_review WHERE store_id = ?';
-const storeUserReview_query = 'SELECT * FROM store_review WHERE user_id = ?';
-const reviewCheck_query = 'SELECT COUNT(*) AS count FROM wait_list WHERE store_id = ? AND user_id = ? AND wait_status = "entered"';
+const storeUserReview_query = 'SELECT * FROM store_review WHERE user_name = ?';
+const reviewCheck_query = 'SELECT COUNT(*) AS count FROM wait_list WHERE store_id = ? AND user_name = ? AND wait_status = "entered"';
 const storeReviewDetail_query = 'SELECT * FROM store_review WHERE review_id = ?';
-const likePopupSelect_query = 'SELECT * FROM BookMark WHERE user_id = ? AND store_id = ?';
+const likePopupSelect_query = 'SELECT * FROM BookMark WHERE user_name = ? AND store_id = ?';
 const likePopupCheck_query = 'SELECT store_mark_number FROM popup_stores WHERE store_id = ?';
 const adminwait_query = 'SELECT * FROM popup_stores WHERE store_id = ?';
 const waitList_query = 'SELECT * FROM wait_list WHERE store_id = ?';
-const waitOrder_query = 'SELECT COUNT(*) AS waitOrder FROM wait_list WHERE store_id = ? AND wait_status = "waiting" AND wait_reservation_time <= (SELECT wait_reservation_time FROM wait_list WHERE store_id = ? AND user_id = ? AND wait_status = "waiting")';
+const waitOrder_query = 'SELECT COUNT(*) AS waitOrder FROM wait_list WHERE store_id = ? AND wait_status = "waiting" AND wait_reservation_time <= (SELECT wait_reservation_time FROM wait_list WHERE store_id = ? AND user_name = ? AND wait_status = "waiting")';
 const waitReservation_query = 'SELECT store_wait_status FROM popup_stores WHERE store_id = ?';
-const getWaitOrder_query = 'SELECT wait_status FROM wait_list WHERE store_id = ? AND user_id = ?';
-const pending_query = 'SELECT * FROM popup_stores WHERE approval_status = "pending"';
+const getWaitOrder_query = 'SELECT wait_status FROM wait_list WHERE store_id = ? AND user_name = ?';
 const viewDenialReason_query = 'SELECT * FROM popup_denial_logs WHERE store_id = ?';
-const userIdSelect_query = 'SELECT user_name FROM user_info WHERE user_id = ?';
+const userIdSelect_query = 'SELECT user_name FROM user_info WHERE user_name = ?';
 const popupStoreUser_query = 'SELECT store_id, store_name FROM popup_stores WHERE user_name = ? AND store_status = "오픈"';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
 const createPopup_query = 'INSERT INTO popup_stores SET ?';
 const createSchedule_query = 'INSERT INTO store_schedules SET ?';
-const likePopupInsert_query = 'INSERT INTO BookMark (user_id, store_id) VALUES (?, ?)';
+const likePopupInsert_query = 'INSERT INTO BookMark (user_name, store_id) VALUES (?, ?)';
 const createWaitReservation_query = 'INSERT INTO wait_list SET ?';
 const createImage_query = 'INSERT INTO images (store_id, image_url) VALUES (?, ?)';
-const insertDeny_query = 'INSERT INTO popup_denial_logs SET ?';
 
 // ------- PUT Query -------
 const updatePopup_query = 'UPDATE popup_stores SET ? WHERE store_id = ?';
@@ -37,19 +35,17 @@ const likePopupUpdatePlus_query = 'UPDATE popup_stores SET store_mark_number = s
 const updateViewCount_query = 'UPDATE popup_stores SET store_view_count = store_view_count + 1 WHERE store_id = ?';
 const updateWaitStatus_query = 'UPDATE popup_stores SET store_wait_status = ? WHERE store_id = ?';
 const updateWaitListStatus_query = 'UPDATE wait_list SET wait_status = ? WHERE wait_id = ?';
-const pendingCheck_query = 'UPDATE popup_stores SET approval_status = "check" WHERE store_id = ?';
-const pendingDeny_query = 'UPDATE popup_stores SET approval_status = "deny" WHERE store_id = ?';
 
 // ------- DELETE Query -------
 const deleteImage_query = 'DELETE FROM images WHERE store_id = ?';
 const deleteSchedule_query = 'DELETE FROM store_schedules WHERE store_id = ?';
 const deleteReview_query = 'DELETE FROM store_review WHERE review_id = ?';
-const likePopupDelete_query = 'DELETE FROM BookMark WHERE user_id = ? AND store_id = ?';
+const likePopupDelete_query = 'DELETE FROM BookMark WHERE user_name = ? AND store_id = ?';
 const adminReservationDelete_query = 'DELETE FROM wait_list WHERE wait_id = ?';
 
-const getWaitOrder = (store_id, user_id) => {
+const getWaitOrder = (store_id, user_name) => {
     return new Promise((resolve, reject) => {
-        db.query(waitOrder_query, [store_id, store_id, user_id], (err, result) => {
+        db.query(waitOrder_query, [store_id, store_id, user_name], (err, result) => {
             if (err) reject(err);
             else resolve(result[0].waitOrder);
         });
@@ -237,63 +233,6 @@ const popupModel = {
         }
     },
 
-    // 관리자 pending List 출력
-    adminPendingList: async (user_id) => {
-        try {
-            const pendingList = await new Promise((resolve, reject) => {
-                db.query(pending_query, (err, result) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(result);
-                    }
-                });
-            });
-            return pendingList;
-        } catch (err) {
-            throw err;
-        }
-    },
-
-    // 관리자 승인
-    adminPendingCheck: async (store_id) => {
-        try {
-            await new Promise((resolve, reject) => {
-                db.query(pendingCheck_query, [store_id], (err, result) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(result);
-                    }
-                });
-            });
-        } catch (err) {
-            throw err;
-        }
-    },
-
-    // 관리자 거부 및 거부 사유 등록
-    adminPendingDeny: async (denyData) => {
-        try {
-
-            await new Promise((resolve, reject) => {
-                db.query(pendingDeny_query, [denyData.store_id], (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result);
-                });
-            });
-
-            await new Promise((resolve, reject) => {
-                db.query(insertDeny_query, denyData, (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result);
-                });
-            });
-        } catch (err) {
-            throw err;
-        }
-    },
-
     // 거부 사유 확인
     viewDenialReason: async (store_id) => {
         try {
@@ -310,10 +249,10 @@ const popupModel = {
     },
 
     // 팝업 북마크
-    likePopup: async (user_id, store_id) => {
+    likePopup: async (user_name, store_id) => {
         try {
             const bookmarks = await new Promise((resolve, reject) => {
-                db.query(likePopupSelect_query, [user_id, store_id], (err, results) => {
+                db.query(likePopupSelect_query, [user_name, store_id], (err, results) => {
                     if (err) reject(err);
                     else resolve(results);
                 });
@@ -321,7 +260,7 @@ const popupModel = {
 
             if (bookmarks.length > 0) {
                 await new Promise((resolve, reject) => {
-                    db.query(likePopupDelete_query, [user_id, store_id], (err, results) => {
+                    db.query(likePopupDelete_query, [user_name, store_id], (err, results) => {
                         if (err) reject(err);
                         else resolve();
                     });
@@ -335,7 +274,7 @@ const popupModel = {
                 });
             } else {
                 await new Promise((resolve, reject) => {
-                    db.query(likePopupInsert_query, [user_id, store_id], (err, results) => {
+                    db.query(likePopupInsert_query, [user_name, store_id], (err, results) => {
                         if (err) reject(err);
                         else resolve();
                     });
@@ -387,10 +326,10 @@ const popupModel = {
     },
 
     // 아이디별 팝업 스토어 리뷰
-    storeUserReview: async (user_id) => {
+    storeUserReview: async (user_name) => {
         try {
             const results = await new Promise((resolve, reject) => {
-                db.query(storeUserReview_query, user_id, (err, results) => {
+                db.query(storeUserReview_query, user_name, (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 });
@@ -422,10 +361,10 @@ const popupModel = {
         }
     },
 
-    createReview: async (reviewdata, user_id) => { // 리뷰 생성
+    createReview: async (reviewdata, user_name) => { // 리뷰 생성
         try {
             const [checkResult] = await new Promise((resolve, reject) => {
-                db.query(reviewCheck_query, [reviewdata.store_id, user_id], (err, results) => {
+                db.query(reviewCheck_query, [reviewdata.store_id, user_name], (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 });
@@ -479,7 +418,7 @@ const popupModel = {
     // 대기 등록
     waitReservation: async (waitReservation) => {
         try {
-            const { store_id, user_id } = waitReservation;
+            const { store_id, user_name } = waitReservation;
 
             const waitStatus = await new Promise((resolve, reject) => { // 현재 팝업스토어 대기 상태 파악
                 db.query(waitReservation_query, store_id, (err, result) => {
@@ -498,7 +437,7 @@ const popupModel = {
             });
 
             if (waitReservation.wait_status == 'waiting') {
-                const waitOrder = await getWaitOrder(store_id, user_id); // 대기 순번 반환
+                const waitOrder = await getWaitOrder(store_id, user_name); // 대기 순번 반환
                 return waitOrder;
             } else {
                 return '지금 바로 입장해주세요';
@@ -510,17 +449,17 @@ const popupModel = {
     },
 
     // 예약자 대기 순서 조회
-    getWaitOrder: async (store_id, user_id) => {
+    getWaitOrder: async (store_id, user_name) => {
         try {
             const wait_status = await new Promise((resolve, reject) => {
-                db.query(getWaitOrder_query, [store_id, user_id], (err, result) => {
+                db.query(getWaitOrder_query, [store_id, user_name], (err, result) => {
                     if (err) reject(err);
                     else resolve(result[0].wait_status);
                 })
             });
 
             if (wait_status == 'waiting') {
-                const waitOrder = await getWaitOrder(store_id, user_id);
+                const waitOrder = await getWaitOrder(store_id, user_name);
                 return waitOrder;
             } else if (wait_status == 'queued') {
                 return '지금 바로 입장해주세요';
@@ -536,10 +475,10 @@ const popupModel = {
     },
 
     // 해당 관리자 waitList 확인
-    adminWaitList: async (user_id) => {
+    adminWaitList: async (user_name) => {
         try {
             const userInfoResult = await new Promise((resolve, reject) => {
-                db.query(userIdSelect_query, user_id, (err, result) => {
+                db.query(userIdSelect_query, user_name, (err, result) => {
                     if (err) reject(err);
                     else resolve(result);
                 });
