@@ -211,7 +211,7 @@ const popupModel = {
 
     // 팝업 정보 삭제
     deletePopup: async (store_id) => {
-        const tables = ['BookMark', 'products', 'store_review', 'store_schedules', 'wait_list', 'images', 'popup_stores'];
+        const tables = ['BookMark', 'products', 'store_review', 'store_schedules', 'wait_list', 'images', 'payment_details', 'popup_stores'];
         try {
             for (const tableName of tables) { // 해당 테이블에 store_id값 확인
                 const yes = await new Promise((resolve, reject) => {
