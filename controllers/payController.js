@@ -3,7 +3,7 @@ const payModel = require('../models/payModel')
 const axios = require('axios');
 const { v4 } = require('uuid');
 
-const SERVER_URL = "http://localhost:3000/";
+const SERVER_URL = process.env.SERVER_URL;
 const MY_ADMIN_KEY = process.env.KAKAO_KEY;
 const CID = "TC0ONETIME";
 
@@ -19,7 +19,7 @@ const $axios = axios.create({
 const payController = {
     payRequest : async(req, res) => {
         try {
-            const { userId, itemName, quantity, totalAmount, vatAmount, taxFreeAmount } = req.body;
+            const { userName, itemName, quantity, totalAmount, vatAmount, taxFreeAmount } = req.body;
             const orderId = v4()
             const PARTNER_ORDER_ID = v4();
             const PARTNER_USER_ID = v4();
@@ -29,7 +29,7 @@ const payController = {
                 store_id: req.body.storeId || null,
                 product_id: req.body.productId || null,
                 partner_order_id: PARTNER_ORDER_ID,
-                user_id: userId,
+                user_name: userName,
                 item_name: itemName,
                 quantity: quantity,
                 total_amount: totalAmount,
@@ -65,7 +65,7 @@ const payController = {
             
             await payModel.payments(paymentsData)
 
-            res.send(response.data.next_redirect_pc_url);
+            res.status(201).send(response.data.next_redirect_app_url);
         } catch (error) {
             console.error("카카오페이 결제 요청 실패:", error.message);
             res.status(500).send("카카오페이 결제 요청 실패");
@@ -89,6 +89,7 @@ const payController = {
             const aid = response.data.aid;
             console.log(response)
             await payModel.updatePayments(partnerOrderId, aid);
+            await payModel.updatePayReq(partnerOrderId);
     
             res.send("CLOSE THE POPUP");
         } catch (error) {
@@ -101,10 +102,22 @@ const payController = {
         console.log('kakaopay :: fail');
         res.send("Payment failed");
     },
+
     cancel : async(req, res) => {
         console.log('kakaopay :: cancel');
         res.send("Payment canceled");
-    }
+    },
+
+    searchPay : async(req, res) => {
+        try {
+            const orderId_details = req.query.payDetails
+            const orderId_payment = req.query.payments
+            if(!orderId_details) await payModel.searchPayment(orderId_payment);
+            else await payModel.searchPayment(orderId_details);
+        } catch (err) {
+            res.status(500).send("orderID 검색 중 오류가 발생했습니다.")
+        }
+    },
 }
 
 module.exports = payController;

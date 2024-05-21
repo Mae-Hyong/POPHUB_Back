@@ -28,6 +28,16 @@ CREATE TABLE user_delete (
     delete_date DATETIME DEFAULT NOW()
 );
 
+CREATE TABLE notice (
+	notice_id int auto_increment primary key,
+    title varchar(50),
+    content text,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_name varchar(50),
+    
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name)
+);
+
 CREATE TABLE inquiry (
 	inquiry_id	int AUTO_INCREMENT primary key,
 	user_name	varchar(50)	NOT NULL,
@@ -119,7 +129,7 @@ CREATE TABLE payment_details (
     store_id varchar(50),
     product_id varchar(50),
     partner_order_id VARCHAR(255) NOT NULL UNIQUE, -- 가맹점 주문 ID(카카오페이에서 제공)
-    user_id varchar(50),
+    user_name varchar(50),
     item_name VARCHAR(255), -- 물품 명
     quantity INT, -- 상품 수량
     total_amount INT, -- 결제 금액
@@ -127,19 +137,21 @@ CREATE TABLE payment_details (
     tax_free_amount DECIMAL(10, 2), -- 비과세 금액
     status ENUM('pending', 'canceled', 'complete') DEFAULT 'pending', -- 주문 상태의 기본값 설정
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 주문 시간
-    FOREIGN KEY (user_id) REFERENCES user_join_info(user_id),
+    status_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name),
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
 CREATE TABLE payments ( -- 결제 정보
-    payment_id varchar(50) PRIMARY KEY, -- 결제 ID (고유 식별자)
+    partner_order_id VARCHAR(255) PRIMARY KEY, -- 결제 ID (고유 식별자)
     order_id varchar(50), -- 주문 ID (Orders 테이블의 외래키)
     tid VARCHAR(255) NOT NULL UNIQUE, -- 결제 고유 번호 (카카오페이에서 제공)
     status ENUM("ready", "approved") DEFAULT "ready", -- 결제 상태
     aid VARCHAR(255), -- 승인 ID (카카오페이에서 제공)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 결제 생성 시간
     aid_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (partner_order_id) REFERENCES payment_details(partner_order_id),
     FOREIGN KEY (order_id) REFERENCES payment_details(order_id) -- Orders 테이블의 외래키
 );
 
