@@ -20,9 +20,7 @@ router.delete('/review/delete/:review_id', popupController.deleteReview); // 팝
 router.post('/', upload.array("files", 5), popupController.createPopup); // 팝업 생성
 router.put('/update/:store_id',upload.array("files", 5), popupController.updatePopup); // 팝업 수정
 router.delete('/:store_id', popupController.deletePopup); // 팝업 삭제
-router.get('/adminPendingList', popupController.adminPendingList); // pendingList 조회
-router.put('/adminPendingCheck', popupController.adminPendingCheck); // 관리자 승인 pending -> check
-router.post('/adminPendingDeny', popupController.adminPendingDeny); // 관리자 승인 deny, 거부 사유 등록
+
 router.get('/viewDenialReason', popupController.viewDenialReason); // 팝업 등록 거부 이유 확인
 router.post('/like', popupController.likePopup); // 팝업 찜
 
@@ -32,6 +30,5 @@ router.get('/adminWaitList', popupController.adminWaitList); // (팝업 등록�
 router.put('/adminPopupStatus/:store_id', popupController.adminPopupStatus); // (팝업 등록자) 팝업 예약 상태 변경
 router.put('/adminWaitStatus', popupController.adminWaitStatus); // (팝업 등록자)예약자 대기 상태 변경
 router.delete('/adminReservationDelete/:wait_id', popupController.adminReservationDelete); // (팝업 등록자) 예약 삭제
-
 
 module.exports = router;
