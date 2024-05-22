@@ -18,6 +18,7 @@ const getWaitOrder_query = 'SELECT wait_status FROM wait_list WHERE store_id = ?
 const viewDenialReason_query = 'SELECT * FROM popup_denial_logs WHERE store_id = ?';
 const userIdSelect_query = 'SELECT user_name FROM user_info WHERE user_name = ?';
 const popupStoreUser_query = 'SELECT store_id, store_name FROM popup_stores WHERE user_name = ? AND store_status = "오픈"';
+const userSelect_query = 'SELECT store_id, user_name FROM payment_details WHERE order_id = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -26,6 +27,7 @@ const createSchedule_query = 'INSERT INTO store_schedules SET ?';
 const likePopupInsert_query = 'INSERT INTO BookMark (user_name, store_id) VALUES (?, ?)';
 const createWaitReservation_query = 'INSERT INTO wait_list SET ?';
 const createImage_query = 'INSERT INTO images (store_id, image_url) VALUES (?, ?)';
+const booking_query = 'INSERT INTO booking_list SET ?';
 
 // ------- PUT Query -------
 const updatePopup_query = 'UPDATE popup_stores SET ? WHERE store_id = ?';
@@ -231,7 +233,7 @@ const popupModel = {
         try {
             await new Promise((resolve, reject) => {
                 db.query('UPDATE popup_stores SET deleted = "true" WHERE store_id = ?', store_id, (err, result) => {
-                    if(err) reject(err);
+                    if (err) reject(err);
                     else resolve();
                 })
             })
@@ -589,10 +591,10 @@ const popupModel = {
     booking: async (bookingData) => {
         try {
             await new Promise((resolve, reject) => {
-                db.query('SELECT store_id, user_name FROM payment_details WHERE order_id = ?', [bookingData.order_id], (err, result) => {
+                db.query(userSelect_query, [bookingData.order_id], (err, result) => {
                     if (err) reject(err);
                     else {
-                        const {store_id, user_name} = result[0];
+                        const { store_id, user_name } = result[0];
                         bookingData.store_id = store_id;
                         bookingData.user_name = user_name;
                         resolve();
@@ -601,7 +603,7 @@ const popupModel = {
             })
 
             await new Promise((resolve, reject) => {
-                db.query('INSERT INTO booking_list SET ?', bookingData, (err, result) => {
+                db.query(booking_query, bookingData, (err, result) => {
                     if (err) reject(err);
                     else resolve(result);
                 });
