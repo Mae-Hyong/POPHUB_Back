@@ -146,7 +146,7 @@ const popupController = {
     // 거부 사유 확인
     viewDenialReason: async(req, res) => {
         try {
-            const store_id = req.body.store_id;
+            const store_id = req.params.store_id;
             const check = await popupModel.viewDenialReason(store_id);
             res.status(200).json(check);
         } catch (err) {
@@ -157,8 +157,9 @@ const popupController = {
     // 팝업 스토어 찜
     likePopup: async (req, res) => {
         try {
-            const { user_id, store_id } = req.body;
-            const like = await popupModel.likePopup(user_id, store_id);
+            const store_id = req.params.store_id;
+            const user_name = req.body.user_name;
+            const like = await popupModel.likePopup(user_name, store_id);
             res.status(201).json(like);
         } catch (err) {
             throw err;
@@ -179,8 +180,8 @@ const popupController = {
     // 아이디별 팝업 스토어 리뷰
     storeUserReview: async (req, res) => {
         try {
-            const user_id = req.body.user_id;
-            const review = await popupModel.storeUserReview(user_id);
+            const user_name = req.body.user_name;
+            const review = await popupModel.storeUserReview(user_name);
             res.status(200).json(review);
         } catch (err) {
             throw err;
@@ -202,23 +203,17 @@ const popupController = {
     // 팝업 스토어 리뷰 생성
     createReview: async (req, res) => {
         try {
-            const user_id = req.body.user_id;
-
-            if (!user_id) {
-                return res.status(400).json("로그인 후 사용해주세요");
-            }
-
-            const store_id = req.params.store_id;
             const body = req.body;
+            const store_id = req.params.store_id;
             const review_date = moment().format('YYYY-MM-DD HH:mm:ss');
-            const reviewdata = {
-                user_id,
+            const reviewData = {
+                user_name: body.user_name,
                 store_id,
                 review_rating: body.review_rating,
                 review_content: body.review_content,
                 review_date,
             }
-            const createReview = await popupModel.createReview(reviewdata, user_id);
+            await popupModel.createReview(reviewData);
             res.status(201).json('리뷰가 등록되었습니다.');
         } catch (err) {
             throw err;
@@ -228,16 +223,11 @@ const popupController = {
     // 팝업 스토어 리뷰 수정
     updateReview: async (req, res) => {
         try {
-            const user_id = req.body.user_id;
-            if (!user_id) {
-                return res.status(400).json("로그인 후 사용해주세요");
-            }
-
-            const review_id = req.params.review_id;
             const body = req.body;
+            const review_id = req.params.review_id;
             const review_modified_date = moment().format('YYYY-MM-DD HH:mm:ss');
             const reviewdata = {
-                user_id: req.body.user_id,
+                user_name: body.user_name,
                 review_rating: body.review_rating,
                 review_content: body.review_content,
                 review_modified_date,
@@ -253,7 +243,6 @@ const popupController = {
     deleteReview: async (req, res) => {
         try {
             const review_id = req.params.review_id;
-            const user_id = req.body.user_id;
             await popupModel.deleteReview(review_id);
             res.status(200).json('삭제가 완료되었습니다.');
         } catch (err) {
@@ -261,15 +250,15 @@ const popupController = {
         }
     },
 
-    // 대기 등록
+    // 현장 대기 등록
     waitReservation: async (req, res) => {
         try {
-            const { user_id, wait_visitor_name, wait_visitor_number } = req.body;
+            const { user_name, wait_visitor_name, wait_visitor_number } = req.body;
             const store_id = req.params.store_id;
             const wait_reservation_time = moment().format('YYYY-MM-DD HH:mm:ss');
             const waitReservation = {
                 store_id,
-                user_id,
+                user_name,
                 wait_visitor_name,
                 wait_visitor_number,
                 wait_reservation_time,
@@ -282,12 +271,12 @@ const popupController = {
         }
     },
 
-    // 예약자 대기 순서 조회
+    // 현장 예약자 대기 순서 조회
     getWaitOrder: async (req, res) => { 
         try {
-            const user_id = req.body.user_id;
+            const user_name = req.body.user_name;
             const store_id = req.params.store_id;
-            const waitOrder = await popupModel.getWaitOrder(store_id, user_id);
+            const waitOrder = await popupModel.getWaitOrder(store_id, user_name);
             res.status(200).json(waitOrder);
         } catch (err) {
             throw err;
@@ -297,8 +286,8 @@ const popupController = {
     // 팝업 등록자 대기 리스트 확인
     adminWaitList: async (req, res) => {
         try {
-            const user_id = req.body.user_id;
-            const waitList = await popupModel.adminWaitList(user_id);
+            const user_name = req.body.user_name;
+            const waitList = await popupModel.adminWaitList(user_name);
             res.status(200).json(waitList);
         } catch (err) {
             throw err;
@@ -306,11 +295,10 @@ const popupController = {
     },
 
     // 팝업 등록자 팝업 대기 상태 변경 (토글)
-    adminPopupStatus: async (req, res) => {
+    popupStatus: async (req, res) => {
         try {
-            const user_id = req.body.user_id;
             const store_id = req.params.store_id;
-            const status = await popupModel.adminPopupStatus(store_id);
+            const status = await popupModel.popupStatus(store_id);
             res.status(200).json(status);
         } catch (err) {
             throw err;
@@ -318,12 +306,11 @@ const popupController = {
     },
     
     // 예약자 status 변경
-    adminWaitStatus: async (req, res) => {
+    waitStatus: async (req, res) => {
         try {
-            const user_id = req.body.user_id;
-            const wait_id = req.body.wait_id;
+            const wait_id = req.params.wait_id;
             const new_status = req.body.wait_status;
-            await popupModel.adminWaitStatus(wait_id, new_status);
+            await popupModel.waitStatus(wait_id, new_status);
             res.status(200).json(`대기 상태가 ${new_status}로 변경되었습니다.`);
         } catch (err) {
             throw err;
@@ -331,17 +318,34 @@ const popupController = {
     },
 
     // 예약 삭제
-    adminReservationDelete: async (req, res) => {
+    waitDelete: async (req, res) => {
         try {
-            const user_id = req.body.user_id;
             const wait_id = req.params.wait_id;
-            await popupModel.adminReservationDelete(wait_id);
+            await popupModel.waitDelete(wait_id);
             res.status(200).json('삭제되었습니다.');
         } catch (err) {
             throw err;
         }
     },
 
+    booking: async (req, res) => {
+        try {
+            const body = req.body;
+            const order_id = req.params.order_id;
+            const booking_time = moment().format('YYYY-MM-DD HH:mm:ss');
+            const bookingData = {
+                order_id,
+                specified_date: body.specified_date,
+                specified_time: body.specified_time,
+                booking_time
+            }
+
+            await popupModel.booking(bookingData);
+            res.status(201).json('예약 등록이 완료되었습니다.');
+        } catch (err) {
+            throw err;
+        }
+    }
 };
 
 module.exports = { popupController }
