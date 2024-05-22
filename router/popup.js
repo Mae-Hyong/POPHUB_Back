@@ -19,7 +19,7 @@ router.delete('/review/delete/:review_id', popupController.deleteReview); // 팝
 
 router.post('/', upload.array("files", 5), popupController.createPopup); // 팝업 생성
 router.put('/update/:store_id',upload.array("files", 5), popupController.updatePopup); // 팝업 수정
-router.delete('/delete/:store_id', popupController.deletePopup); // 팝업 삭제 -- 수정 필여
+router.delete('/delete/:store_id', popupController.deletePopup); // 팝업 삭제
 
 router.get('/viewDenialReason/:store_id', popupController.viewDenialReason); // 팝업 등록 거부 이유 확인
 router.post('/like/:store_id', popupController.likePopup); // 팝업 찜
