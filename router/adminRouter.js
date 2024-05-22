@@ -4,10 +4,11 @@ const router = express.Router();
 
 const adminController = require('../controllers/adminController');
 
+router.get("/notice", adminController.searchNotice);
 router.post("/answer", token.verifyToken, adminController.createAnswer);
 router.post("/create_notice", token.verifyToken, adminController.createNotice);
-router.get("/notice", token.verifyToken, adminController.searchNotice);
-router.get('/popupPendingList', adminController.popupPendingList); // pendingList 조회
-router.put('/popupPendingCheck', adminController.popupPendingCheck); // 관리자 승인 pending -> check
-router.post('/popupPendingDeny', adminController.popupPendingDeny); // 관리자 승인 deny, 거부 사유 등록
+router.get('/popupPendingList', token.verifyToken, adminController.popupPendingList); // pendingList 조회
+router.put('/popupPendingCheck', token.verifyToken, adminController.popupPendingCheck); // 관리자 승인 pending -> check
+router.post('/popupPendingDeny', token.verifyToken, adminController.popupPendingDeny); // 관리자 승인 deny, 거부 사유 등록
+
 module.exports = router;
