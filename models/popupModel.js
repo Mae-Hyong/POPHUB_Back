@@ -41,7 +41,7 @@ const deleteImage_query = 'DELETE FROM images WHERE store_id = ?';
 const deleteSchedule_query = 'DELETE FROM store_schedules WHERE store_id = ?';
 const deleteReview_query = 'DELETE FROM store_review WHERE review_id = ?';
 const likePopupDelete_query = 'DELETE FROM BookMark WHERE user_name = ? AND store_id = ?';
-const adminReservationDelete_query = 'DELETE FROM wait_list WHERE wait_id = ?';
+const waitDelete_query = 'DELETE FROM wait_list WHERE wait_id = ?';
 
 const getWaitOrder = (store_id, user_name) => {
     return new Promise((resolve, reject) => {
@@ -54,6 +54,7 @@ const getWaitOrder = (store_id, user_name) => {
 
 
 const popupModel = {
+
     // 오픈 중인 모든 팝업스토어 정보 확인
     allPopups: async () => {
         try {
@@ -267,7 +268,7 @@ const popupModel = {
                 });
 
                 await new Promise((resolve, reject) => {
-                    db.query(likePopupUpdateMinus_query, [store_id], (err, results) => {
+                    db.query(likePopupUpdateMinus_query, store_id, (err, results) => {
                         if (err) reject(err);
                         else resolve();
                     });
@@ -281,7 +282,7 @@ const popupModel = {
                 });
 
                 await new Promise((resolve, reject) => {
-                    db.query(likePopupUpdatePlus_query, [store_id], (err, results) => {
+                    db.query(likePopupUpdatePlus_query, store_id, (err, results) => {
                         if (err) reject(err);
                         else resolve();
                     });
@@ -289,7 +290,7 @@ const popupModel = {
             }
 
             const store_mark_number = await new Promise((resolve, reject) => {
-                db.query(likePopupCheck_query, [store_id], (err, results) => {
+                db.query(likePopupCheck_query, store_id, (err, results) => {
                     if (err) reject(err);
                     else resolve(results[0].store_mark_number);
                 });
@@ -361,10 +362,10 @@ const popupModel = {
         }
     },
 
-    createReview: async (reviewdata, user_name) => { // 리뷰 생성
+    createReview: async (reviewdata) => { // 리뷰 생성
         try {
             const [checkResult] = await new Promise((resolve, reject) => {
-                db.query(reviewCheck_query, [reviewdata.store_id, user_name], (err, results) => {
+                db.query(reviewCheck_query, [reviewdata.store_id, reviewdata.user_name], (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 });
@@ -478,15 +479,15 @@ const popupModel = {
     adminWaitList: async (user_name) => {
         try {
             const userInfoResult = await new Promise((resolve, reject) => {
-                db.query(userIdSelect_query, user_name, (err, result) => {
+                db.query(userIdSelect_query, [user_name], (err, result) => {
                     if (err) reject(err);
                     else resolve(result);
                 });
             });
-            const user_name = userInfoResult[0].user_name;
+            const userName = userInfoResult[0].user_name;
 
             const popupStoreResult = await new Promise((resolve, reject) => {
-                db.query(popupStoreUser_query, [user_name], (err, result) => {
+                db.query(popupStoreUser_query, userName, (err, result) => {
                     if (err) reject(err);
                     else resolve(result);
                 });
@@ -524,7 +525,7 @@ const popupModel = {
 
 
     // 팝업 관리자 팝업 대기 상태 변경 (오픈 중인 스토어에 대해서만)
-    adminPopupStatus: async (store_id) => {
+    popupStatus: async (store_id) => {
         try {
             const result = await new Promise((resolve, reject) => {
                 db.query(adminwait_query, store_id, (err, result) => {
@@ -552,7 +553,7 @@ const popupModel = {
 
 
     // 예약자 status 변경
-    adminWaitStatus: async (wait_id, new_status) => {
+    waitStatus: async (wait_id, new_status) => {
         try {
             await new Promise((resolve, reject) => {
                 db.query(updateWaitListStatus_query, [new_status, wait_id], (err, result) => {
@@ -566,10 +567,10 @@ const popupModel = {
     },
 
     // 예약자 삭제
-    adminReservationDelete: async (wait_id) => {
+    waitDelete: async (wait_id) => {
         try {
             await new Promise((resolve, reject) => {
-                db.query(adminReservationDelete_query, wait_id, (err, result) => {
+                db.query(waitDelete_query, wait_id, (err, result) => {
                     if (err) reject(err);
                     else resolve();
                 })
@@ -578,6 +579,31 @@ const popupModel = {
             throw err;
         }
     },
+
+    booking: async (bookingData) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query('SELECT store_id, user_name FROM payment_details WHERE order_id = ?', [bookingData.order_id], (err, result) => {
+                    if (err) reject(err);
+                    else {
+                        const {store_id, user_name} = result[0];
+                        bookingData.store_id = store_id;
+                        bookingData.user_name = user_name;
+                        resolve();
+                    }
+                })
+            })
+
+            await new Promise((resolve, reject) => {
+                db.query('INSERT INTO booking_list SET ?', bookingData, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+        } catch (err) {
+            throw err;
+        }
+    }
 
 };
 
