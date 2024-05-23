@@ -95,6 +95,7 @@ const userController = {
                 gender: result.gender,
                 age: result.age,
                 userImage: result.user_image,
+                userRole : result.user_role
             });
         } catch (err) {
             console.log(err);
