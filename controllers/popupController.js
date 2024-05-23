@@ -38,6 +38,7 @@ const popupController = {
                 store_location: body.store_location,
                 store_contact_info: body.store_contact_info,
                 store_description: body.store_description,
+                max_capacity: body.max_capacity,
                 store_start_date: body.store_start_date,
                 store_end_date: body.store_end_date,
             };
@@ -98,6 +99,7 @@ const popupController = {
                 store_location: body.store_location,
                 store_contact_info: body.store_contact_info,
                 store_description: body.store_description,
+                max_capacity: body.max_capacity,
                 store_start_date: body.store_start_date,
                 store_end_date: body.store_end_date,
             };
