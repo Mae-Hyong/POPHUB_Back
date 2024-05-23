@@ -35,7 +35,7 @@ CREATE TABLE notice (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     user_name varchar(50),
     
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name)
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
 CREATE TABLE inquiry (
@@ -82,7 +82,7 @@ CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     store_wait_status ENUM('false', 'true') DEFAULT 'false', -- 대기 상태
     approval_status ENUM('pending', 'check', 'deny') DEFAULT 'pending', -- 승인 상태
     FOREIGN KEY (category_id) REFERENCES category(category_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name)
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) 
 );
 
 CREATE TABLE popup_denial_logs ( -- 팝업 스토어 등록 거부 이유
@@ -138,7 +138,7 @@ CREATE TABLE payment_details (
     status ENUM('pending', 'canceled', 'complete') DEFAULT 'pending', -- 주문 상태의 기본값 설정
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 주문 시간
     status_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name),
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );

@@ -199,10 +199,21 @@ const userController = {
             try {
                 let userImage = null;
                 if (req.file) userImage = req.file.path;
-                
-                await userModel.updateProfile(userId, userName, userImage);
+
+                if (!userName) {
+                    await userModel.updateImage(userId, userImage);
+                    return res.status(200).send('Profile userImage successfully');
+                }
+                else if (!userImage) {
+                    await userModel.updateName(userId, userName);
+                    return res.status(200).send('Profile userName successfully');
+                }
+                else {
+                    await userModel.updateImage(userId, userImage);
+                    await userModel.updateName(userId, userName);
+                }
                   
-                return res.status(201).send('Profile added successfully');
+                return res.status(200).send('Profile Modify successfully');
             } catch (error) {
                 console.error("Error uploading image to Cloudinary:", error);
                 return res.status(500).json({
