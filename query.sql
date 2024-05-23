@@ -81,9 +81,11 @@ CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     store_view_count INT DEFAULT 0, -- 조회수
     store_wait_status ENUM('false', 'true') DEFAULT 'false', -- 대기 상태
     approval_status ENUM('pending', 'check', 'deny') DEFAULT 'pending', -- 승인 상태
-    FOREIGN KEY (category_id) REFERENCES category(category_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name)
+    deleted ENUM('false', 'true') DEFAULT 'false', -- 팝업 삭제 여부
+    FOREIGN KEY (category_id) REFERENCES category(category_id) ON UPDATE CASCADE,
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
+
 
 CREATE TABLE popup_denial_logs ( -- 팝업 스토어 등록 거부 이유
     log_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -138,7 +140,7 @@ CREATE TABLE payment_details (
     status ENUM('pending', 'canceled', 'complete') DEFAULT 'pending', -- 주문 상태의 기본값 설정
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 주문 시간
     status_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name),
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
@@ -160,7 +162,7 @@ CREATE TABLE BookMark (
     user_name VARCHAR(50) NOT NULL,
     store_id VARCHAR(50),
     product_id VARCHAR(50),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name),
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
@@ -174,7 +176,7 @@ CREATE TABLE wait_list ( -- 대기 상태
     wait_reservation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     wait_status ENUM('waiting', 'queued', 'entered', 'skipped') DEFAULT 'queued', -- 대기 / 입장 대기 / 입장 완료 / 입장 X
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name)
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE
 );
 
 CREATE TABLE store_review (
@@ -186,7 +188,21 @@ CREATE TABLE store_review (
     review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     review_modified_date TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name)
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE
+);
+
+CREATE TABLE booking_list (
+    book_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    order_id VARCHAR(50),
+    store_id VARCHAR(50) NOT NULL,
+    user_name VARCHAR(50) NOT NULL,
+    specified_date DATE NOT NULL,
+    specified_time TIME NOT NULL,
+    quantity INT NOT NULL,
+    booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES payment_details(order_id),
+    FOREIGN KEY (store_id) REFERENCES payment_details(store_id),
+    FOREIGN KEY (user_name) REFERENCES payment_details(user_name)  ON UPDATE CASCADE
 );
 
 CREATE TABLE product_review (
@@ -198,7 +214,7 @@ CREATE TABLE product_review (
     review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     review_modified_date TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(product_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name)
+    FOREIGN KEY (user_name) REFERENCES user_info(user_id)
 );
 
 INSERT INTO category (category_id, category_name) VALUES
@@ -215,10 +231,11 @@ INSERT INTO category (category_id, category_name) VALUES
 (15, '가전제품'),
 (16, '생활용품'),
 (17, '푸드/음료'),
-(18, '스포츠 용품'),
+(18, '스포츠'),
 (19, '문구/책/잡화'),
 (20, '유아용품'),
 (21, '전자기기/액세서리'),
-(22, '건강/웰빙 제품'),
-(23, '패션/라이프스타일 제품'),
-(24, '예술/공예품');
+(22, '건강/웰빙'),
+(23, '패션/라이프스타일'),
+(24, '예술/공예'),
+(25, '애니메이션');

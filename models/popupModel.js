@@ -19,6 +19,7 @@ const viewDenialReason_query = 'SELECT * FROM popup_denial_logs WHERE store_id =
 const userIdSelect_query = 'SELECT user_name FROM user_info WHERE user_name = ?';
 const popupStoreUser_query = 'SELECT store_id, store_name FROM popup_stores WHERE user_name = ? AND store_status = "오픈"';
 const userSelect_query = 'SELECT store_id, user_name, quantity FROM payment_details WHERE order_id = ?';
+const storeSchedules_query = 'SELECT * FROM store_schedules WHERE store_id = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -56,25 +57,38 @@ const getWaitOrder = (store_id, user_name) => {
 
 
 const popupModel = {
-
-    // 오픈 중인 모든 팝업스토어 정보 확인
     allPopups: async () => {
         try {
             const results = await new Promise((resolve, reject) => {
-                db.query(allPopups_query, (err, results) => {
+                db.query(allPopups_query, async (err, popupResults) => {
                     if (err) reject(err);
-                    if (!results || results.length === 0) {
+                    if (!popupResults || popupResults.length === 0) {
                         resolve("팝업스토어 정보가 존재하지 않습니다.");
                     } else {
-                        results.forEach(result => {
-                            if (result.image_urls) {
-                                result.imageUrls = result.image_urls.split(',');
-                                delete result.image_urls;
+                        for (const popup of popupResults) {
+                            const storeSchedules = await new Promise((resolve, reject) => {
+                                db.query(storeSchedules_query, [popup.store_id], (err, scheduleResults) => {
+                                    if (err) reject(err);
+                                    resolve(scheduleResults);
+                                });
+                            });
+                            
+                            const schedules = storeSchedules.map(schedule => ({
+                                day_of_week: schedule.day_of_week,
+                                open_time: schedule.open_time,
+                                close_time: schedule.close_time
+                            }));
+
+                            popup.store_schedules = schedules;
+                            
+                            if (popup.image_urls) {
+                                popup.imageUrls = popup.image_urls.split(',');
+                                delete popup.image_urls;
                             } else {
-                                result.imageUrls = [];
+                                popup.imageUrls = [];
                             }
-                        });
-                        resolve(results);
+                        }
+                        resolve(popupResults);
                     }
                 });
             });
@@ -172,13 +186,28 @@ const popupModel = {
                 db.query(updateViewCount_query, store_id, (err, updateResult) => {
                     if (err) reject(err);
                     else {
-                        db.query(getImagePopup_query, store_id, (err, popupResult) => {
+                        db.query(getImagePopup_query, store_id, async (err, popupResult) => {
                             if (err) reject(err);
                             else {
                                 const popupInfo = { ...popupResult[0] }; // 복사하여 새로운 객체 생성
                                 delete popupInfo.image_url; // 이미지 URL 속성 삭제
                                 const imageUrls = popupResult.map(row => row.image_url).filter(url => url !== null);
                                 popupInfo.imageUrls = imageUrls;
+
+                                const storeSchedules = await new Promise((resolve, reject) => {
+                                    db.query(storeSchedules_query, [store_id], (err, scheduleResults) => {
+                                        if (err) reject(err);
+                                        resolve(scheduleResults);
+                                    });
+                                });
+        
+                                const schedules = storeSchedules.map(schedule => ({
+                                    day_of_week: schedule.day_of_week,
+                                    open_time: schedule.open_time,
+                                    close_time: schedule.close_time
+                                }));
+        
+                                popupInfo.store_schedules = schedules;
                                 resolve(popupInfo);
                             }
                         });
