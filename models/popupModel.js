@@ -18,7 +18,7 @@ const getWaitOrder_query = 'SELECT wait_status FROM wait_list WHERE store_id = ?
 const viewDenialReason_query = 'SELECT * FROM popup_denial_logs WHERE store_id = ?';
 const userIdSelect_query = 'SELECT user_name FROM user_info WHERE user_name = ?';
 const popupStoreUser_query = 'SELECT store_id, store_name FROM popup_stores WHERE user_name = ? AND store_status = "오픈"';
-const userSelect_query = 'SELECT store_id, user_name FROM payment_details WHERE order_id = ?';
+const userSelect_query = 'SELECT store_id, user_name, quantity FROM payment_details WHERE order_id = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -588,15 +588,17 @@ const popupModel = {
         }
     },
 
-    booking: async (bookingData) => {
+    bookingPopup: async (bookingData) => {
         try {
             await new Promise((resolve, reject) => {
                 db.query(userSelect_query, [bookingData.order_id], (err, result) => {
                     if (err) reject(err);
                     else {
-                        const { store_id, user_name } = result[0];
+                        console.log(result[0]);
+                        const { store_id, user_name, quantity } = result[0];
                         bookingData.store_id = store_id;
                         bookingData.user_name = user_name;
+                        bookingData.quantity = quantity;
                         resolve();
                     }
                 })
@@ -608,6 +610,7 @@ const popupModel = {
                     else resolve(result);
                 });
             });
+
         } catch (err) {
             throw err;
         }

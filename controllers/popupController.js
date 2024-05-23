@@ -328,19 +328,17 @@ const popupController = {
         }
     },
 
-    booking: async (req, res) => {
+    bookingPopup: async (req, res) => {
         try {
             const body = req.body;
-            const order_id = req.params.order_id;
             const booking_time = moment().format('YYYY-MM-DD HH:mm:ss');
             const bookingData = {
-                order_id,
+                order_id: body.order_id,
                 specified_date: body.specified_date,
                 specified_time: body.specified_time,
                 booking_time
             }
-
-            await popupModel.booking(bookingData);
+            await popupModel.bookingPopup(bookingData);
             res.status(201).json('예약 등록이 완료되었습니다.');
         } catch (err) {
             throw err;
