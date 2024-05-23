@@ -2,6 +2,7 @@ const db = require('../config/mysqlDatabase');
 
 // ------- GET Query -------
 const user_search_query = 'SELECT * FROM user_info WHERE user_id = ?';
+const user_join_query = 'SELECT * FROM user_info WHERE user_id = ?';
 const name_check_query = 'SELECT * FROM user_info WHERE user_name = ?';
 const id_check_query = 'SELECT * FROM user_info WHERE user_id = ?';
 const id_search_query = 'SELECT user_id From user_info WHERE phone_number = ?';
@@ -25,11 +26,17 @@ const userModel = {
     searchUser : (userId) => {
         return new Promise((resolve, reject) => {
             db.query(user_search_query, userId, (err, result) => {
-                if(err) {
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
+                if(err) reject(err);
+                else resolve(result[0]);
+            });
+        })
+    },
+
+    searchJoin : (userId) => {
+        return new Promise((resolve, reject) => {
+            db.query(user_join_query, userId, (err, result) => {
+                if(err) reject(err);
+                else resolve(result[0]);
             });
         })
     },

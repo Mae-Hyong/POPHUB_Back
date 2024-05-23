@@ -85,6 +85,7 @@ const userController = {
             } 
     
             const result = await userModel.searchUser(userId);
+            const role = await userModel.searchJoin(userId);
     
             if (!result || result.length === 0) return res.status(404).send('User not found');
             return res.status(200).json({
@@ -95,7 +96,7 @@ const userController = {
                 gender: result.gender,
                 age: result.age,
                 userImage: result.user_image,
-                userRole : result.user_role
+                userRole : role.user_role
             });
         } catch (err) {
             console.log(err);
