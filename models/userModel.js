@@ -12,7 +12,8 @@ const answer_search_query = 'SELECT * FROM answer WHERE inquiry_id = ?';
 // ------- POST Query -------
 const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE user_id = ?';
 const profile_add_query = 'INSERT INTO user_info (user_id, user_name, phone_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
-const profile_change_query = 'UPDATE user_info SET user_name = ?, user_image = ?  WHERE user_id = ?';
+const name_change_query = 'UPDATE user_info SET user_name = ?  WHERE user_id = ?';
+const image_change_query = 'UPDATE user_info SET user_image = ?  WHERE user_id = ?';
 const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content) VALUES (?, ?, ?, ?)';
 const delete_add_query = 'INSERT INTO user_delete(user_id, phone_number) VALUES (?, ?)'
 const delete_change_query = 'UPDATE user_info SET user_name = ?, withdrawal = ? WHERE user_id = ?'
@@ -89,14 +90,20 @@ const userModel = {
         })
     },
 
-    updateProfile : (userId, userName, userImage) => {
+    updateName : (userId, userName) => {
         return new Promise((resolve, reject) => {
-            db.query(profile_change_query, [userName, userImage, userId], (err, result) => {
-                if(err) {
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
+            db.query(name_change_query, [userName, userId], (err, result) => {
+                if(err) reject(err);
+                else resolve(result[0]);
+            });
+        })
+    },
+
+    updateImage : (userId, userImage) => {
+        return new Promise((resolve, reject) => {
+            db.query(image_change_query, [userImage, userId], (err, result) => {
+                if(err) reject(err);
+                else resolve(result[0]);
             });
         })
     },

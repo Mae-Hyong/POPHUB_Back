@@ -86,10 +86,7 @@ const userController = {
     
             const result = await userModel.searchUser(userId);
     
-            if (!result || result.length === 0) {
-                res.status(404).send('User not found');
-                return;
-            }
+            if (!result || result.length === 0) return res.status(404).send('User not found');
             return res.status(200).json({
                 userId: result.user_id,
                 userName: result.user_name,
@@ -120,18 +117,12 @@ const userController = {
 
             if (userId){
                 const result = await userModel.userDoubleCheck(userId, null);
-                if(!result) {
-                  return res.status(200).send('User ID not found');
-                }
-                return res.status(200).send('User ID Exists');
+                if(!result) return res.status(200).json('User ID not found');
+                return res.status(200).json('User ID Exists');
               } else {
                 const result = await userModel.userDoubleCheck(null, userName);
-                if(!result) {
-                  console.log('User Name not found');
-                  return res.status(200).send('User Name not found');
-                }
-                console.log('User Name Exists');
-                return res.status(200).send('User Name Exists');
+                if(!result) return res.status(200).json('User Name not found');
+                return res.status(200).json('User Name Exists');
               }
         } catch (err) {
             console.log(err);
@@ -208,10 +199,21 @@ const userController = {
             try {
                 let userImage = null;
                 if (req.file) userImage = req.file.path;
-                
-                await userModel.updateProfile(userId, userName, userImage);
+
+                if (!userName) {
+                    await userModel.updateImage(userId, userImage);
+                    return res.status(200).send('Profile userImage successfully');
+                }
+                else if (!userImage) {
+                    await userModel.updateName(userId, userName);
+                    return res.status(200).send('Profile userName successfully');
+                }
+                else {
+                    await userModel.updateImage(userId, userImage);
+                    await userModel.updateName(userId, userName);
+                }
                   
-                res.status(201).send('Profile added successfully');
+                return res.status(200).send('Profile Modify successfully');
             } catch (error) {
                 console.error("Error uploading image to Cloudinary:", error);
                 return res.status(500).json({
@@ -244,11 +246,10 @@ const userController = {
     },
 
     createInquiry : async (req, res) => {
-        const { userName, categoryId, title, content } = req.body;
-
-        await userModel.createInquiry(userName, categoryId, title, content);
-
         try {
+            const { userName, categoryId, title, content } = req.body;
+
+            await userModel.createInquiry(userName, categoryId, title, content);
             res.status(201).send('Inquiry added successfully');
         } catch (err) {
             console.log(err);
@@ -257,23 +258,19 @@ const userController = {
     },
 
     searchInquiry : async (req, res) => {
-        const userName = req.params.userName;
-
-        if (!userName) {
-            return res.status(400).json({
-                resultCode: 400,
-                resultMsg: "사용자 Name을 제공해야 합니다.",
-            });
-        }        
-
-        const result = await userModel.searchInquiry(userName);
-
         try {
+            const userName = req.params.userName;
 
-            if (result.length === 0) {
-                res.status(404).send('User not found');
-                return;
-            }
+            if (!userName) {
+                return res.status(400).json({
+                    resultCode: 400,
+                    resultMsg: "사용자 Name을 제공해야 합니다.",
+                });
+            }        
+
+            const result = await userModel.searchInquiry(userName);
+
+            if (result.length === 0) return res.status(404).send('User not found');
             
             return res.status(200).json({
                 inquiryId : result.inquiry_id,
@@ -288,22 +285,17 @@ const userController = {
     },
 
     selectInquiry : async (req, res) => {
-        const inquiryId = req.params.inquiryId;
-
-        if(!inquiryId) {
-            return res.status(400).json({
-                resultCode: 400,
-                resultMsg: "문의 Id를 제공해야합니다."
-            })
-        }
-        const result = await userModel.searchInquiry(userName);
-
         try {
+            const inquiryId = req.params.inquiryId;
 
-            if (result.length === 0) {
-                res.status(404).send('User not found');
-                return;
+            if(!inquiryId) {
+                return res.status(400).json({
+                    resultCode: 400,
+                    resultMsg: "문의 Id를 제공해야합니다."
+                })
             }
+            const result = await userModel.searchInquiry(userName);
+            if (result.length === 0) return res.status(404).send('User not found');
             
             return res.status(200).json({
                 inquiryId : result.inquiry_id,
@@ -321,21 +313,16 @@ const userController = {
     },
 
     searchAnswer : async (req, res) => {
-        const inquiryId = req.params.inquiryId;
-        if(!inquiryId) {
-            return res.status(400).json({
-                resultCode: 400,
-                resultMsg: "문의 Id를 제공해야합니다."
-            })
-        }
-        const result = await userModel.searchAnswer(inquiryId);
         try {
-
-            if (result.length === 0) {
-                res.status(404).send('User not found');
-                return;
+            const inquiryId = req.params.inquiryId;
+            if(!inquiryId) {
+                return res.status(400).json({
+                    resultCode: 400,
+                    resultMsg: "문의 Id를 제공해야합니다."
+                })
             }
-            
+            const result = await userModel.searchAnswer(inquiryId);
+            if (result.length === 0) return res.status(404).send('User not found');
             return res.status(200).json({
                 answerId : result.answer_id,
                 inquiryId : result.inquiry_id,
