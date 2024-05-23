@@ -31,5 +31,6 @@ router.put('/popupStatus/:store_id', popupController.popupStatus); // (팝업 �
 router.put('/waitStatus/:wait_id', popupController.waitStatus); // (팝업 등록자)예약자 대기 상태 변경
 router.delete('/waitDelete/:wait_id', popupController.waitDelete); // (팝업 등록자) 예약 삭제
 
-router.post('/booking/:order_id', popupController.booking); // 사전 예약
+router.post('/bookingPopup', popupController.bookingPopup); // 사전 예약
+router.get('/recommendation', popupController.recommendation); // 추천 시스템
 module.exports = router;

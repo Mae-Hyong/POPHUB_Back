@@ -2,6 +2,7 @@ const db = require('../config/mysqlDatabase');
 
 // ------- GET Query -------
 const allProducts_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN images pi ON p.product_id = pi.product_id GROUP BY p.product_id';
+const getstoreId_query = 'SELECT store_id FROM products WHERE product_id = ?';
 const userNameCheck_query = 'SELECT user_name FROM popup_stores WHERE store_id = ?';
 const storeProducts_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN images pi ON p.product_id = pi.product_id WHERE p.store_id = ? GROUP BY p.product_id';
 const getProduct_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN images pi ON p.product_id = pi.product_id WHERE p.product_id = ? GROUP BY p.product_id';
@@ -27,8 +28,8 @@ const productModel = {
             const results = await new Promise((resolve, reject) => {
                 db.query(allProducts_query, (err, results) => {
                     if (err) reject(err);
-                    if (results.length === 0) {
-                        return '상품이 존재하지 않습니다.';
+                    if (results.length == 0) {
+                        return resolve('상품이 존재하지 않습니다.');
                     } else {
                         results.forEach(result => {
                             if (result.image_urls) {
@@ -155,8 +156,15 @@ const productModel = {
      // 굿즈 수정
     updateProduct: async (productData, user_name) => {
         try {
+            const popup_id = await new Promise((resolve, reject) => {
+                db.query(getstoreId_query, [productData.product_id], (err, result) => {
+                    if (err) return reject(err);
+                    resolve(result[0].store_id);
+                });
+            });
+
             const check = await new Promise((resolve, reject) => {
-                db.query(userNameCheck_query, [productData.store_id], (err, results) => {
+                db.query(userNameCheck_query, popup_id, (err, results) => {
                     if (err) return reject(err);
                     if (results.length === 0 || results[0].user_name !== user_name) {
                         resolve(false);
@@ -180,8 +188,6 @@ const productModel = {
             throw err;
         }
     },
-
-    
 
     // (수정 삭제시 사용) 이미지 삭제
     deleteImage: async (product_id) => {
