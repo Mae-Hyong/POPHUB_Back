@@ -1,6 +1,7 @@
 const popupModel = require('../models/popupModel');
 const moment = require('moment');
 const { v4: uuidv4 } = require("uuid");
+const { getRecommendation } = require('../function/recommendation');
 
 const popupController = {
     // 모든 팝업 조회
@@ -340,6 +341,15 @@ const popupController = {
             }
             await popupModel.bookingPopup(bookingData);
             res.status(201).json('예약 등록이 완료되었습니다.');
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    recommendation: async (req, res) => {
+        try  {
+            const user_recommendation = await getRecommendation(req.body.user_name);
+            res.status(200).json(user_recommendation);
         } catch (err) {
             throw err;
         }
