@@ -649,18 +649,19 @@ const popupModel = {
                 });
             });
 
-            await new Promise((resolve, reject) => {
-                db.query(reservation_query, reservationData, (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result);
-                });
-            });
-
             const current_capacity = check.length > 0 ? check[0].current_capacity : 0;
             const max_capacity = popup_capacity[0].max_capacity;
             const update_capacity = current_capacity + reservationData.capacity;
 
             if (update_capacity <= max_capacity) {
+
+                await new Promise((resolve, reject) => {
+                    db.query(reservation_query, reservationData, (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    });
+                });
+                
                 if (check.length === 0) { // store_capacity에 값이 없는 경우,
                     const capacityData = {
                         store_id,
@@ -725,13 +726,13 @@ const popupModel = {
             });
         });
 
-        const {store_id, reservation_date, reservation_time, capacity } = getCapacity[0];
+        const { store_id, reservation_date, reservation_time, capacity } = getCapacity[0];
         console.log(store_id);
         console.log(capacity);
 
         await new Promise((resolve, reject) => {
             db.query(updateCapacityMinus_query, [capacity, store_id, reservation_date, reservation_time], (err, result) => {
-                if(err) reject(err);
+                if (err) reject(err);
                 else resolve(result);
             });
         });
