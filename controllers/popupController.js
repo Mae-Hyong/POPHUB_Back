@@ -169,6 +169,17 @@ const popupController = {
         }
     },
 
+    // 유저별 찜 조회
+    likeUser: async (req, res) => {
+        try {
+            const user_name = req.body.user_name;
+            const result = await popupModel.likeUser(user_name);
+            res.status(200).json(result);
+        } catch (err) {
+            throw err;
+        }
+    },
+
     // 스토어별 리뷰
     storeReview: async (req, res) => {
         try {
