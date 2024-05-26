@@ -23,6 +23,8 @@ const maxCapacity_query = 'SELECT max_capacity FROM popup_stores WHERE store_id 
 const getReservationUser_query = 'SELECT * FROM reservation WHERE user_name = ?';
 const getReservationPresident_query = 'SELECT * FROM reservation WHERE store_id = ?';
 const getcapacityByReservationId_query = 'SELECT * FROM reservation WHERE reservation_id = ?';
+const bookmark_query = 'SELECT mark_id, user_name, store_id FROM BookMark WHERE user_name = ?';
+const bookmarkbystore_query = 'SELECT COUNT(*) AS bookmark FROM BookMark WHERE store_id = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -233,6 +235,16 @@ const popupModel = {
                                 }));
 
                                 popupInfo.store_schedules = schedules;
+
+                                const storeBookMark = await new Promise ((resolve, reject) => {
+                                    db.query(bookmarkbystore_query, store_id, (err, result) => {
+                                        if (err) reject(err);
+                                        resolve(result[0].bookmark_count);
+                                    })
+                                });
+
+                                popupInfo.store_bookmark = storeBookMark;
+
                                 resolve(popupInfo);
                             }
                         });
@@ -363,6 +375,21 @@ const popupModel = {
             } else {
                 return { message: '찜이 추가되었습니다.', mark_number: store_mark_number };
             }
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 팝업 찜 조회
+    likeUser: async(user_name) => {
+        try {
+            const bookmark = await new Promise((resolve, reject) => {
+                db.query(bookmark_query, user_name, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                })
+            })
+            return bookmark;
         } catch (err) {
             throw err;
         }

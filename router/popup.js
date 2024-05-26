@@ -23,6 +23,7 @@ router.delete('/delete/:store_id', popupController.deletePopup); // 팝업 삭�
 
 router.get('/viewDenialReason/:store_id', popupController.viewDenialReason); // 팝업 등록 거부 이유 확인
 router.post('/like/:store_id', popupController.likePopup); // 팝업 찜
+router.get('/likeUser', popupController.likeUser); // 팝업 유저별 찜 조회
 
 // router.post('/reservation/:store_id', popupController.waitReservation); // 예약
 // router.get('/reservation/:store_id', popupController.getWaitOrder); // 예약자 대기 순서 조회
