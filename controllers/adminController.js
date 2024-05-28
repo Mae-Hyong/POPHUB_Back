@@ -32,7 +32,6 @@ const adminController = {
 
     searchNotice : async(req, res) => {
         try {
-
             const noticeId = req.query.notice_id;
             if(!noticeId){
                 const searchResult = await adminModel.searchNotice();
@@ -41,11 +40,10 @@ const adminController = {
             else {
                 const result = await adminModel.selectNotice(noticeId);
                 return res.status(200).json(result);
-
             }
             
         } catch (err) {
-            
+            res.status(500).send("공지사항 조회 중 오류가 발생했습니다.");
         }
     },
 
@@ -87,6 +85,16 @@ const adminController = {
         }
     },
     
+    category : async(req, res) => {
+        try {
+            const categoryId = req.body;
+            const result =  await adminModel.category(categoryId);
+
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(500).send("카테고리 조회 중 오류가 발생했습니다.");
+        }
+    }
 }
 
 module.exports = adminController;
