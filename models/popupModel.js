@@ -24,7 +24,7 @@ const getReservationUser_query = 'SELECT * FROM reservation WHERE user_name = ?'
 const getReservationPresident_query = 'SELECT * FROM reservation WHERE store_id = ?';
 const getcapacityByReservationId_query = 'SELECT * FROM reservation WHERE reservation_id = ?';
 const bookmark_query = 'SELECT mark_id, user_name, store_id FROM BookMark WHERE user_name = ?';
-const bookmarkbystore_query = 'SELECT COUNT(*) AS bookmark FROM BookMark WHERE store_id = ?';
+const checkBookmark_query = 'SELECT * FROM BookMark WHERE store_id = ? AND user_name = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -207,51 +207,72 @@ const popupModel = {
     },
 
     // 하나의 팝업 정보 조회
-    getPopup: async (store_id) => {
-        try {
-            const result = await new Promise((resolve, reject) => {
-                db.query(updateViewCount_query, store_id, (err, updateResult) => {
+    getPopup: async (store_id, user_name) => {
+        // 조회수를 업데이트하는 함수
+        const updateViewCount = (store_id) => {
+            return new Promise((resolve, reject) => {
+                db.query(updateViewCount_query, store_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+        };
+    
+        // 팝업 정보
+        const getPopupInfo = (store_id) => {
+            return new Promise((resolve, reject) => {
+                db.query(getImagePopup_query, store_id, (err, result) => {
                     if (err) reject(err);
                     else {
-                        db.query(getImagePopup_query, store_id, async (err, popupResult) => {
-                            if (err) reject(err);
-                            else {
-                                const popupInfo = { ...popupResult[0] }; // 복사하여 새로운 객체 생성
-                                delete popupInfo.image_url; // 이미지 URL 속성 삭제
-                                const imageUrls = popupResult.map(row => row.image_url).filter(url => url !== null);
-                                popupInfo.imageUrls = imageUrls;
-
-                                const storeSchedules = await new Promise((resolve, reject) => {
-                                    db.query(storeSchedules_query, [store_id], (err, scheduleResults) => {
-                                        if (err) reject(err);
-                                        resolve(scheduleResults);
-                                    });
-                                });
-
-                                const schedules = storeSchedules.map(schedule => ({
-                                    day_of_week: schedule.day_of_week,
-                                    open_time: schedule.open_time,
-                                    close_time: schedule.close_time
-                                }));
-
-                                popupInfo.store_schedules = schedules;
-
-                                const storeBookMark = await new Promise ((resolve, reject) => {
-                                    db.query(bookmarkbystore_query, store_id, (err, result) => {
-                                        if (err) reject(err);
-                                        resolve(result[0].bookmark_count);
-                                    })
-                                });
-
-                                popupInfo.store_bookmark = storeBookMark;
-
-                                resolve(popupInfo);
-                            }
-                        });
+                        const popupInfo = { ...result[0] };
+                        delete popupInfo.image_url;
+                        popupInfo.imageUrls = result.map(row => row.image_url).filter(url => url !== null);
+                        resolve(popupInfo);
                     }
                 });
             });
-            return result;
+        };
+    
+        // 스케줄
+        const getStoreSchedules = (store_id) => {
+            return new Promise((resolve, reject) => {
+                db.query(storeSchedules_query, [store_id], (err, result) => {
+                    if (err) reject(err);
+                    else {
+                        const schedules = result.map(schedule => ({
+                            day_of_week: schedule.day_of_week,
+                            open_time: schedule.open_time,
+                            close_time: schedule.close_time
+                        }));
+                        resolve(schedules);
+                    }
+                });
+            });
+        };
+
+        const checkBookmark = (store_id, user_name) => {
+            return new Promise((resolve, reject) => {
+                db.query(checkBookmark_query, [store_id, user_name], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result.length > 0);
+                });
+            });
+        };
+    
+        try {
+            await updateViewCount(store_id);
+            const popupInfo = await getPopupInfo(store_id);
+            const storeSchedules = await getStoreSchedules(store_id);
+            
+            popupInfo.store_schedules = storeSchedules;
+
+            if(user_name) { // user_name이 있는 경우
+                popupInfo.is_bookmarked = await checkBookmark(store_id, user_name);
+            } else {
+                popupInfo.is_bookmarked = false;
+            }
+    
+            return popupInfo;
         } catch (err) {
             throw err;
         }

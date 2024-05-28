@@ -79,7 +79,8 @@ const popupController = {
     getPopup: async (req, res) => {
         try {
             const store_id = req.params.store_id;
-            const result = await popupModel.getPopup(store_id);
+            const user_name = req.body.user_name;
+            const result = await popupModel.getPopup(store_id, user_name);
             res.status(200).json(result);
         } catch (err) {
             throw err;
