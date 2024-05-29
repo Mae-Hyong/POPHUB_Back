@@ -106,7 +106,7 @@ CREATE TABLE store_schedules ( -- 요일별 시간
 );
 
 CREATE TABLE products (
-    product_id VARCHAR(50) NOT NULL, -- 상품 아이디
+    product_id VARCHAR(50) NOT NULL PRIMARY KEY, -- 상품 아이디
     store_id VARCHAR(50) NOT NULL, -- 스토어 아이디
     product_name VARCHAR(255) NOT NULL, -- 상품 이름 
     product_price FLOAT NOT NULL, -- 상품 가격
@@ -228,7 +228,7 @@ CREATE TABLE product_review (
     review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     review_modified_date TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(product_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_id)
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
 INSERT INTO category (category_id, category_name) VALUES
@@ -253,3 +253,7 @@ INSERT INTO category (category_id, category_name) VALUES
 (23, '패션/라이프스타일'),
 (24, '예술/공예'),
 (25, '애니메이션');
+
+
+ALTER TABLE popup_stores
+ADD INDEX idx_max_capacity (max_capacity);
