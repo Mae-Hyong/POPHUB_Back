@@ -25,6 +25,7 @@ const getReservationPresident_query = 'SELECT * FROM reservation WHERE store_id 
 const getcapacityByReservationId_query = 'SELECT * FROM reservation WHERE reservation_id = ?';
 const bookmark_query = 'SELECT mark_id, user_name, store_id FROM BookMark WHERE user_name = ?';
 const checkBookmark_query = 'SELECT * FROM BookMark WHERE store_id = ? AND user_name = ?';
+const reservationStatus_query = 'SELECT * FROM store_capacity WHERE store_id = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -723,6 +724,26 @@ const popupModel = {
                     else resolve();
                 })
             })
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 예약 상태
+    reservationStatus: async (store_id) => {
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query(reservationStatus_query, store_id, (err, result) => {
+                    if (err) reject (err);
+                    else resolve(result);
+                });
+            });
+
+            const status = results.map(item => {
+                item.status = item.current_capacity >= item.max_capacity;
+                return item;
+            });
+            return status;
         } catch (err) {
             throw err;
         }
