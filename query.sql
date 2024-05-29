@@ -82,6 +82,7 @@ CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     store_wait_status ENUM('false', 'true') DEFAULT 'false', -- 대기 상태
     approval_status ENUM('pending', 'check', 'deny') DEFAULT 'pending', -- 승인 상태
     deleted ENUM('false', 'true') DEFAULT 'false', -- 팝업 삭제 여부
+    max_capacity INT NOT NULL, -- 시간대별 최대 인원
     FOREIGN KEY (category_id) REFERENCES category(category_id) ON UPDATE CASCADE,
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
@@ -105,7 +106,7 @@ CREATE TABLE store_schedules ( -- 요일별 시간
 );
 
 CREATE TABLE products (
-    product_id VARCHAR(50) NOT NULL, -- 상품 아이디
+    product_id VARCHAR(50) NOT NULL PRIMARY KEY, -- 상품 아이디
     store_id VARCHAR(50) NOT NULL, -- 스토어 아이디
     product_name VARCHAR(255) NOT NULL, -- 상품 이름 
     product_price FLOAT NOT NULL, -- 상품 가격
@@ -191,19 +192,32 @@ CREATE TABLE store_review (
     FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE
 );
 
-CREATE TABLE booking_list (
-    book_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    order_id VARCHAR(50),
+CREATE TABLE reservation (
+    reservation_id VARCHAR(50) NOT NULL PRIMARY KEY,
     store_id VARCHAR(50) NOT NULL,
     user_name VARCHAR(50) NOT NULL,
-    specified_date DATE NOT NULL,
-    specified_time TIME NOT NULL,
-    quantity INT NOT NULL,
-    booking_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (order_id) REFERENCES payment_details(order_id),
-    FOREIGN KEY (store_id) REFERENCES payment_details(store_id),
-    FOREIGN KEY (user_name) REFERENCES payment_details(user_name)  ON UPDATE CASCADE
+    reservation_date DATE NOT NULL,
+    reservation_time TIME NOT NULL,
+    capacity INT NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reservation_status ENUM('pending', 'completed') NOT NULL DEFAULT 'pending',
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
+
+CREATE TABLE store_capacity (
+    store_id VARCHAR(50) NOT NULL,
+    reservation_date DATE NOT NULL,
+    reservation_time TIME NOT NULL,
+    max_capacity INT NOT NULL,
+    current_capacity INT,
+    PRIMARY KEY (store_id, reservation_date, reservation_time),
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
+    FOREIGN KEY (max_capacity) REFERENCES popup_stores(max_capacity)
+);
+
+ALTER TABLE popup_stores
+ADD INDEX idx_max_capacity (max_capacity);
 
 CREATE TABLE product_review (
     review_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -214,7 +228,7 @@ CREATE TABLE product_review (
     review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     review_modified_date TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (product_id) REFERENCES products(product_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_id)
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
 INSERT INTO category (category_id, category_name) VALUES
@@ -239,3 +253,7 @@ INSERT INTO category (category_id, category_name) VALUES
 (23, '패션/라이프스타일'),
 (24, '예술/공예'),
 (25, '애니메이션');
+
+
+ALTER TABLE popup_stores
+ADD INDEX idx_max_capacity (max_capacity);

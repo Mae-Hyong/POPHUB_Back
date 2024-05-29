@@ -5,6 +5,7 @@ const getUserInfo_query = 'SELECT gender, age FROM user_info WHERE user_name = ?
 const getPaymentDetails_query = 'SELECT user_name, store_id FROM payment_details';
 const getCategoryId_query = 'SELECT category_id FROM popup_stores WHERE store_id = ?';
 const getPopup_query = 'SELECT * FROM popup_stores WHERE category_id = ?'
+
 async function getRecommendation(user_name) {
     try {
         console.log("ㅎㅇ");

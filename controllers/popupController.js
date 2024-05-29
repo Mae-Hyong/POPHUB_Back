@@ -24,6 +24,17 @@ const popupController = {
         }
     },
 
+    // 팝업 등록자별 조회
+    popupByPresident: async (req, res) => {
+        try {
+            const user_name = req.body.user_name;
+            const result = await popupModel.popupByPresident(user_name);
+            res.status(200).json(result);
+        } catch (err) {
+            throw err;
+        }
+    },
+
     // 팝업 스토어 생성
     createPopup: async (req, res) => {
         try {
@@ -38,6 +49,7 @@ const popupController = {
                 store_location: body.store_location,
                 store_contact_info: body.store_contact_info,
                 store_description: body.store_description,
+                max_capacity: body.max_capacity,
                 store_start_date: body.store_start_date,
                 store_end_date: body.store_end_date,
             };
@@ -78,7 +90,8 @@ const popupController = {
     getPopup: async (req, res) => {
         try {
             const store_id = req.params.store_id;
-            const result = await popupModel.getPopup(store_id);
+            const user_name = req.body.user_name;
+            const result = await popupModel.getPopup(store_id, user_name);
             res.status(200).json(result);
         } catch (err) {
             throw err;
@@ -98,6 +111,7 @@ const popupController = {
                 store_location: body.store_location,
                 store_contact_info: body.store_contact_info,
                 store_description: body.store_description,
+                max_capacity: body.max_capacity,
                 store_start_date: body.store_start_date,
                 store_end_date: body.store_end_date,
             };
@@ -167,7 +181,18 @@ const popupController = {
         }
     },
 
-    // 특정 팝업 스토어 리뷰
+    // 유저별 찜 조회
+    likeUser: async (req, res) => {
+        try {
+            const user_name = req.body.user_name;
+            const result = await popupModel.likeUser(user_name);
+            res.status(200).json(result);
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 스토어별 리뷰
     storeReview: async (req, res) => {
         try {
             const store_id = req.params.store_id;
@@ -178,7 +203,7 @@ const popupController = {
         }
     },
 
-    // 아이디별 팝업 스토어 리뷰
+    // 아이디별 리뷰
     storeUserReview: async (req, res) => {
         try {
             const user_name = req.body.user_name;
@@ -329,31 +354,67 @@ const popupController = {
         }
     },
 
-    bookingPopup: async (req, res) => {
+    // 예약
+    reservation: async (req, res) => {
         try {
+            const store_id = req.params.store_id;
             const body = req.body;
-            const booking_time = moment().format('YYYY-MM-DD HH:mm:ss');
-            const bookingData = {
-                order_id: body.order_id,
-                specified_date: body.specified_date,
-                specified_time: body.specified_time,
-                booking_time
+            const reservation_id = uuidv4();
+            const created_at = moment().format('YYYY-MM-DD HH:mm:ss');
+            let reservationData = {
+                reservation_id,
+                store_id,
+                user_name: body.user_name,
+                reservation_date: body.reservation_date,
+                reservation_time: body.reservation_time,
+                capacity: body.capacity,
+                created_at
+            };
+
+            const result = await popupModel.reservation(reservationData);
+
+            if(result.success == true) {
+                res.status(201).json(`예약 등록이 완료되었습니다. 현재 인원:${result.update_capacity}, 최대 인원: ${result.max_capacity}`);
+            } else {
+                res.status(400).json(`최대 인원을 초과하였습니다. 시간당 최대 인원:${result.max_capacity}`);
             }
-            await popupModel.bookingPopup(bookingData);
-            res.status(201).json('예약 등록이 완료되었습니다.');
         } catch (err) {
             throw err;
         }
     },
 
-    recommendation: async (req, res) => {
-        try  {
-            const user_recommendation = await getRecommendation(req.body.user_name);
-            res.status(200).json(user_recommendation);
-        } catch (err) {
-            throw err;
-        }
-    }
+    // 예약 조회 - 유저
+    getReservationUser: async (req, res) => {
+        const user_name = req.body.user_name;
+        const result = await popupModel.getReservationUser(user_name);
+
+        res.status(200).json(result);
+    },
+    
+    // 예약 조회 - 스토어 (팝업 등록자가 볼 것)
+    getReservationPresident: async (req, res) => {
+        const store_id = req.body.store_id;
+        const result = await popupModel.getReservationPresident(store_id);
+        
+        res.status(200).json(result);
+    },
+
+    deleteReservation: async (req, res) => {
+        const reservation_id = req.params.reservation_id;
+        await popupModel.deleteReservation(reservation_id);
+        res.status(200).json("예약이 취소되었습니다.");
+    },
+
+    // // 추천
+    // recommendation: async (req, res) => {
+    //     try  {
+    //         const user_recommendation = await getRecommendation(req.body.user_name);
+    //         const data = await popupModel.recommendationData(user_recommendation);
+    //         res.status(200).json(data);
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // }
 };
 
 module.exports = { popupController }
