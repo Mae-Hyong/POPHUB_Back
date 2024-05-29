@@ -24,6 +24,17 @@ const popupController = {
         }
     },
 
+    // 팝업 등록자별 조회
+    popupByPresident: async (req, res) => {
+        try {
+            const user_name = req.body.user_name;
+            const result = await popupModel.popupByPresident(user_name);
+            res.status(200).json(result);
+        } catch (err) {
+            throw err;
+        }
+    },
+
     // 팝업 스토어 생성
     createPopup: async (req, res) => {
         try {
@@ -394,15 +405,16 @@ const popupController = {
         res.status(200).json("예약이 취소되었습니다.");
     },
 
-    // 추천
-    recommendation: async (req, res) => {
-        try  {
-            const user_recommendation = await getRecommendation(req.body.user_name);
-            res.status(200).json(user_recommendation);
-        } catch (err) {
-            throw err;
-        }
-    }
+    // // 추천
+    // recommendation: async (req, res) => {
+    //     try  {
+    //         const user_recommendation = await getRecommendation(req.body.user_name);
+    //         const data = await popupModel.recommendationData(user_recommendation);
+    //         res.status(200).json(data);
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // }
 };
 
 module.exports = { popupController }

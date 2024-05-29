@@ -152,6 +152,54 @@ const popupModel = {
         }
     },
 
+    // 팝업 등록자별 조회
+    popupByPresident: async (user_name) => {
+        try {
+            const query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.user_name = ? GROUP BY ps.store_id';
+            const results = await new Promise((resolve, reject) => {
+                db.query(query, user_name, async(err, result) => {
+                    if (err) reject(err);
+                    if (!result || result.length === 0) {
+                        resolve("현재 등록된 팝업이 없습니다. 팝업을 등록해주세요!");
+                    } else {
+                        for (const popup of result) {
+                            try {
+                                const storeSchedules = await new Promise((resolve, reject) => {
+                                    db.query(storeSchedules_query, [popup.store_id], (err, scheduleResults) => {
+                                        if (err) reject(err);
+                                        resolve(scheduleResults);
+                                    });
+                                });
+
+                                const schedules = storeSchedules.map(schedule => ({
+                                    day_of_week: schedule.day_of_week,
+                                    open_time: schedule.open_time,
+                                    close_time: schedule.close_time
+                                }));
+
+                                popup.store_schedules = schedules;
+
+                                if (popup.image_urls) {
+                                    popup.imageUrls = popup.image_urls.split(',');
+                                    delete popup.image_urls;
+                                } else {
+                                    popup.imageUrls = [];
+                                }
+                            } catch (err) {
+                                reject(err);
+                                return;
+                            }
+                        }
+                        resolve(result);
+                    }
+                });
+            });
+            return results;
+        } catch (err) {
+            throw err;
+        }
+    },
+
     // 이미지 업로드
     uploadImage: async (store_id, imagePath) => {
         try {
@@ -208,7 +256,8 @@ const popupModel = {
 
     // 하나의 팝업 정보 조회
     getPopup: async (store_id, user_name) => {
-        // 조회수를 업데이트하는 함수
+
+        // 조회수
         const updateViewCount = (store_id) => {
             return new Promise((resolve, reject) => {
                 db.query(updateViewCount_query, store_id, (err, result) => {
@@ -793,6 +842,17 @@ const popupModel = {
         })
     },
 
+    // recommendationData: async(user_recommendation) => {
+    //     const query ='SELECT * FROM popup_stores WHERE category_id = ? ORDER BY RAND() LIMIT 3;'
+    //     const results = await new Promise((resolve, reject) => {
+    //         db.query(query, user_recommendation, (err, result) => {
+    //             if (err) reject(err);
+    //             else resolve(result);
+    //         })
+    //     })
+
+    //     return results;
+    // },
 };
 
 module.exports = popupModel;
