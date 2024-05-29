@@ -250,8 +250,11 @@ const userController = {
     createInquiry : async (req, res) => {
         try {
             const { userName, categoryId, title, content } = req.body;
-
-            await userModel.createInquiry(userName, categoryId, title, content);
+            console.log(req.body)
+            let userImage = null;
+            if (req.file) userImage = req.file.path;
+            
+            await userModel.createInquiry(userName, categoryId, title, content, userImage);
             res.status(201).send('Inquiry added successfully');
         } catch (err) {
             console.log(err);
@@ -261,56 +264,42 @@ const userController = {
 
     searchInquiry : async (req, res) => {
         try {
-            const userName = req.params.userName;
+            const userName = req.query.userName;
+            const inquiryId = req.query.inquiryId;
 
-            if (!userName) {
-                return res.status(400).json({
-                    resultCode: 400,
-                    resultMsg: "사용자 Name을 제공해야 합니다.",
-                });
-            }        
+            if (userName) { // userName이 존재할 경우
+                const result = await userModel.searchInquiry(userName);
+                const category = await userModel.category(result.category_id);
 
-            const result = await userModel.searchInquiry(userName);
+                return res.status(200).json({
+                    inquiryId : result.inquiry_id,
+                    userName : result.user_name,
+                    categoryId : result.category_id,
+                    category : category[0].category_name,
+                    title : result.title,
+                })
+            } else if (inquiryId) {
+                const result = await userModel.selectInquiry(inquiryId);
+                const category = await userModel.category(result.category_id);
 
-            if (result.length === 0) return res.status(404).send('User not found');
+                return res.status(200).json({
+                    inquiryId : result.inquiry_id,
+                    userName : result.user_name,
+                    categoryId : result.category_id,
+                    category : category[0].category_name,
+                    title : result.title,
+                    content : result.content,
+                    image : result.image,
+                    writeDate : result.write_date,
+                    answerStatus : result.status
+                })
+            }
+
+            // if (result.length === 0) return res.status(404).send('User not found');
             
-            return res.status(200).json({
-                inquiryId : result.inquiry_id,
-                userName : result.user_name,
-                categoryId : result.category_id,
-                title : result.title
-            })
         } catch (err) {
             console.log(err);
             res.status(500).send("문의 검색 중 오류가 발생했습니다.")
-        }
-    },
-
-    selectInquiry : async (req, res) => {
-        try {
-            const inquiryId = req.params.inquiryId;
-
-            if(!inquiryId) {
-                return res.status(400).json({
-                    resultCode: 400,
-                    resultMsg: "문의 Id를 제공해야합니다."
-                })
-            }
-            const result = await userModel.searchInquiry(userName);
-            if (result.length === 0) return res.status(404).send('User not found');
-            
-            return res.status(200).json({
-                inquiryId : result.inquiry_id,
-                userName : result.user_name,
-                categoryId : result.category_id,
-                title : result.title,
-                content : result.content,
-                writeDate : result.write_date,
-                answerStatus : result.status
-            })
-        } catch (err) {
-            console.log(err);
-            res.status(500).send("문의 내역을 가져오는 중 오류가 발생했습니다.")
         }
     },
 

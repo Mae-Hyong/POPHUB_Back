@@ -5,7 +5,6 @@ const router = express.Router();
 const adminController = require('../controllers/adminController');
 
 router.get("/notice", adminController.searchNotice);
-router.get("/category", adminController.category);
 router.post("/answer", token.verifyToken, adminController.createAnswer);
 router.post("/create_notice", token.verifyToken, adminController.createNotice);
 router.get('/popupPendingList', token.verifyToken, adminController.popupPendingList); // pendingList 조회

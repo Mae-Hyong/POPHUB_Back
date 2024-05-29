@@ -9,13 +9,14 @@ const id_search_query = 'SELECT user_id From user_info WHERE phone_number = ?';
 const inquiry_search_query = 'SELECT * FROM inquiry WHERE user_name = ?';
 const inquiry_select_query = 'SELECT * FROM inquiry WHERE inquiry_id = ?';
 const answer_search_query = 'SELECT * FROM answer WHERE inquiry_id = ?';
+const search_category_query = 'SELECT category_name FROM category WHERE category_id = ?'
 
 // ------- POST Query -------
 const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE user_id = ?';
 const profile_add_query = 'INSERT INTO user_info (user_id, user_name, phone_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
 const name_change_query = 'UPDATE user_info SET user_name = ?  WHERE user_id = ?';
 const image_change_query = 'UPDATE user_info SET user_image = ?  WHERE user_id = ?';
-const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content) VALUES (?, ?, ?, ?)';
+const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content, image) VALUES (?, ?, ?, ?, ?)';
 const delete_add_query = 'INSERT INTO user_delete(user_id, phone_number) VALUES (?, ?)'
 const delete_change_query = 'UPDATE user_info SET user_name = ?, withdrawal = ? WHERE user_id = ?'
 
@@ -142,9 +143,9 @@ const userModel = {
         })
     },
 
-    createInquiry : (userName, categoryId, title, content) => {
+    createInquiry : (userName, categoryId, title, content, userImage) => {
         return new Promise((resolve, reject) => {
-            db.query(inquiry_add_query, [userName, categoryId, title, content], (err, result) => {
+            db.query(inquiry_add_query, [userName, categoryId, title, content, userImage], (err, result) => {
                 if(err) {
                     reject(err);
                 } else {
@@ -157,11 +158,8 @@ const userModel = {
     searchInquiry : (userName) => {
         return new Promise((resolve, reject) => {
             db.query(inquiry_search_query, userName, (err, result) => {
-                if(err) {
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
+                if(err) reject(err);
+                else resolve(result[0]);
             });
         })
     },
@@ -169,11 +167,8 @@ const userModel = {
     selectInquiry : (inquiry_id) => {
         return new Promise((resolve, reject) => {
             db.query(inquiry_select_query, inquiry_id, (err, result) => {
-                if(err) {
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
+                if(err) reject(err);
+                else resolve(result[0]);
             })
         })
     },
@@ -186,6 +181,15 @@ const userModel = {
                 } else {
                     resolve(result[0]);
                 }
+            })
+        })
+    },
+
+    category: async(categoryId) => {
+        return new Promise((resolve, reject) => {
+            db.query(search_category_query, categoryId, (err, result) => {
+                if(err) reject(err);
+                else resolve(result);
             })
         })
     },

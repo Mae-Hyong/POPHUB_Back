@@ -4,7 +4,6 @@ const db = require('../config/mysqlDatabase');
 const pending_query = 'SELECT * FROM popup_stores WHERE approval_status = "pending"';
 const search_notice_query = 'SELECT * FROM notice'
 const select_notice_query = 'SELECT * FROM notice WHERE notice_id = ?'
-const search_category_query = 'SELECT category_name FROM category WHERE category_id = ?'
 // ------- POST Query -------
 const create_answer_query = 'INSERT INTO answer(inquiry_id, user_name, content) VALUES (?, ?, ?)'
 const create_notice_query = 'INSERT INTO notice SET ?'
@@ -113,16 +112,6 @@ const adminModel = {
             throw err;
         }
     },
-
-    category: async(categoryId) => {
-        return new Promise((resolve, reject) => {
-            db.query(search_category_query, categoryId, (err, result) => {
-                if(err) reject(err);
-                else resolve(result);
-            })
-        })
-    }
-
 }
 
 module.exports = adminModel;
