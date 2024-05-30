@@ -44,9 +44,10 @@ CREATE TABLE inquiry (
 	category_id	int	NOT NULL,
 	title	varchar(100)	NOT NULL,
 	content	text	NOT NULL,
+    image longtext,
     write_date datetime default now(),
 	status	enum("pending", "complete")	NOT NULL DEFAULT "pending",
-		
+	
     foreign key (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
     foreign key (category_id) REFERENCES category(category_id) ON UPDATE CASCADE
 );
@@ -87,6 +88,16 @@ CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
+CREATE TABLE wait_list(
+    user_name varchar(50) NOT NULL,
+    store_id varchar(50) NOT NULL,
+    status ENUM('waiting', 'completed', 'cancelled') NOT NULL default 'waiting',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name),
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
+
+    primary key(user_name, store_id)
+);
 
 CREATE TABLE popup_denial_logs ( -- 팝업 스토어 등록 거부 이유
     log_id INT AUTO_INCREMENT PRIMARY KEY,
