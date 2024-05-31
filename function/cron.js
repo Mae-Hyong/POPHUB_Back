@@ -3,7 +3,7 @@ const db = require('../config/mysqlDatabase');
 const open_query =
     'UPDATE popup_stores SET store_status = "오픈" WHERE store_status = "오픈 예정" AND store_start_date <= DATE(NOW() + INTERVAL 9 HOUR)';
 const close_query =
-    'UPDATE popup_stores SET store_status = "마감" WHERE store_status = "오픈" AND store_end_date <= DATE(NOW() + INTERVAL 9 HOUR)';
+    'UPDATE popup_stores SET store_status = "마감" WHERE store_status = "오픈" AND store_end_date < DATE(NOW() + INTERVAL 9 HOUR)';
 const completed_query =
     'UPDATE reservation SET reservation_status = "completed" WHERE reservation_date < DATE(NOW() + INTERVAL 9 HOUR)';
 

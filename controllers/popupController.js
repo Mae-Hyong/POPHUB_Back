@@ -27,7 +27,7 @@ const popupController = {
     // 팝업 등록자별 조회
     popupByPresident: async (req, res) => {
         try {
-            const user_name = req.body.user_name;
+            const user_name = req.params.user_name;
             const result = await popupModel.popupByPresident(user_name);
             res.status(200).json(result);
         } catch (err) {
