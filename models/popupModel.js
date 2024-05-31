@@ -26,6 +26,9 @@ const getcapacityByReservationId_query = 'SELECT * FROM reservation WHERE reserv
 const bookmark_query = 'SELECT mark_id, user_name, store_id FROM BookMark WHERE user_name = ?';
 const checkBookmark_query = 'SELECT * FROM BookMark WHERE store_id = ? AND user_name = ?';
 const reservationStatus_query = 'SELECT * FROM store_capacity WHERE store_id = ?';
+const getpopupByPresident_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.user_name = ? GROUP BY ps.store_id';
+const scheduledToOpen_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 14 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_start_date ASC';
+const scheduledToClose_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_end_date ASC';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -156,9 +159,8 @@ const popupModel = {
     // 팝업 등록자별 조회
     popupByPresident: async (user_name) => {
         try {
-            const query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.user_name = ? GROUP BY ps.store_id';
             const results = await new Promise((resolve, reject) => {
-                db.query(query, user_name, async(err, result) => {
+                db.query(getpopupByPresident_query, user_name, async (err, result) => {
                     if (err) reject(err);
                     if (!result || result.length === 0) {
                         resolve("현재 등록된 팝업이 없습니다. 팝업을 등록해주세요!");
@@ -196,6 +198,60 @@ const popupModel = {
                 });
             });
             return results;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 오픈 예정 팝업 조회
+    scheduledToOpen: async () => {
+        try {
+            const popupResults = await new Promise((resolve, reject) => {
+                db.query(scheduledToOpen_query, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+    
+            if (popupResults.length === 0) {
+                return "2주 안으로 오픈 예정 팝업스토어가 없습니다.";
+            }
+    
+            const result = popupResults.map(popup => {
+                return {
+                    ...popup,
+                    imageUrls: popup.imageUrls ? popup.imageUrls.split(',') : []
+                };
+            });
+    
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 마감 임박 팝업 조회
+    scheduledToClose: async () => {
+        try {
+            const popupResults = await new Promise((resolve, reject) => {
+                db.query(scheduledToClose_query, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+    
+            if (popupResults.length === 0) {
+                return "일주일 안으로 마감 예정 팝업스토어가 없습니다.";
+            }
+    
+            const result = popupResults.map(popup => {
+                return {
+                    ...popup,
+                    imageUrls: popup.imageUrls ? popup.imageUrls.split(',') : []
+                };
+            });
+    
+            return result;
         } catch (err) {
             throw err;
         }
@@ -267,7 +323,7 @@ const popupModel = {
                 });
             });
         };
-    
+
         // 팝업 정보
         const getPopupInfo = (store_id) => {
             return new Promise((resolve, reject) => {
@@ -282,7 +338,7 @@ const popupModel = {
                 });
             });
         };
-    
+
         // 스케줄
         const getStoreSchedules = (store_id) => {
             return new Promise((resolve, reject) => {
@@ -308,20 +364,20 @@ const popupModel = {
                 });
             });
         };
-    
+
         try {
             await updateViewCount(store_id);
             const popupInfo = await getPopupInfo(store_id);
             const storeSchedules = await getStoreSchedules(store_id);
-            
+
             popupInfo.store_schedules = storeSchedules;
 
-            if(user_name) { // user_name이 있는 경우
+            if (user_name) { // user_name이 있는 경우
                 popupInfo.is_bookmarked = await checkBookmark(store_id, user_name);
             } else {
                 popupInfo.is_bookmarked = false;
             }
-    
+
             return popupInfo;
         } catch (err) {
             throw err;
@@ -452,7 +508,7 @@ const popupModel = {
     },
 
     // 팝업 찜 조회
-    likeUser: async(user_name) => {
+    likeUser: async (user_name) => {
         try {
             const bookmark = await new Promise((resolve, reject) => {
                 db.query(bookmark_query, user_name, (err, results) => {
@@ -734,7 +790,7 @@ const popupModel = {
         try {
             const results = await new Promise((resolve, reject) => {
                 db.query(reservationStatus_query, store_id, (err, result) => {
-                    if (err) reject (err);
+                    if (err) reject(err);
                     else resolve(result);
                 });
             });
@@ -779,7 +835,7 @@ const popupModel = {
                         else resolve(result);
                     });
                 });
-                
+
                 if (check.length === 0) { // store_capacity에 값이 없는 경우,
                     const capacityData = {
                         store_id,

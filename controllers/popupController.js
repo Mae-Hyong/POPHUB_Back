@@ -35,6 +35,26 @@ const popupController = {
         }
     },
 
+    // 오픈 예정 팝업 조회
+    scheduledToOpen: async (req, res) => {
+        try {
+            const result = await popupModel.scheduledToOpen();
+            res.status(200).json(result);
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 마감 임박 팝업 조회
+    scheduledToClose: async (req, res) => {
+        try {
+            const result = await popupModel.scheduledToClose();
+            res.status(200).json(result);
+        } catch (err) {
+            throw err;
+        }
+    },
+
     // 팝업 스토어 생성
     createPopup: async (req, res) => {
         try {
@@ -159,7 +179,7 @@ const popupController = {
     },
 
     // 거부 사유 확인
-    viewDenialReason: async(req, res) => {
+    viewDenialReason: async (req, res) => {
         try {
             const store_id = req.params.store_id;
             const check = await popupModel.viewDenialReason(store_id);
@@ -289,7 +309,7 @@ const popupController = {
                 wait_visitor_number,
                 wait_reservation_time,
             }
-            
+
             const status = await popupModel.waitReservation(waitReservation);
             res.status(201).json(status);
         } catch (err) {
@@ -298,7 +318,7 @@ const popupController = {
     },
 
     // 현장 예약자 대기 순서 조회
-    getWaitOrder: async (req, res) => { 
+    getWaitOrder: async (req, res) => {
         try {
             const user_name = req.body.user_name;
             const store_id = req.params.store_id;
@@ -330,7 +350,7 @@ const popupController = {
             throw err;
         }
     },
-    
+
     // 예약자 status 변경
     waitStatus: async (req, res) => {
         try {
@@ -384,7 +404,7 @@ const popupController = {
 
             const result = await popupModel.reservation(reservationData);
 
-            if(result.success == true) {
+            if (result.success == true) {
                 res.status(201).json(`예약 등록이 완료되었습니다. 현재 인원:${result.update_capacity}, 최대 인원: ${result.max_capacity}`);
             } else {
                 res.status(400).json(`최대 인원을 초과하였습니다. 시간당 최대 인원:${result.max_capacity}`);
@@ -401,12 +421,12 @@ const popupController = {
 
         res.status(200).json(result);
     },
-    
+
     // 예약 조회 - 스토어 (팝업 등록자가 볼 것)
     getReservationPresident: async (req, res) => {
         const store_id = req.body.store_id;
         const result = await popupModel.getReservationPresident(store_id);
-        
+
         res.status(200).json(result);
     },
 
@@ -418,8 +438,8 @@ const popupController = {
 
     // // 추천
     // recommendation: async (req, res) => {
-    //     try  {
-    //         const user_recommendation = await getRecommendation(req.body.user_name);
+    //     try {
+    //         const user_recommendation = await getRecommendation(req.params.user_name);
     //         const data = await popupModel.recommendationData(user_recommendation);
     //         res.status(200).json(data);
     //     } catch (err) {
