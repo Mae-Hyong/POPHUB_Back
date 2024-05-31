@@ -4,11 +4,10 @@ const { popupController } = require('../controllers/popupController');
 const upload = require('../function/multer');
 const token = require('../function/jwt');
 
-
 router.get('/', popupController.allPopups); // 모든 팝업 조회
 router.get('/view/:store_id', popupController.getPopup); // 특정 팝업 조회
 router.get('/popular', popupController.popularPopups); // 인기 팝업 조회
-router.get('/president', popupController.popupByPresident); // 팝업 등록자별 조회
+router.get('/president/:user_name', popupController.popupByPresident); // 팝업 등록자별 조회
 
 router.post('/review/create/:store_id', popupController.createReview); // 팝업 리뷰 생성
 router.get('/reviews/store/:store_id', popupController.storeReview); // 특정 팝업 리뷰 조회
