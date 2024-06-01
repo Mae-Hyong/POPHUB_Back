@@ -1,9 +1,11 @@
 const db = require('../config/mysqlDatabase');
 
 // ------- GET Query -------
+const search_category_query = 'SELECT category_name FROM category';
 const pending_query = 'SELECT * FROM popup_stores WHERE approval_status = "pending"';
 const search_notice_query = 'SELECT * FROM notice'
 const select_notice_query = 'SELECT * FROM notice WHERE notice_id = ?'
+const search_inquiry_query = 'SELECT * FROM inquiry'
 // ------- POST Query -------
 const create_answer_query = 'INSERT INTO answer(inquiry_id, user_name, content) VALUES (?, ?, ?)'
 const create_notice_query = 'INSERT INTO notice SET ?'
@@ -15,49 +17,64 @@ const insertDeny_query = 'INSERT INTO popup_denial_logs SET ?';
 
 
 const adminModel = {
-    createAnswer : (inquiry_id, user_name, content) => {
+    searchCategory: () => {
+        return new Promise((resolve, reject) => {
+            db.query(search_category_query, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
+            });
+        })
+    },
+
+    createAnswer: (inquiry_id, user_name, content) => {
         return new Promise((resolve, reject) => {
             db.query(create_answer_query, [inquiry_id, user_name, content], (err, result) => {
-                if(err) {
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
+                if (err) reject(err);
+                else resolve(result[0]);
             });
         })
     },
 
-    updateInquiry : (inquiry_id) => {
+    updateInquiry: (inquiry_id) => {
         return new Promise((resolve, reject) => {
             db.query(update_inquiry_query, ['complete', inquiry_id], (err, result) => {
-                if(err) reject(err);
+                if (err) reject(err);
                 else resolve(result[0]);
             });
         })
     },
 
-    searchNotice : () => {
+    searchInquiry: () => {
+        return new Promise((resolve, reject) => {
+            db.query(search_inquiry_query, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
+            });
+        })
+    },
+
+    searchNotice: () => {
         return new Promise((resolve, reject) => {
             db.query(search_notice_query, (err, result) => {
-                if(err) reject(err);
+                if (err) reject(err);
                 else resolve(result[0]);
             })
         })
     },
 
-    selectNotice : (noticeId) => {
+    selectNotice: (noticeId) => {
         return new Promise((resolve, reject) => {
             db.query(select_notice_query, noticeId, (err, result) => {
-                if(err) reject(err);
+                if (err) reject(err);
                 else resolve(result[0]);
             })
         })
     },
 
-    createNotice : (noticeData) => {
+    createNotice: (noticeData) => {
         return new Promise((resolve, reject) => {
             db.query(create_notice_query, noticeData, (err, result) => {
-                if(err) reject(err);
+                if (err) reject(err);
                 else resolve(result);
             })
         })
@@ -83,7 +100,7 @@ const adminModel = {
         try {
             await new Promise((resolve, reject) => {
                 db.query(pendingCheck_query, store_id, (err, result) => {
-                    if (err)reject(err);
+                    if (err) reject(err);
                     else resolve(result);
                 });
             });

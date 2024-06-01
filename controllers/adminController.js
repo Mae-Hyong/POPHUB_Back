@@ -2,7 +2,17 @@ const adminModel = require('../models/adminModel');
 const moment = require('moment');
 
 const adminController = {
-    createAnswer : async (req, res) => {
+    searchCategory: async (req, res) => {
+        try {
+            const result = await adminModel.searchCategory();
+
+            res.status(200).json(result)
+        } catch (err) {
+            res.status(500).send("카테고리 조회 중 오류가 발생했습니다.");
+        }
+    },
+
+    createAnswer: async (req, res) => {
         try {
             const { inquiryId, userName, content } = req.body;
 
@@ -10,17 +20,31 @@ const adminController = {
             await adminModel.updateInquiry(inquiryId)
             res.status(201).send(`답변 작성이 완료되었습니다.`);
         } catch (err) {
-            console.log(err);
             res.status(500).send("답변 작성 중 오류가 발생했습니다.");
         }
     },
 
-    createNotice : async (req, res) => {
+    searchInquiry: async (req, res) => {
+        try {
+            const result = await adminModel.searchInquiry();
+            res.status(200).json({
+                inquiryId: result.inquiry_id,
+                userName: result.user_name,
+                title: result.title,
+                writeDate: result.write_date,
+                status: result.status
+            });
+        } catch (err) {
+            res.status(500).send("문의 전체 조회 중 오류가 발생했습니다.");
+        }
+    },
+
+    createNotice: async (req, res) => {
         try {
             const noticeData = {
-                title : title,
-                content : content,
-                usesr_name : userName
+                title: title,
+                content: content,
+                usesr_name: userName
             }
 
             await adminModel.createNotice(noticeData);
@@ -30,10 +54,10 @@ const adminController = {
         }
     },
 
-    searchNotice : async(req, res) => {
+    searchNotice: async (req, res) => {
         try {
             const noticeId = req.query.notice_id;
-            if(!noticeId){
+            if (!noticeId) {
                 const searchResult = await adminModel.searchNotice();
                 return res.status(200).json(searchResult);
             }
@@ -41,24 +65,24 @@ const adminController = {
                 const result = await adminModel.selectNotice(noticeId);
                 return res.status(200).json(result);
             }
-            
+
         } catch (err) {
             res.status(500).send("공지사항 조회 중 오류가 발생했습니다.");
         }
     },
 
     // 관리자 pending List 조회
-    popupPendingList: async(req, res) => {
+    popupPendingList: async (req, res) => {
         try {
             const pendingList = await adminModel.popupPendingList();
             res.status(200).json(pendingList);
-        }  catch (err) {
+        } catch (err) {
             throw err;
         }
     },
 
     // 관리자 pending List에서 check값 부여 (승인)
-    popupPendingCheck: async(req, res) => {
+    popupPendingCheck: async (req, res) => {
         try {
             const store_id = req.body.store_id;
             await adminModel.popupPendingCheck(store_id);
@@ -69,7 +93,7 @@ const adminController = {
     },
 
     // 관리자 pending List에서 deny값 부여 (거부)
-    popupPendingDeny: async(req, res) => {
+    popupPendingDeny: async (req, res) => {
         try {
             const { store_id, denial_reason } = req.body;
             const denial_date = moment().format('YYYY-MM-DD HH:mm:ss');
