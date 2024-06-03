@@ -6,7 +6,7 @@ const token = require('../function/jwt');
 
 
 router.get('/', popupController.allPopups); // 모든 팝업 조회
-router.get('/view/:store_id', popupController.getPopup); // 특정 팝업 조회
+router.get('/view/:store_id/:user_name?', popupController.getPopup); // 특정 팝업 조회
 router.get('/popular', popupController.popularPopups); // 인기 팝업 조회
 router.get('/president/:user_name', popupController.popupByPresident); // 팝업 등록자별 조회
 router.get('/scheduledToOpen', popupController.scheduledToOpen); // 오픈 예정 팝업 조회
