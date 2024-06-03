@@ -116,8 +116,8 @@ async function getRecommendation(user_name) {
         console.log(`추천 카테고리: ${recommendedCategory}`);
 
         return recommendedCategory;
-    } catch (error) {
-        throw error;
+    } catch (err) {
+        throw err;
     }
 }
 
