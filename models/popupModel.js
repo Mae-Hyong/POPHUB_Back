@@ -29,7 +29,7 @@ const reservationStatus_query = 'SELECT * FROM store_capacity WHERE store_id = ?
 const getpopupByPresident_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.user_name = ? GROUP BY ps.store_id';
 const scheduledToOpen_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 14 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_start_date ASC';
 const scheduledToClose_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_end_date ASC';
-const recommendation_query = 'SELECT * FROM popup_stores WHERE category_id = ? ORDER BY RAND() LIMIT 5';
+const recommendation_query = 'SELECT popup_stores.*, GROUP_CONCAT(images.image_url) AS image_urls FROM popup_stores JOIN images ON popup_stores.store_id = images.store_id WHERE popup_stores.category_id = ? GROUP BY popup_stores.store_id ORDER BY RAND() LIMIT 5';
 
 
 // ------- POST Query -------
@@ -214,18 +214,18 @@ const popupModel = {
                     else resolve(result);
                 });
             });
-    
+
             if (popupResults.length === 0) {
                 return "2주 안으로 오픈 예정 팝업스토어가 없습니다.";
             }
-    
+
             const result = popupResults.map(popup => {
                 return {
                     ...popup,
                     imageUrls: popup.imageUrls ? popup.imageUrls.split(',') : []
                 };
             });
-    
+
             return result;
         } catch (err) {
             throw err;
@@ -241,18 +241,18 @@ const popupModel = {
                     else resolve(result);
                 });
             });
-    
+
             if (popupResults.length === 0) {
                 return "일주일 안으로 마감 예정 팝업스토어가 없습니다.";
             }
-    
+
             const result = popupResults.map(popup => {
                 return {
                     ...popup,
                     imageUrls: popup.imageUrls ? popup.imageUrls.split(',') : []
                 };
             });
-    
+
             return result;
         } catch (err) {
             throw err;
@@ -903,8 +903,6 @@ const popupModel = {
         });
 
         const { store_id, reservation_date, reservation_time, capacity } = getCapacity[0];
-        console.log(store_id);
-        console.log(capacity);
 
         await new Promise((resolve, reject) => {
             db.query(updateCapacityMinus_query, [capacity, store_id, reservation_date, reservation_time], (err, result) => {
@@ -921,20 +919,35 @@ const popupModel = {
         })
     },
 
+    // 추천 시스템
     recommendationData: async (user_recommendation) => {
         try {
             const results = await new Promise((resolve, reject) => {
-                db.query(recommendation_query, user_recommendation, (err, result) => {
+                db.query(recommendation_query, user_recommendation, async (err, result) => {
                     if (err) reject(err);
-                    else resolve(result);
+                    else {
+                        try {
+                            for (const popup of result) {
+                                if (popup.image_urls) {
+                                    popup.imageUrls = popup.image_urls.split(',');
+                                    delete popup.image_urls;
+                                } else {
+                                    popup.imageUrls = [];
+                                }
+                            }
+                            resolve(result); // 이 부분이 빠졌었습니다.
+                        } catch (err) {
+                            reject(err);
+                        }
+                    }
                 });
             });
-            
-        return results.length > 0 ? results : '해당 카테고리의 팝업이 존재하지 않습니다.';
-        } catch (error) {
-            throw error;
+            return results.length > 0 ? results : '해당 카테고리의 팝업이 존재하지 않습니다.';
+        } catch (err) {
+            throw err;
         }
-    }
+    },
+
 };
 
 module.exports = popupModel;
