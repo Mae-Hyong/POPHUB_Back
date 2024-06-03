@@ -436,16 +436,16 @@ const popupController = {
         res.status(200).json("예약이 취소되었습니다.");
     },
 
-    // // 추천
-    // recommendation: async (req, res) => {
-    //     try {
-    //         const user_recommendation = await getRecommendation(req.params.user_name);
-    //         const data = await popupModel.recommendationData(user_recommendation);
-    //         res.status(200).json(data);
-    //     } catch (err) {
-    //         throw err;
-    //     }
-    // }
+    // 추천
+    recommendation: async (req, res) => {
+        try {
+            const user_recommendation = await getRecommendation(req.params.user_name);
+            const data = await popupModel.recommendationData(user_recommendation);
+            res.status(200).json(data);
+        } catch (err) {
+            throw err;
+        }
+    }
 };
 
 module.exports = { popupController }
