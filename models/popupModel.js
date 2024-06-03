@@ -29,6 +29,8 @@ const reservationStatus_query = 'SELECT * FROM store_capacity WHERE store_id = ?
 const getpopupByPresident_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.user_name = ? GROUP BY ps.store_id';
 const scheduledToOpen_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 14 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_start_date ASC';
 const scheduledToClose_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_end_date ASC';
+const recommendation_query = 'SELECT * FROM popup_stores WHERE category_id = ? ORDER BY RAND() LIMIT 5';
+
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -919,17 +921,20 @@ const popupModel = {
         })
     },
 
-    recommendationData: async(user_recommendation) => {
-        const query ='SELECT * FROM popup_stores WHERE category_id = ? ORDER BY RAND() LIMIT 5;'
-        const results = await new Promise((resolve, reject) => {
-            db.query(query, user_recommendation, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
-            })
-        })
-
-        return results;
-    },
+    recommendationData: async (user_recommendation) => {
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query(recommendation_query, user_recommendation, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+            
+        return results.length > 0 ? results : '해당 카테고리의 팝업이 존재하지 않습니다.';
+        } catch (error) {
+            throw error;
+        }
+    }
 };
 
 module.exports = popupModel;
