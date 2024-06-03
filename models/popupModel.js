@@ -919,17 +919,17 @@ const popupModel = {
         })
     },
 
-    // recommendationData: async(user_recommendation) => {
-    //     const query ='SELECT * FROM popup_stores WHERE category_id = ? ORDER BY RAND() LIMIT 3;'
-    //     const results = await new Promise((resolve, reject) => {
-    //         db.query(query, user_recommendation, (err, result) => {
-    //             if (err) reject(err);
-    //             else resolve(result);
-    //         })
-    //     })
+    recommendationData: async(user_recommendation) => {
+        const query ='SELECT * FROM popup_stores WHERE category_id = ? ORDER BY RAND() LIMIT 5;'
+        const results = await new Promise((resolve, reject) => {
+            db.query(query, user_recommendation, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
 
-    //     return results;
-    // },
+        return results;
+    },
 };
 
 module.exports = popupModel;
