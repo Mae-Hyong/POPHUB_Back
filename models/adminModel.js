@@ -1,7 +1,7 @@
 const db = require('../config/mysqlDatabase');
 
 // ------- GET Query -------
-const search_category_query = 'SELECT category_name FROM category';
+const search_category_query = 'SELECT category_name FROM category WHERE category_id = ?';
 const pending_query = 'SELECT * FROM popup_stores WHERE approval_status = "pending"';
 const search_notice_query = 'SELECT * FROM notice'
 const select_notice_query = 'SELECT * FROM notice WHERE notice_id = ?'
@@ -17,9 +17,9 @@ const insertDeny_query = 'INSERT INTO popup_denial_logs SET ?';
 
 
 const adminModel = {
-    searchCategory: () => {
+    searchCategory: (categoryId) => {
         return new Promise((resolve, reject) => {
-            db.query(search_category_query, (err, result) => {
+            db.query(search_category_query, categoryId, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             });

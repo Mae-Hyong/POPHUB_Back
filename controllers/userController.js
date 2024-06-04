@@ -287,7 +287,7 @@ const userController = {
 
     searchAnswer: async (req, res) => {
         try {
-            const inquiryId = req.params.inquiryId;
+            const inquiryId = req.query.inquiryId;
             if (!inquiryId) {
                 return res.status(400).json({
                     resultCode: 400,

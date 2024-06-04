@@ -4,9 +4,10 @@ const moment = require('moment');
 const adminController = {
     searchCategory: async (req, res) => {
         try {
-            const result = await adminModel.searchCategory();
-
-            res.status(200).json(result)
+            const categoryId = req.query.categoryId;
+            const result = await adminModel.searchCategory(categoryId);
+            if (result) res.status(200).json(result)
+            else res.status(203).json({ msg: "해당 카테고리 미존재" });
         } catch (err) {
             res.status(500).send("카테고리 조회 중 오류가 발생했습니다.");
         }
