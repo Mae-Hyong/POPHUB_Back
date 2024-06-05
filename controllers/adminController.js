@@ -53,7 +53,8 @@ const adminController = {
             const pendingList = await adminModel.popupPendingList();
             res.status(200).json(pendingList);
         }  catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("오류 발생");
         }
     },
 
@@ -64,7 +65,8 @@ const adminController = {
             const user_name = await adminModel.popupPendingCheck(store_id);
             res.status(200).json(user_name);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("오류 발생");
         }
     },
 
@@ -81,7 +83,8 @@ const adminController = {
             const user_name = await adminModel.popupPendingDeny(denialData);
             res.status(201).json(user_name);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("오류 발생");
         }
     },
 }
