@@ -16,13 +16,13 @@ app.use(bodyParser.json());
 
 // 사용자 및 FCM 토큰 초기화
 app.post("/token_reset", async (req, res) => {
-  const { userId, fcmToken } = req.body;
+  const { userName, fcmToken } = req.body;
   try {
     await db
       .collection("users")
-      .doc(userId)
+      .doc(userName)
       .set({ fcmToken: fcmToken }, { merge: true });
-    res.status(200).send(`사용자 ${userId} 및 FCM 토큰 저장 성공`);
+    res.status(200).send(`사용자 ${userName} 및 FCM 토큰 저장 성공`);
   } catch (error) {
     console.error("사용자 추가 오류:", error);
     res.status(500).send("사용자 추가 오류");
@@ -31,11 +31,11 @@ app.post("/token_reset", async (req, res) => {
 
 // 알람 추가
 app.post("/alarm_add", async (req, res) => {
-  const { userId, type, alarmDetails } = req.body; // type: 'alarms', 'orderAlarms', 'waitAlarms'
+  const { userName, type, alarmDetails } = req.body; // type: 'alarms', 'orderAlarms', 'waitAlarms'
 
   // 'alarmDetails' 내의 필수 필드 확인
   if (
-    !userId ||
+    !userName ||
     !type ||
     !alarmDetails ||
     !alarmDetails.time ||
@@ -47,7 +47,7 @@ app.post("/alarm_add", async (req, res) => {
   }
 
   try {
-    const userRef = db.collection("users").doc(userId).collection(type);
+    const userRef = db.collection("users").doc(userName).collection(type);
 
     // 중복 알람 확인, 'time'과 'label' 기준
     const existingAlarms = await userRef
@@ -75,13 +75,13 @@ app.post("/alarm_add", async (req, res) => {
 
 // FCM 토큰 저장 및 만료일 설정
 app.post("/token_save", async (req, res) => {
-  const { userId, fcmToken } = req.body;
+  const { userName, fcmToken } = req.body;
   const expiresIn = 14; // 토큰 유효 기간 (14일)
   const expirationDate = new Date();
   expirationDate.setDate(expirationDate.getDate() + expiresIn); // 현재 날짜에 + 14일
 
   try {
-    await db.collection("users").doc(userId).set(
+    await db.collection("users").doc(userName).set(
       {
         fcmToken: fcmToken,
         expirationDate: expirationDate,
