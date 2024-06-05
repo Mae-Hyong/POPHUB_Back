@@ -5,14 +5,26 @@ const adminController = {
     searchCategory: async (req, res) => {
         try {
             const categoryId = req.query.categoryId;
+            let results;  // results 변수를 여기서 정의합니다.
+
             if (categoryId) {
-                const result = await adminModel.selectCategory(categoryId);
+                results = await adminModel.selectCategory(categoryId);
+                console.log(results);
             } else {
-                const result = await adminModel.searchCategory(categoryId);
+                const result = await adminModel.searchCategory();
+                results = await Promise.all(result.map(async (result) => {
+                    return {
+                        categoryId: result.category_id,
+                        categoryName: result.category_name
+                    };
+                }));
+                console.log(results);
             }
-            if (result) res.status(200).json(result)
+
+            if (results) res.status(200).json(results);
             else res.status(203).json({ msg: "해당 카테고리 미존재" });
         } catch (err) {
+            console.log(err);
             res.status(500).send("카테고리 조회 중 오류가 발생했습니다.");
         }
     },
