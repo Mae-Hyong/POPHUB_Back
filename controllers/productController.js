@@ -8,8 +8,9 @@ const productController = {
         try {
             const result = await productModel.allProducts();
             res.status(200).json(result);
-        } catch (err) {W
-            throw err;
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("오류가 발생하였습니다.");
         }
     },
 
@@ -20,7 +21,8 @@ const productController = {
             const result = await productModel.storeProducts(store_id);
             res.status(200).json(result);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("오류가 발생하였습니다.");
         }
     },
 
@@ -57,7 +59,8 @@ const productController = {
             }
 
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("오류가 발생하였습니다.");
         }
     },
 
@@ -68,7 +71,8 @@ const productController = {
             const result = await productModel.getProduct(product_id);
             res.status(200).json(result);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("오류가 발생하였습니다.");
         }
     },
 
@@ -100,7 +104,8 @@ const productController = {
                 res.status(200).json('해당 상품이 수정되었습니다.');
             }
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("오류가 발생하였습니다.");
         }
     },
 
@@ -112,104 +117,111 @@ const productController = {
             await productModel.deleteProduct(product_id);
             res.status(200).json('해당 상품이 삭제되었습니다.');
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("오류가 발생하였습니다.");
         }
     },
 
-    // 주문
-    orderProduct: async (req, res) => {
-        try {
-            const product_id = req.params.product_id;
-            const user_name = req.body.user_name;
-            await productModel.orderProduct(product_id);
-            res.status(200).json('주문이 완료되었습니다.');
-        } catch (err) {
-            throw err;
-        }
-    },
+    // // 주문
+    // orderProduct: async (req, res) => {
+    //     try {
+    //         const product_id = req.params.product_id;
+    //         const user_name = req.body.user_name;
+    //         await productModel.orderProduct(product_id);
+    //         res.status(200).json('주문이 완료되었습니다.');
+    //     } catch (err) {
+    //         console.log(err);
+    //         res.status(500).send("오류가 발생하였습니다.");
+    //     }
+    // },
 
-    // 특정 굿즈 리뷰
-    productReview: async (req, res) => {
-        try {
-            const product_id = req.params.product_id;
-            const review = await (productModel.productReview(product_id));
-            res.status(200).json(review);
-        } catch (err) {
-            throw err;
-        }
-    },
+    // // 특정 굿즈 리뷰
+    // productReview: async (req, res) => {
+    //     try {
+    //         const product_id = req.params.product_id;
+    //         const review = await (productModel.productReview(product_id));
+    //         res.status(200).json(review);
+    //     } catch (err) {
+    //         console.log(err);
+    //         res.status(500).send("오류가 발생하였습니다.");
+    //     }
+    // },
 
-    // 굿즈 리뷰 상세 조회
-    productReviewDetail: async (req, res) => {
-        try {
-            const review_id = req.params.review_id;
-            const reviewDetail = await productModel.productReviewDetail(review_id);
-            res.status(200).json(reviewDetail);
-        } catch (err) {
-            throw err;
-        }
-    },
+    // // 굿즈 리뷰 상세 조회
+    // productReviewDetail: async (req, res) => {
+    //     try {
+    //         const review_id = req.params.review_id;
+    //         const reviewDetail = await productModel.productReviewDetail(review_id);
+    //         res.status(200).json(reviewDetail);
+    //     } catch (err) {
+    //         console.log(err);
+    //         res.status(500).send("오류가 발생하였습니다.");
+    //     }
+    // },
 
-    // 굿즈 리뷰 생성
-    createReview: async (req, res) => {
-        try {
-            const user_name = req.body.user_name;
+    // // 굿즈 리뷰 생성
+    // createReview: async (req, res) => {
+    //     try {
+    //         const user_name = req.body.user_name;
 
-            if (!user_name) {
-                return res.status(400).send("로그인 후 사용해주세요");
-            }
+    //         if (!user_name) {
+    //             return res.status(400).send("로그인 후 사용해주세요");
+    //         }
 
-            const product_id = req.params.product_id;
-            const reviewData = req.body.reviewData;
-            const review_date = moment().format('YYYY-MM-DD HH:mm:ss');
-            const reviewdata = {
-                user_name,
-                product_id,
-                review_rating: reviewData.review_rating,
-                review_content: reviewData.review_content,
-                review_date,
-            }
-            const allreview = await productModel.createReview(reviewdata);
-            res.status(201).json(allreview);
-        } catch (err) {
-            throw err;
-        }
-    },
+    //         const product_id = req.params.product_id;
+    //         const reviewData = req.body.reviewData;
+    //         const review_date = moment().format('YYYY-MM-DD HH:mm:ss');
+    //         const reviewdata = {
+    //             user_name,
+    //             product_id,
+    //             review_rating: reviewData.review_rating,
+    //             review_content: reviewData.review_content,
+    //             review_date,
+    //         }
+    //         const allreview = await productModel.createReview(reviewdata);
+    //         res.status(201).json(allreview);
+    //     } catch (err) {
+    //         console.log(err);
+    //         res.status(500).send("오류가 발생하였습니다.");
+    //     }
+    // },
 
-    // 굿즈 리뷰 수정
-    updateReview: async (req, res) => {
-        try {
-            const user_name = req.body.user_name;
-            if (!user_name) {
-                return res.status(400).send("로그인 후 사용해주세요");
-            }
+    // // 굿즈 리뷰 수정
+    // updateReview: async (req, res) => {
+    //     try {
+    //         const user_name = req.body.user_name;
+    //         if (!user_name) {
+    //             return res.status(400).send("로그인 후 사용해주세요");
+    //         }
 
-            const review_id = req.params.review_id;
-            const reviewData = req.body.reviewData;
-            const review_modified_date = moment().format('YYYY-MM-DD HH:mm:ss');
-            const reviewdata = {
-                user_name,
-                review_rating: reviewData.review_rating,
-                review_content: reviewData.review_content,
-                review_modified_date,
-            }
-            await productModel.updateReview(reviewdata, review_id);
-            res.status(200).json('수정이 완료되었습니다.');
-        } catch (err) {
-            throw err;
-        }
-    },
+    //         const review_id = req.params.review_id;
+    //         const reviewData = req.body.reviewData;
+    //         const review_modified_date = moment().format('YYYY-MM-DD HH:mm:ss');
+    //         const reviewdata = {
+    //             user_name,
+    //             review_rating: reviewData.review_rating,
+    //             review_content: reviewData.review_content,
+    //             review_modified_date,
+    //         }
+    //         await productModel.updateReview(reviewdata, review_id);
+    //         res.status(200).json('수정이 완료되었습니다.');
+    //     } catch (err) {
+    //         console.log(err);
+    //         res.status(500).send("오류가 발생하였습니다.");
+    //     }
+    // },
 
-    // 굿즈 리뷰 삭제
-    deleteReview: async (req, res) => {
-        try {
-            const review_id = req.params.review_id;
-            await productModel.deleteReview(review_id);
-            res.status(200).json('삭제가 완료되었습니다.');
-        } catch (err) {
-            throw err;
-        }
-    }
+    // // 굿즈 리뷰 삭제
+    // deleteReview: async (req, res) => {
+    //     try {
+    //         const review_id = req.params.review_id;
+    //         await productModel.deleteReview(review_id);
+    //         res.status(200).json('삭제가 완료되었습니다.');
+    //     } catch (err) {
+    //         console.log(err);
+    //         res.status(500).send("오류가 발생하였습니다.");
+    //     }
+    // }
 }
 
 module.exports = { productController }

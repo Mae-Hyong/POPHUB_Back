@@ -10,10 +10,7 @@ router.get('/view/:product_id', productController.getProduct); // 특정 굿즈 
 router.put('/update/:product_id', upload.array("files", 5), productController.updateProduct); // 굿즈 수정
 router.delete('/delete/:product_id', productController.deleteProduct); // 굿즈 삭제
 
-router.put('/order/:product_id', productController.orderProduct); // 굿즈 구매 
-
-
-
+//router.put('/order/:product_id', productController.orderProduct); // 굿즈 구매 
 // 리뷰 삭제
 // router.get('/reviews/:product_id', productController.productReview); // 굿즈 리뷰
 // router.get('/review/:review_id', productController.productReviewDetail); // 굿즈 리뷰 상세 조회
