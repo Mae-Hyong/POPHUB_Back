@@ -248,6 +248,7 @@ const userController = {
     searchInquiry: async (req, res) => {
         try {
             const userName = req.query.userName;
+            const inquiryId = req.query.inquiryId;
 
             if (userName) { // userName이 존재할 경우
                 const result = await userModel.searchInquiry(userName);
