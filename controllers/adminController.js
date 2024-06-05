@@ -5,7 +5,11 @@ const adminController = {
     searchCategory: async (req, res) => {
         try {
             const categoryId = req.query.categoryId;
-            const result = await adminModel.searchCategory(categoryId);
+            if (categoryId) {
+                const result = await adminModel.selectCategory(categoryId);
+            } else {
+                const result = await adminModel.searchCategory(categoryId);
+            }
             if (result) res.status(200).json(result)
             else res.status(203).json({ msg: "해당 카테고리 미존재" });
         } catch (err) {
