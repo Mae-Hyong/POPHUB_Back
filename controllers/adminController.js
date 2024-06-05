@@ -86,10 +86,11 @@ const adminController = {
     popupPendingCheck: async (req, res) => {
         try {
             const store_id = req.body.store_id;
-            await adminModel.popupPendingCheck(store_id);
-            res.status(200).json('check 되었습니다.');
+            const user_name = await adminModel.popupPendingCheck(store_id);
+            res.status(200).json(user_name);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("오류 발생");
         }
     },
 
@@ -103,10 +104,11 @@ const adminController = {
                 denial_reason,
                 denial_date
             }
-            await adminModel.popupPendingDeny(denialData);
-            res.status(201).json('deny 되었습니다.');
+            const user_name = await adminModel.popupPendingDeny(denialData);
+            res.status(201).json(user_name);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("오류 발생");
         }
     },
 }

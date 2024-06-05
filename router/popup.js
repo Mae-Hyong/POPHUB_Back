@@ -6,9 +6,11 @@ const token = require('../function/jwt');
 
 
 router.get('/', popupController.allPopups); // 모든 팝업 조회
-router.get('/view/:store_id', popupController.getPopup); // 특정 팝업 조회
+router.get('/view/:store_id/:user_name?', popupController.getPopup); // 특정 팝업 조회
 router.get('/popular', popupController.popularPopups); // 인기 팝업 조회
-router.get('/president', popupController.popupByPresident); // 팝업 등록자별 조회
+router.get('/president/:user_name', popupController.popupByPresident); // 팝업 등록자별 조회
+router.get('/scheduledToOpen', popupController.scheduledToOpen); // 오픈 예정 팝업 조회
+router.get('/scheduledToclose', popupController.scheduledToClose); // 마감 임박 팝업 조회
 
 router.post('/review/create/:store_id', popupController.createReview); // 팝업 리뷰 생성
 router.get('/reviews/store/:store_id', popupController.storeReview); // 특정 팝업 리뷰 조회
@@ -32,7 +34,7 @@ router.get('/getReservation/user', popupController.getReservationUser); // 예�
 router.get('/getReservation/president', popupController.getReservationPresident); // 팝업 등록자 스토어 예약 조회
 router.delete('/deleteReservation/:reservation_id', popupController.deleteReservation) // 예약 취소
 
-// router.get('/recommendation', popupController.recommendation); // 추천 시스템
+router.get('/recommendation/:user_name', popupController.recommendation); // 추천 시스템
 module.exports = router;
 
 

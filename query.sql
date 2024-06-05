@@ -38,6 +38,11 @@ CREATE TABLE notice (
     FOREIGN KEY (user_name) REFERENCES user_info(user_name)
 );
 
+CREATE TABLE category (
+	category_id	int primary key,
+	category_name	VARCHAR(25)	NOT NULL
+);
+
 CREATE TABLE inquiry (
 	inquiry_id	int AUTO_INCREMENT primary key,
 	user_name	varchar(50)	NOT NULL,
@@ -62,11 +67,6 @@ CREATE TABLE answer (
     foreign key (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
-CREATE TABLE category (
-	category_id	int AUTO_INCREMENT primary key,
-	category_name	VARCHAR(25)	NOT NULL
-);
-
 CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     store_id VARCHAR(50) PRIMARY KEY, -- 고유 식별자
     category_id INT, -- 카테고리 ID
@@ -88,16 +88,6 @@ CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
-CREATE TABLE wait_list(
-    user_name varchar(50) NOT NULL,
-    store_id varchar(50) NOT NULL,
-    status ENUM('waiting', 'completed', 'cancelled') NOT NULL default 'waiting',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name),
-    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-
-    primary key(user_name, store_id)
-);
 
 CREATE TABLE popup_denial_logs ( -- 팝업 스토어 등록 거부 이유
     log_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -117,7 +107,7 @@ CREATE TABLE store_schedules ( -- 요일별 시간
 );
 
 CREATE TABLE products (
-    product_id VARCHAR(50) NOT NULL PRIMARY KEY, -- 상품 아이디
+    product_id VARCHAR(50) NOT NULL, -- 상품 아이디
     store_id VARCHAR(50) NOT NULL, -- 스토어 아이디
     product_name VARCHAR(255) NOT NULL, -- 상품 이름 
     product_price FLOAT NOT NULL, -- 상품 가격
@@ -125,7 +115,7 @@ CREATE TABLE products (
     remaining_quantity INT, -- 잔여 수량
     product_view_count INT DEFAULT 0, -- 조회수
     product_mark_number INT DEFAULT 0, -- 찜 수
-    PRIMARY KEY (product_id, store_id),
+    PRIMARY KEY (product_id),
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
 );
 
@@ -242,6 +232,22 @@ CREATE TABLE product_review (
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
+CREATE TABLE stand_store (
+    user_name VARCHAR(50) NOT NULL,
+    store_id VARCHAR(50) NOT NULL,
+    stand_at TIMESTAMP NOT NULL,
+    PRIMARY KEY (user_name, store_id)
+);
+
+CREATE TABLE wait_list (
+    user_name VARCHAR(50) NOT NULL,
+    store_id VARCHAR(50) NOT NULL,
+    status ENUM('waiting', 'completed', 'cancelled') NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_name, store_id)
+);
+
+
 INSERT INTO category (category_id, category_name) VALUES
 (0, '기술 문의'),
 (1, '상품 문의'),
@@ -264,7 +270,3 @@ INSERT INTO category (category_id, category_name) VALUES
 (23, '패션/라이프스타일'),
 (24, '예술/공예'),
 (25, '애니메이션');
-
-
-ALTER TABLE popup_stores
-ADD INDEX idx_max_capacity (max_capacity);

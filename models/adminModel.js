@@ -13,6 +13,7 @@ const create_notice_query = 'INSERT INTO notice SET ?'
 const update_inquiry_query = 'UPDATE inquiry SET status = ? WHERE inquiry_id = ?'
 const pendingCheck_query = 'UPDATE popup_stores SET approval_status = "check" WHERE store_id = ?';
 const pendingDeny_query = 'UPDATE popup_stores SET approval_status = "deny" WHERE store_id = ?';
+const userName_query = 'SELECT user_name FROM popup_stores WHERE store_id = ?';
 const insertDeny_query = 'INSERT INTO popup_denial_logs SET ?';
 
 
@@ -104,6 +105,15 @@ const adminModel = {
                     else resolve(result);
                 });
             });
+
+            const user_name = await new Promise((resolve, reject) => {
+                db.query(userName_query, store_id, (err, result) => {
+                    if(err) reject(err);
+                    else resolve(result[0].user_name);
+                })
+            })
+
+            return user_name;
         } catch (err) {
             throw err;
         }
@@ -125,6 +135,16 @@ const adminModel = {
                     else resolve(result);
                 });
             });
+
+            const user_name = await new Promise((resolve, reject) => {
+                db.query(userName_query, denyData.store_id, (err, result) => {
+                    if(err) reject(err);
+                    else resolve(result[0].user_name);
+                })
+            })
+
+            return user_name;
+
         } catch (err) {
             throw err;
         }
