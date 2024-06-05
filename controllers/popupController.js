@@ -354,6 +354,17 @@ const popupController = {
         }
     },
 
+    // 스토어별 예약 상태
+    reservationStatus: async (req, res) => {
+        try {
+            const store_id = req.params.store_id;
+            const result = await popupModel.reservationStatus(store_id);
+            res.status(200).json(result);
+        } catch (err) {
+            throw err;
+        }
+    },
+
     // 예약
     reservation: async (req, res) => {
         try {

@@ -26,6 +26,7 @@ router.get('/viewDenialReason/:store_id', popupController.viewDenialReason); // 
 router.post('/like/:store_id', popupController.likePopup); // 팝업 찜
 router.get('/likeUser', popupController.likeUser); // 팝업 유저별 찜 조회
 
+router.get('/reservationStatus/:store_id', popupController.reservationStatus); // 스토어별 예약 상태
 router.post('/reservation/:store_id', popupController.reservation); // 사전 예약
 router.get('/getReservation/user', popupController.getReservationUser); // 예약자 예약 조회
 router.get('/getReservation/president', popupController.getReservationPresident); // 팝업 등록자 스토어 예약 조회
