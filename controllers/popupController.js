@@ -10,7 +10,8 @@ const popupController = {
             const result = await popupModel.allPopups();
             res.status(200).json(result);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("전체 팝업 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -20,7 +21,8 @@ const popupController = {
             const popular = await popupModel.popularPopups();
             res.status(200).json(popular);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("인기 팝업 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -31,7 +33,8 @@ const popupController = {
             const result = await popupModel.popupByPresident(user_name);
             res.status(200).json(result);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("팝업 등록자별 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -41,7 +44,8 @@ const popupController = {
             const result = await popupModel.scheduledToOpen();
             res.status(200).json(result);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("오픈 예정 팝업 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -51,7 +55,8 @@ const popupController = {
             const result = await popupModel.scheduledToClose();
             res.status(200).json(result);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("마감 임박 팝업 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -102,7 +107,8 @@ const popupController = {
 
             res.status(201).json(`팝업스토어 등록 요청이 접수되었습니다. 관리자 승인 결과를 기다려 주십시오.`);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("팝업 생성 중 오류가 발생하였습니다.");
         }
     },
 
@@ -114,7 +120,8 @@ const popupController = {
             const result = await popupModel.getPopup(store_id, user_name);
             res.status(200).json(result);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("팝업 상세 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -162,7 +169,8 @@ const popupController = {
             }
             res.status(200).json(`수정 요청이 접수되었습니다. 관리자 승인 결과를 기다려 주십시오.`);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("팝업 수정 중 오류가 발생하였습니다.");
         }
     },
 
@@ -174,7 +182,8 @@ const popupController = {
             res.status(200).json(`해당 팝업스토어의 정보가 삭제되었습니다.`);
 
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("팝업 삭제 중 오류가 발생하였습니다.");
         }
     },
 
@@ -185,7 +194,8 @@ const popupController = {
             const check = await popupModel.viewDenialReason(store_id);
             res.status(200).json(check);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("팝업 거부 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -197,7 +207,8 @@ const popupController = {
             const like = await popupModel.likePopup(user_name, store_id);
             res.status(201).json(like);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("팝업 찜 중 오류가 발생하였습니다.");
         }
     },
 
@@ -208,7 +219,8 @@ const popupController = {
             const result = await popupModel.likeUser(user_name);
             res.status(200).json(result);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("사용자별 찜 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -219,7 +231,8 @@ const popupController = {
             const review = await popupModel.storeReview(store_id);
             res.status(200).json(review);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("스토어별 리뷰 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -230,7 +243,8 @@ const popupController = {
             const review = await popupModel.storeUserReview(user_name);
             res.status(200).json(review);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("사용자별 리뷰 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -242,7 +256,8 @@ const popupController = {
             const reviewDetail = await popupModel.storeReviewDetail(review_id);
             res.status(200).json(reviewDetail);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("리뷰 상세 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -262,7 +277,8 @@ const popupController = {
             await popupModel.createReview(reviewData);
             res.status(201).json('리뷰가 등록되었습니다.');
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("리뷰 생성 중 오류가 발생하였습니다.");
         }
     },
 
@@ -281,7 +297,8 @@ const popupController = {
             await popupModel.updateReview(reviewdata, review_id);
             res.status(200).json('수정이 완료되었습니다.');
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("리뷰 수정 중 오류가 발생하였습니다.");
         }
     },
 
@@ -292,7 +309,8 @@ const popupController = {
             await popupModel.deleteReview(review_id);
             res.status(200).json('삭제가 완료되었습니다.');
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("리뷰 삭제 중 오류가 발생하였습니다.");
         }
     },
 
@@ -381,7 +399,8 @@ const popupController = {
             const result = await popupModel.reservationStatus(store_id);
             res.status(200).json(result);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("스토어별 예약 상태 확인 중 오류가 발생하였습니다.");
         }
     },
 
@@ -410,30 +429,44 @@ const popupController = {
                 res.status(400).json(`최대 인원을 초과하였습니다. 시간당 최대 인원:${result.max_capacity}`);
             }
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("예약 중 오류가 발생하였습니다.");
         }
     },
 
     // 예약 조회 - 유저
     getReservationUser: async (req, res) => {
-        const user_name = req.body.user_name;
-        const result = await popupModel.getReservationUser(user_name);
-
-        res.status(200).json(result);
+        try {
+            const user_name = req.body.user_name;
+            const result = await popupModel.getReservationUser(user_name);
+            res.status(200).json(result);
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("예약 조회 중 오류가 발생하였습니다.");
+        }
     },
 
     // 예약 조회 - 스토어 (팝업 등록자가 볼 것)
     getReservationPresident: async (req, res) => {
-        const store_id = req.body.store_id;
-        const result = await popupModel.getReservationPresident(store_id);
-
-        res.status(200).json(result);
+        try {
+            const store_id = req.body.store_id;
+            const result = await popupModel.getReservationPresident(store_id);
+            res.status(200).json(result);
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("예약 조회 오류가 발생하였습니다.");
+        }
     },
 
     deleteReservation: async (req, res) => {
-        const reservation_id = req.params.reservation_id;
-        await popupModel.deleteReservation(reservation_id);
-        res.status(200).json("예약이 취소되었습니다.");
+        try {
+            const reservation_id = req.params.reservation_id;
+            await popupModel.deleteReservation(reservation_id);
+            res.status(200).json("예약이 취소되었습니다.");
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("예약 삭제 오류가 발생하였습니다.");
+        }
     },
 
     // 추천
@@ -443,7 +476,8 @@ const popupController = {
             const data = await popupModel.recommendationData(user_recommendation);
             res.status(200).json(data);
         } catch (err) {
-            throw err;
+            console.log(err);
+            res.status(500).send("추천 시스템 확인 오류가 발생하였습니다.");
         }
     }
 };
