@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 const { getRecommendation } = require('../function/recommendation');
 
 const popupController = {
+
     // 모든 팝업 조회
     allPopups: async (req, res) => {
         try {
@@ -314,83 +315,83 @@ const popupController = {
         }
     },
 
-    // 현장 대기 등록
-    waitReservation: async (req, res) => {
-        try {
-            const { user_name, wait_visitor_name, wait_visitor_number } = req.body;
-            const store_id = req.params.store_id;
-            const wait_reservation_time = moment().format('YYYY-MM-DD HH:mm:ss');
-            const waitReservation = {
-                store_id,
-                user_name,
-                wait_visitor_name,
-                wait_visitor_number,
-                wait_reservation_time,
-            }
+    // // 현장 대기 등록
+    // waitReservation: async (req, res) => {
+    //     try {
+    //         const { user_name, wait_visitor_name, wait_visitor_number } = req.body;
+    //         const store_id = req.params.store_id;
+    //         const wait_reservation_time = moment().format('YYYY-MM-DD HH:mm:ss');
+    //         const waitReservation = {
+    //             store_id,
+    //             user_name,
+    //             wait_visitor_name,
+    //             wait_visitor_number,
+    //             wait_reservation_time,
+    //         }
 
-            const status = await popupModel.waitReservation(waitReservation);
-            res.status(201).json(status);
-        } catch (err) {
-            throw err;
-        }
-    },
+    //         const status = await popupModel.waitReservation(waitReservation);
+    //         res.status(201).json(status);
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
 
-    // 현장 예약자 대기 순서 조회
-    getWaitOrder: async (req, res) => {
-        try {
-            const user_name = req.body.user_name;
-            const store_id = req.params.store_id;
-            const waitOrder = await popupModel.getWaitOrder(store_id, user_name);
-            res.status(200).json(waitOrder);
-        } catch (err) {
-            throw err;
-        }
-    },
+    // // 현장 예약자 대기 순서 조회
+    // getWaitOrder: async (req, res) => {
+    //     try {
+    //         const user_name = req.body.user_name;
+    //         const store_id = req.params.store_id;
+    //         const waitOrder = await popupModel.getWaitOrder(store_id, user_name);
+    //         res.status(200).json(waitOrder);
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
 
-    // 팝업 등록자 대기 리스트 확인
-    adminWaitList: async (req, res) => {
-        try {
-            const user_name = req.body.user_name;
-            const waitList = await popupModel.adminWaitList(user_name);
-            res.status(200).json(waitList);
-        } catch (err) {
-            throw err;
-        }
-    },
+    // // 팝업 등록자 대기 리스트 확인
+    // adminWaitList: async (req, res) => {
+    //     try {
+    //         const user_name = req.body.user_name;
+    //         const waitList = await popupModel.adminWaitList(user_name);
+    //         res.status(200).json(waitList);
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
 
-    // 팝업 등록자 팝업 대기 상태 변경 (토글)
-    popupStatus: async (req, res) => {
-        try {
-            const store_id = req.params.store_id;
-            const status = await popupModel.popupStatus(store_id);
-            res.status(200).json(status);
-        } catch (err) {
-            throw err;
-        }
-    },
+    // // 팝업 등록자 팝업 대기 상태 변경 (토글)
+    // popupStatus: async (req, res) => {
+    //     try {
+    //         const store_id = req.params.store_id;
+    //         const status = await popupModel.popupStatus(store_id);
+    //         res.status(200).json(status);
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
 
-    // 예약자 status 변경
-    waitStatus: async (req, res) => {
-        try {
-            const wait_id = req.params.wait_id;
-            const new_status = req.body.wait_status;
-            await popupModel.waitStatus(wait_id, new_status);
-            res.status(200).json(`대기 상태가 ${new_status}로 변경되었습니다.`);
-        } catch (err) {
-            throw err;
-        }
-    },
+    // // 예약자 status 변경
+    // waitStatus: async (req, res) => {
+    //     try {
+    //         const wait_id = req.params.wait_id;
+    //         const new_status = req.body.wait_status;
+    //         await popupModel.waitStatus(wait_id, new_status);
+    //         res.status(200).json(`대기 상태가 ${new_status}로 변경되었습니다.`);
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
 
-    // 예약 삭제
-    waitDelete: async (req, res) => {
-        try {
-            const wait_id = req.params.wait_id;
-            await popupModel.waitDelete(wait_id);
-            res.status(200).json('삭제되었습니다.');
-        } catch (err) {
-            throw err;
-        }
-    },
+    // // 예약 삭제
+    // waitDelete: async (req, res) => {
+    //     try {
+    //         const wait_id = req.params.wait_id;
+    //         await popupModel.waitDelete(wait_id);
+    //         res.status(200).json('삭제되었습니다.');
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
 
     // 스토어별 예약 상태
     reservationStatus: async (req, res) => {
