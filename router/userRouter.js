@@ -19,12 +19,12 @@ router.get("/check", userController.doubleCheck);
 router.get("/search_id/:phoneNumber", userController.searchId);
 router.post("/change_password", userController.changePassword);
 router.get("/search_inquiry", userController.searchInquiry);
+router.get("/search_answer", token.verifyToken, userController.searchAnswer);
 router.post("/create_profile", token.verifyToken, upload.single("file"), userController.createProfile);
 router.post("/update_profile", token.verifyToken, upload.single("file"), userController.updateProfile);
 
 // 토큰 검증 필요
 router.get("/:userId", token.verifyToken, userController.searchUser);
-router.get("/search_answer/:inquiryId", token.verifyToken, userController.searchAnswer);
 router.post("/create_inquiry", token.verifyToken, upload.single("file"), userController.createInquiry);
 
 router.post("/user_delete", token.verifyToken, userController.deleteUser);

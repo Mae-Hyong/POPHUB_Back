@@ -49,7 +49,7 @@ const adminModel = {
         return new Promise((resolve, reject) => {
             db.query(search_inquiry_query, (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             });
         })
     },
@@ -58,7 +58,7 @@ const adminModel = {
         return new Promise((resolve, reject) => {
             db.query(search_notice_query, (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             })
         })
     },
@@ -108,7 +108,7 @@ const adminModel = {
 
             const user_name = await new Promise((resolve, reject) => {
                 db.query(userName_query, store_id, (err, result) => {
-                    if(err) reject(err);
+                    if (err) reject(err);
                     else resolve(result[0].user_name);
                 })
             })
@@ -138,7 +138,7 @@ const adminModel = {
 
             const user_name = await new Promise((resolve, reject) => {
                 db.query(userName_query, denyData.store_id, (err, result) => {
-                    if(err) reject(err);
+                    if (err) reject(err);
                     else resolve(result[0].user_name);
                 })
             })

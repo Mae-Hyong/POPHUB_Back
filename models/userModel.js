@@ -176,11 +176,8 @@ const userModel = {
     searchAnswer: (inquiry_id) => {
         return new Promise((resolve, reject) => {
             db.query(answer_search_query, inquiry_id, (err, result) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
+                if (err) reject(err);
+                else resolve(result[0]);
             })
         })
     },

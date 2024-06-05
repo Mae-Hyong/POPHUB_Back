@@ -296,7 +296,7 @@ const userController = {
                 })
             }
             const result = await userModel.searchAnswer(inquiryId);
-            if (result.length === 0) return res.status(404).send('User not found');
+            if (!result) return res.status(404).send('Answer not found');
             return res.status(200).json({
                 answerId: result.answer_id,
                 inquiryId: result.inquiry_id,

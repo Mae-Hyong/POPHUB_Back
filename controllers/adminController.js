@@ -28,13 +28,16 @@ const adminController = {
     searchInquiry: async (req, res) => {
         try {
             const result = await adminModel.searchInquiry();
-            res.status(200).json({
-                inquiryId: result.inquiry_id,
-                userName: result.user_name,
-                title: result.title,
-                writeDate: result.write_date,
-                status: result.status
-            });
+            const results = await Promise.all(result.map(async (result) => {
+                return {
+                    inquiryId: result.inquiry_id,
+                    userName: result.user_name,
+                    title: result.title,
+                    writeDate: result.write_date,
+                    status: result.status
+                };
+            }));
+            return res.status(200).json(results);
         } catch (err) {
             res.status(500).send("문의 전체 조회 중 오류가 발생했습니다.");
         }
@@ -60,7 +63,15 @@ const adminController = {
             const noticeId = req.query.notice_id;
             if (!noticeId) {
                 const searchResult = await adminModel.searchNotice();
-                return res.status(200).json(searchResult);
+                const results = await Promise.all(searchResult.map(async (result) => {
+                    return {
+                        noticeId: searchResult.notice_id,
+                        userName: searchResult.user_name,
+                        title: searchResult.title,
+                        createdAt: searchResult.created_at,
+                    };
+                }));
+                return res.status(200).json(results);
             }
             else {
                 const result = await adminModel.selectNotice(noticeId);
