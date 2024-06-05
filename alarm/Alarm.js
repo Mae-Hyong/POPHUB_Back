@@ -1,7 +1,5 @@
 const admin = require("firebase-admin");
-const express = require("express");
 const bodyParser = require("body-parser");
-const app = express();
 const cron = require("node-cron");
 
 // Firebase Admin SDK 초기화
@@ -110,8 +108,4 @@ cron.schedule("0 0 * * *", async () => {
 
   await batch.commit();
   console.log("만료된 토큰 처리 완료");
-});
-
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
 });
