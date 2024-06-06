@@ -1,5 +1,6 @@
 const adminModel = require('../models/adminModel');
 const moment = require('moment');
+const userModel = require('../models/userModel');
 
 const adminController = {
     searchCategory: async (req, res) => {
@@ -35,7 +36,8 @@ const adminController = {
 
             await adminModel.createAnswer(inquiryId, userName, content);
             await adminModel.updateInquiry(inquiryId)
-            res.status(201).send(`답변 작성이 완료되었습니다.`);
+            const result = await userModel.selectInquiry(inquiryId);
+            res.status(201).json({ msg: `답변 작성이 완료되었습니다.`, userName: result.user_name });
         } catch (err) {
             res.status(500).send("답변 작성 중 오류가 발생했습니다.");
         }
