@@ -26,11 +26,13 @@ const getcapacityByReservationId_query = 'SELECT * FROM reservation WHERE reserv
 const bookmark_query = 'SELECT mark_id, user_name, store_id FROM BookMark WHERE user_name = ?';
 const checkBookmark_query = 'SELECT * FROM BookMark WHERE store_id = ? AND user_name = ?';
 const reservationStatus_query = 'SELECT * FROM store_capacity WHERE store_id = ?';
-const getpopupByPresident_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.user_name = ? GROUP BY ps.store_id';
+const getpopupByPresident_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.user_name = ? AND ps.deleted = "false" GROUP BY ps.store_id';
 const scheduledToOpen_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 14 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_start_date ASC';
 const scheduledToClose_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_end_date ASC';
 const recommendation_query = 'SELECT popup_stores.*, GROUP_CONCAT(images.image_url) AS image_urls FROM popup_stores JOIN images ON popup_stores.store_id = images.store_id WHERE popup_stores.category_id = ? GROUP BY popup_stores.store_id ORDER BY RAND() LIMIT 5';
-
+const searchByname_query = 'SELECT * FROM popup_stores WHERE deleted ="false" AND store_name LIKE ? ';
+const searchByCategory_query = 'SELECT * FROM popup_stores WHERE deleted = "false" AND category_id = ?';
+const image_query = 'SELECT image_url FROM images WHERE store_id = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -254,6 +256,72 @@ const popupModel = {
             });
 
             return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 검색어로 스토어 이름 검색
+    searchStoreName: async (store_name) => {
+        try {
+            const name = await new Promise((resolve, reject) => {
+                db.query(searchByname_query, `%${store_name}%`, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+
+            if (name.length === 0) {
+                return { message: '검색 결과가 없습니다.' };
+            }
+
+            const result = await Promise.all(name.map(async (popup) => {
+                
+                const images = await new Promise((resolve, reject) => {
+                    db.query(image_query, popup.store_id, (err, images) => {
+                        if (err) reject(err);
+                        else resolve(images.map(image => image.image_url));
+                    });
+                });
+                return {
+                    ...popup,
+                    images
+                };
+            }));
+
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 카테고리로 팝업 검색
+    searchCategory: async (category_id) => {
+        try {
+            const category = await new Promise((resolve, reject) => {
+                db.query(searchByCategory_query, category_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                })
+            })
+
+            if (category.length === 0) {
+                return { message: '해당 카테고리의 팝업이 존재하지 않습니다.' };
+            }
+            const results = await Promise.all(category.map(async (store) => {
+                const images = await new Promise((resolve, reject) => {
+                    db.query(image_query, store.store_id, (err, images) => {
+                        if (err) reject(err);
+                        else resolve(images.map(image => image.image_url));
+                    });
+                });
+                return {
+                    ...store,
+                    images
+                };
+            }));
+
+            return results;
         } catch (err) {
             throw err;
         }

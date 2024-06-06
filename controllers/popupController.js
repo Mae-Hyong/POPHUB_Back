@@ -61,6 +61,31 @@ const popupController = {
         }
     },
 
+    // 스토어 이름으로 팝업 검색
+    searchStoreName: async (req, res) => {
+        try {
+            const store_name = req.query.store_name;
+            const result = await popupModel.searchStoreName(store_name);
+            res.status(200).json(result);
+            console.log(store_name);
+        } catch(err) {
+            console.log(err);
+            res.status(500).send("오류 발생");
+        }
+    },
+
+    // 스토어 카테고리로 팝업 검색
+    searchCategory: async (req, res) => {
+        try {
+            const category_id = req.params.category_id;
+            const result = await popupModel.searchCategory(category_id);
+            res.status(200).json(result);
+        } catch(err) {
+            console.log(err);
+            res.status(500).send("오류 발생");
+        }
+    },
+
     // 팝업 스토어 생성
     createPopup: async (req, res) => {
         try {
