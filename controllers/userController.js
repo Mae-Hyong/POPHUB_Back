@@ -131,7 +131,7 @@ const userController = {
             const phoneNumber = req.params.phoneNumber;
             if (!phoneNumber) return res.send('사용자의 Phone Number을 제공해야 합니다.').status(400);
 
-            const result = await userModel.searchUser(phoneNumber);
+            const result = await userModel.searchId(phoneNumber);
 
             if (result.length === 0) {
                 res.status(404).send('User not found');
@@ -151,9 +151,9 @@ const userController = {
             if (!userId) return res.send('사용자의 Id를 제공해야 합니다.').status(400)
 
             await userModel.changePassword(userId, hashedPassword);
-            if (result.length === 0) return res.status(404).send('User not found');
             return res.status(200).send('Password Change successfully');
         } catch (err) {
+            console.error(err)
             return res.status(500).send("비밀번호 변경 중 오류가 발생했습니다.");
         }
     },
