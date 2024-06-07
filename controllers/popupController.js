@@ -241,7 +241,7 @@ const popupController = {
     // 유저별 찜 조회
     likeUser: async (req, res) => {
         try {
-            const user_name = req.body.user_name;
+            const user_name = req.params.user_name;
             const result = await popupModel.likeUser(user_name);
             res.status(200).json(result);
         } catch (err) {
@@ -265,7 +265,7 @@ const popupController = {
     // 아이디별 리뷰
     storeUserReview: async (req, res) => {
         try {
-            const user_name = req.body.user_name;
+            const user_name = req.params.user_name;
             const review = await popupModel.storeUserReview(user_name);
             res.status(200).json(review);
         } catch (err) {
@@ -463,7 +463,7 @@ const popupController = {
     // 예약 조회 - 유저
     getReservationUser: async (req, res) => {
         try {
-            const user_name = req.body.user_name;
+            const user_name = req.params.user_name;
             const result = await popupModel.getReservationUser(user_name);
             res.status(200).json(result);
         } catch (err) {
@@ -475,7 +475,7 @@ const popupController = {
     // 예약 조회 - 스토어 (팝업 등록자가 볼 것)
     getReservationPresident: async (req, res) => {
         try {
-            const store_id = req.body.store_id;
+            const store_id = req.params.store_id;
             const result = await popupModel.getReservationPresident(store_id);
             res.status(200).json(result);
         } catch (err) {
