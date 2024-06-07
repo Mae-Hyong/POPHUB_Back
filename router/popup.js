@@ -17,7 +17,7 @@ router.get('/searchCategory/:category_id', popupController.searchCategory); // �
 
 router.post('/review/create/:store_id', popupController.createReview); // 팝업 리뷰 생성
 router.get('/reviews/store/:store_id', popupController.storeReview); // 특정 팝업 리뷰 조회
-router.get('/reviews/user', popupController.storeUserReview); // 특정 아이디별 리뷰 조회
+router.get('/reviews/user/:user_name', popupController.storeUserReview); // 특정 아이디별 리뷰 조회
 router.get('/review/storeReview/:review_id', popupController.storeReviewDetail); // 특정 팝업 리뷰 상세 조회
 router.put('/review/update/:review_id', popupController.updateReview);  // 팝업 리뷰 수정
 router.delete('/review/delete/:review_id', popupController.deleteReview); // 팝업 리뷰 삭제
@@ -29,12 +29,12 @@ router.delete('/delete/:store_id', popupController.deletePopup); // 팝업 삭�
 
 router.get('/viewDenialReason/:store_id', popupController.viewDenialReason); // 팝업 등록 거부 이유 확인
 router.post('/like/:store_id', popupController.likePopup); // 팝업 찜
-router.get('/likeUser', popupController.likeUser); // 팝업 유저별 찜 조회
+router.get('/likeUser/:user_name', popupController.likeUser); // 팝업 유저별 찜 조회
 
 router.get('/reservationStatus/:store_id', popupController.reservationStatus); // 스토어별 예약 상태
 router.post('/reservation/:store_id', popupController.reservation); // 사전 예약
-router.get('/getReservation/user', popupController.getReservationUser); // 예약자 예약 조회
-router.get('/getReservation/president', popupController.getReservationPresident); // 팝업 등록자 스토어 예약 조회
+router.get('/getReservation/user/:user_name', popupController.getReservationUser); // 예약자 예약 조회
+router.get('/getReservation/president/:store_id', popupController.getReservationPresident); // 팝업 등록자 스토어 예약 조회
 router.delete('/deleteReservation/:reservation_id', popupController.deleteReservation) // 예약 취소
 
 router.get('/recommendation/:user_name?', popupController.recommendation); // 추천 시스템
