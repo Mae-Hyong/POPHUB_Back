@@ -875,10 +875,18 @@ const popupModel = {
                 })
             });
 
+            const day = await new Promise((resolve, reject) => {
+                db.query(storeSchedules_query, store_id, (err, result) => {
+                    if(err) reject(err);
+                    else resolve(result);
+                })
+            })
+
             const common = {
                 store_id: results[0].store_id,
                 max_capacity: results[0].max_capacity,
-                store_end_date: date[0].store_end_date // date가 배열이 아닌 경우에만 사용 가능합니다.
+                store_end_date: date[0].store_end_date,
+                day: day.map(({ schedule_id, store_id, ...dayData }) => dayData)
             };
 
             const status = results.map(({ max_capacity, store_id, ...rest }) => {
