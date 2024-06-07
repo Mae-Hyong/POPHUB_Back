@@ -446,7 +446,7 @@ const popupController = {
                 capacity: body.capacity,
                 created_at
             };
-
+            
             const result = await popupModel.reservation(reservationData);
 
             if (result.success == true) {
@@ -484,6 +484,7 @@ const popupController = {
         }
     },
 
+    // 예약 취소
     deleteReservation: async (req, res) => {
         try {
             const reservation_id = req.params.reservation_id;
