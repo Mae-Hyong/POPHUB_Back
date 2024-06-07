@@ -34,6 +34,7 @@ const searchByname_query = 'SELECT * FROM popup_stores WHERE deleted ="false" AN
 const searchByCategory_query = 'SELECT * FROM popup_stores WHERE deleted = "false" AND category_id = ?';
 const image_query = 'SELECT image_url FROM images WHERE store_id = ?';
 const getStoreName_query = 'SELECT store_name FROM popup_stores WHERE store_id = ?';
+const storeEndDate_query = 'SELECT store_end_date FROM popup_stores WHERE store_id = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -866,12 +867,27 @@ const popupModel = {
                     else resolve(result);
                 });
             });
-
-            const status = results.map(item => {
-                item.status = item.current_capacity >= item.max_capacity;
-                return item;
+            
+            const date = await new Promise((resolve, reject) => {
+                db.query(storeEndDate_query, store_id, (err, result) => {
+                    if(err) reject(err);
+                    else resolve(result);
+                })
             });
-            return status;
+
+            const common = {
+                store_id: results[0].store_id,
+                max_capacity: results[0].max_capacity,
+                store_end_date: date[0].store_end_date // date가 배열이 아닌 경우에만 사용 가능합니다.
+            };
+
+            const status = results.map(({ max_capacity, store_id, ...rest }) => {
+                rest.status = rest.current_capacity >= common.max_capacity;
+                return rest;
+            });
+
+            return {common, status};
+
         } catch (err) {
             throw err;
         }
