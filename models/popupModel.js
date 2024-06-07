@@ -29,7 +29,7 @@ const reservationStatus_query = 'SELECT * FROM store_capacity WHERE store_id = ?
 const getpopupByPresident_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.user_name = ? AND ps.deleted = "false" GROUP BY ps.store_id';
 const scheduledToOpen_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 14 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" AND ps.store_status = "오픈 예정" GROUP BY ps.store_id ORDER BY ps.store_start_date ASC';
 const scheduledToClose_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" AND ps.store_status = "오픈" GROUP BY ps.store_id ORDER BY ps.store_end_date ASC';
-const recommendation_query = 'SELECT popup_stores.*, GROUP_CONCAT(images.image_url) AS image_urls FROM popup_stores JOIN images ON popup_stores.store_id = images.store_id WHERE popup_stores.category_id = ? AND popup_stores.deleted = "false" AND popup_stores.store_status = "오픈" GROUP BY popup_stores.store_id ORDER BY RAND() LIMIT 5';
+const recommendation_query = 'SELECT popup_stores.*, GROUP_CONCAT(images.image_url) AS image_urls FROM popup_stores JOIN images ON popup_stores.store_id = images.store_id WHERE popup_stores.category_id = ? AND popup_stores.deleted = "false" AND (store_status = "오픈" OR store_status = "오픈 예정") GROUP BY popup_stores.store_id ORDER BY RAND() LIMIT 5';
 const searchByname_query = 'SELECT * FROM popup_stores WHERE deleted ="false" AND store_name LIKE ? ';
 const searchByCategory_query = 'SELECT * FROM popup_stores WHERE deleted = "false" AND category_id = ?';
 const image_query = 'SELECT image_url FROM images WHERE store_id = ?';
@@ -55,6 +55,7 @@ const updateWaitStatus_query = 'UPDATE popup_stores SET store_wait_status = ? WH
 const updateWaitListStatus_query = 'UPDATE wait_list SET wait_status = ? WHERE wait_id = ?';
 const updateCapacity_query = 'UPDATE store_capacity SET current_capacity = ? WHERE store_id = ? AND reservation_date = ? AND reservation_time = ?';
 const updateCapacityMinus_query = 'UPDATE store_capacity SET current_capacity = current_capacity - ? WHERE store_id = ? AND reservation_date = ? AND reservation_time = ?';
+
 // ------- DELETE Query -------
 const deleteImage_query = 'DELETE FROM images WHERE store_id = ?';
 const deleteSchedule_query = 'DELETE FROM store_schedules WHERE store_id = ?';
@@ -1025,26 +1026,41 @@ const popupModel = {
     // 추천 시스템
     recommendationData: async (user_recommendation) => {
         try {
-            const results = await new Promise((resolve, reject) => {
-                db.query(recommendation_query, user_recommendation, async (err, result) => {
-                    if (err) reject(err);
-                    else {
-                        try {
-                            for (const popup of result) {
-                                if (popup.image_urls) {
-                                    popup.imageUrls = popup.image_urls.split(',');
-                                    delete popup.image_urls;
-                                } else {
-                                    popup.imageUrls = [];
+            const getCategoryData = async (category) => {
+                return new Promise((resolve, reject) => {
+                    db.query(recommendation_query, [category], (err, result) => {
+                        if (err) reject(err);
+                        else {
+                            try {
+                                for (const popup of result) {
+                                    if (popup.image_urls) {
+                                        popup.imageUrls = popup.image_urls.split(',');
+                                        delete popup.image_urls;
+                                    } else {
+                                        popup.imageUrls = [];
+                                    }
                                 }
+                                resolve(result);
+                            } catch (err) {
+                                reject(err);
                             }
-                            resolve(result);
-                        } catch (err) {
-                            reject(err);
                         }
-                    }
+                    });
                 });
-            });
+            };
+    
+            // 첫 번째 카테고리 데이터
+            const firstCategoryData = await getCategoryData(user_recommendation[0]);
+    
+            // 첫 번째 카테고리 5개 이하일 경우,
+            let results = firstCategoryData;
+            if (results.length < 5 && user_recommendation.length > 1) {
+                const count = 5 - results.length;
+                const secondCategoryData = await getCategoryData(user_recommendation[1]);
+                const slice = Math.min(count, secondCategoryData.length);
+                results = results.concat(secondCategoryData.slice(0, slice));
+            }
+    
             return results.length > 0 ? results : '해당 카테고리의 팝업이 존재하지 않습니다.';
         } catch (err) {
             throw err;
