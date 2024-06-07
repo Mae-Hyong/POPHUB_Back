@@ -37,7 +37,7 @@ router.get('/getReservation/user', popupController.getReservationUser); // 예�
 router.get('/getReservation/president', popupController.getReservationPresident); // 팝업 등록자 스토어 예약 조회
 router.delete('/deleteReservation/:reservation_id', popupController.deleteReservation) // 예약 취소
 
-router.get('/recommendation/:user_name', popupController.recommendation); // 추천 시스템
+router.get('/recommendation/:user_name?', popupController.recommendation); // 추천 시스템
 module.exports = router;
 
 
