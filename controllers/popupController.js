@@ -68,7 +68,7 @@ const popupController = {
             const result = await popupModel.searchStoreName(store_name);
             res.status(200).json(result);
             console.log(store_name);
-        } catch(err) {
+        } catch (err) {
             console.log(err);
             res.status(500).send("오류 발생");
         }
@@ -80,7 +80,7 @@ const popupController = {
             const category_id = req.params.category_id;
             const result = await popupModel.searchCategory(category_id);
             res.status(200).json(result);
-        } catch(err) {
+        } catch (err) {
             console.log(err);
             res.status(500).send("오류 발생");
         }
@@ -446,7 +446,7 @@ const popupController = {
                 capacity: body.capacity,
                 created_at
             };
-            
+
             const result = await popupModel.reservation(reservationData);
 
             if (result.success == true) {
@@ -499,6 +499,9 @@ const popupController = {
     // 추천
     recommendation: async (req, res) => {
         try {
+            if (!req.params.user_name) {
+                return res.status(200).send("로그인 후 추천 시스템을 사용해보세요!");
+            }
             const user_recommendation = await getRecommendation(req.params.user_name);
             const data = await popupModel.recommendationData(user_recommendation);
             res.status(200).json(data);
