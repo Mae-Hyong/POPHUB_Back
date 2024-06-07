@@ -46,11 +46,8 @@ const userModel = {
         return new Promise((resolve, reject) => {
             if (!userId) {
                 db.query(name_check_query, userName, (err, result) => {
-                    if (err) {
-                        reject(err);
-                    } else {
-                        resolve(result[0]);
-                    }
+                    if (err) reject(err);
+                    else resolve(result[0]);
                 });
             } else {
                 db.query(id_check_query, userId, (err, result) => {
@@ -65,11 +62,8 @@ const userModel = {
     searchId: (phoneNumber) => {
         return new Promise((resolve, reject) => {
             db.query(id_search_query, phoneNumber, (err, result) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
+                if (err) reject(err);
+                else resolve(result[0]);
             });
         })
     },
@@ -77,11 +71,8 @@ const userModel = {
     changePassword: (userId, userPassword) => {
         return new Promise((resolve, reject) => {
             db.query(password_change_query, [userPassword, userId], (err, result) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
+                if (err) reject(err);
+                else resolve(result[0]);
             });
         })
     },
@@ -89,11 +80,8 @@ const userModel = {
     createProfile: (userId, userName, phoneNumber, Gender, Age, userImage) => {
         return new Promise((resolve, reject) => {
             db.query(profile_add_query, [userId, userName, phoneNumber, Gender, Age, userImage], (err, result) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
+                if (err) reject(err);
+                else resolve(result[0]);
             });
         })
     },
@@ -146,11 +134,8 @@ const userModel = {
     createInquiry: (userName, categoryId, title, content, userImage) => {
         return new Promise((resolve, reject) => {
             db.query(inquiry_add_query, [userName, categoryId, title, content, userImage], (err, result) => {
-                if (err) {
-                    reject(err);
-                } else {
-                    resolve(result[0]);
-                }
+                if (err) reject(err);
+                else resolve(result[0]);
             });
         })
     },
