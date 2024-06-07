@@ -274,4 +274,6 @@ INSERT INTO category (category_id, category_name) VALUES
 (27, '애니메이션'),
 (28, '전시'),
 (29, '연예인/굿즈'),
-(30, '동물');
+(30, '동물'),
+(31, '캐릭터'),
+(32, '캠페인');

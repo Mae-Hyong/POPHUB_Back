@@ -20,19 +20,20 @@ const popupStoreUser_query = 'SELECT store_id, store_name FROM popup_stores WHER
 const storeSchedules_query = 'SELECT * FROM store_schedules WHERE store_id = ?';
 const checkCapacity_query = 'SELECT max_capacity, current_capacity FROM store_capacity WHERE store_id = ? AND reservation_date = ? AND reservation_time = ?';
 const maxCapacity_query = 'SELECT max_capacity FROM popup_stores WHERE store_id = ?';
-const getReservationUser_query = 'SELECT * FROM reservation WHERE user_name = ?';
-const getReservationPresident_query = 'SELECT * FROM reservation WHERE store_id = ?';
+const getReservationUser_query = 'SELECT * FROM reservation WHERE user_name = ? ORDER BY reservation_date ASC, reservation_time ASC';
+const getReservationPresident_query = 'SELECT * FROM reservation WHERE store_id = ? ORDER BY reservation_date ASC, reservation_time ASC';
 const getcapacityByReservationId_query = 'SELECT * FROM reservation WHERE reservation_id = ?';
 const bookmark_query = 'SELECT mark_id, user_name, store_id FROM BookMark WHERE user_name = ?';
 const checkBookmark_query = 'SELECT * FROM BookMark WHERE store_id = ? AND user_name = ?';
 const reservationStatus_query = 'SELECT * FROM store_capacity WHERE store_id = ?';
 const getpopupByPresident_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.user_name = ? AND ps.deleted = "false" GROUP BY ps.store_id';
-const scheduledToOpen_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 14 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_start_date ASC';
-const scheduledToClose_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_end_date ASC';
+const scheduledToOpen_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 14 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" AND ps.store_status = "오픈 예정" GROUP BY ps.store_id ORDER BY ps.store_start_date ASC';
+const scheduledToClose_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" AND ps.store_status = "오픈" GROUP BY ps.store_id ORDER BY ps.store_end_date ASC';
 const recommendation_query = 'SELECT popup_stores.*, GROUP_CONCAT(images.image_url) AS image_urls FROM popup_stores JOIN images ON popup_stores.store_id = images.store_id WHERE popup_stores.category_id = ? GROUP BY popup_stores.store_id ORDER BY RAND() LIMIT 5';
 const searchByname_query = 'SELECT * FROM popup_stores WHERE deleted ="false" AND store_name LIKE ? ';
 const searchByCategory_query = 'SELECT * FROM popup_stores WHERE deleted = "false" AND category_id = ?';
 const image_query = 'SELECT image_url FROM images WHERE store_id = ?';
+const getStoreName_query = 'SELECT store_name FROM popup_stores WHERE store_id = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -276,7 +277,7 @@ const popupModel = {
             }
 
             const result = await Promise.all(name.map(async (popup) => {
-                
+
                 const images = await new Promise((resolve, reject) => {
                     db.query(image_query, popup.store_id, (err, images) => {
                         if (err) reject(err);
@@ -940,51 +941,85 @@ const popupModel = {
         }
     },
 
+    // 유저별 예약 조회
     getReservationUser: async (user_name) => {
-        const results = await new Promise((resolve, reject) => {
-            db.query(getReservationUser_query, user_name, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query(getReservationUser_query, user_name, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
             });
-        });
 
-        return results;
+            if (results.length === 0) {
+                return '예약 정보가 없습니다.';
+            }
+
+            const reservation = await Promise.all(results.map(async (data) => {
+                const store_name = await new Promise((resolve, reject) => {
+                    db.query(getStoreName_query, [data.store_id], (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result.map(name => name.store_name)[0]);
+                    });
+                });
+                return {
+                    ...data,
+                    store_name
+                };
+            }));
+
+            return reservation;
+
+        } catch (err) {
+            throw err;
+        }
     },
 
+    // 스토어별 예약 조회
     getReservationPresident: async (store_id) => {
-        const results = await new Promise((resolve, reject) => {
-            db.query(getReservationPresident_query, store_id, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query(getReservationPresident_query, store_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
             });
-        });
 
-        return results;
+            return results;
+        } catch (err) {
+            throw err;
+        }
     },
 
+    // 예약 취소
     deleteReservation: async (reservation_id) => {
-        const getCapacity = await new Promise((resolve, reject) => {
-            db.query(getcapacityByReservationId_query, reservation_id, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
+        try {
+            const getCapacity = await new Promise((resolve, reject) => {
+                db.query(getcapacityByReservationId_query, reservation_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
             });
-        });
 
-        const { store_id, reservation_date, reservation_time, capacity } = getCapacity[0];
+            const { store_id, reservation_date, reservation_time, capacity } = getCapacity[0];
 
-        await new Promise((resolve, reject) => {
-            db.query(updateCapacityMinus_query, [capacity, store_id, reservation_date, reservation_time], (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
+            await new Promise((resolve, reject) => {
+                db.query(updateCapacityMinus_query, [capacity, store_id, reservation_date, reservation_time], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
             });
-        });
 
-        await new Promise((resolve, reject) => {
-            db.query(deleteReservation_query, reservation_id, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
+            await new Promise((resolve, reject) => {
+                db.query(deleteReservation_query, reservation_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                })
             })
-        })
+        } catch (err) {
+            throw err;
+        }
+
     },
 
     // 추천 시스템
@@ -1003,7 +1038,7 @@ const popupModel = {
                                     popup.imageUrls = [];
                                 }
                             }
-                            resolve(result); // 이 부분이 빠졌었습니다.
+                            resolve(result);
                         } catch (err) {
                             reject(err);
                         }
