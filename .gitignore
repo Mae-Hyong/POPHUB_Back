@@ -1,1 +1,7 @@
+<<<<<<< HEAD
 node_modules
+=======
+node_modules
+config/PopHub_key.json
+.env
+>>>>>>> 38c3d6c (오류 해결)
