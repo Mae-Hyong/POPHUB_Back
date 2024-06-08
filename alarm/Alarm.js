@@ -110,7 +110,7 @@ cron.schedule("0 0 * * *", async () => {
   console.log("만료된 토큰 처리 완료");
 });
 
-// 예약 대기 알림 설정 추가
+// 사용자 대기 목록에 추가
 app.post("/waitlist_add", async (req, res) => {
   const { userName, storeId, date, desiredTime } = req.body;
 
@@ -136,7 +136,7 @@ app.post("/waitlist_add", async (req, res) => {
   }
 });
 
-// 예약 상태 체크 및 알림 전송
+// 예약 상태 확인 및 대기 사용자에게 알림 전송
 app.post("/check_and_notify", async (req, res) => {
   const { storeId } = req.body;
 
@@ -152,7 +152,7 @@ app.post("/check_and_notify", async (req, res) => {
     const availableCount = data.count;
 
     if (availableCount > 0) {
-      // 대기 리스트에서 알림 보내지 않은 사용자 찾기
+      // 알림 보내지 않은 대기 목록 사용자 찾기
       const waitlistSnapshot = await db
         .collection("waitlist")
         .where("storeId", "==", storeId)
@@ -181,10 +181,10 @@ app.post("/check_and_notify", async (req, res) => {
                 .messaging()
                 .send(message)
                 .then((response) => {
-                  console.log("Successfully sent message:", response);
+                  console.log("성공적으로 메시지가 보내짐:", response);
                 })
                 .catch((error) => {
-                  console.error("Error sending message:", error);
+                  console.error("메시지 보내는 중 오류남", error);
                 });
             }
           }
