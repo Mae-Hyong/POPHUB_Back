@@ -35,6 +35,7 @@ const searchByCategory_query = 'SELECT * FROM popup_stores WHERE deleted = "fals
 const image_query = 'SELECT image_url FROM images WHERE store_id = ?';
 const getStoreName_query = 'SELECT store_name FROM popup_stores WHERE store_id = ?';
 const storeEndDate_query = 'SELECT store_end_date FROM popup_stores WHERE store_id = ?';
+const getUserImage_query = 'SELECT user_image FROM user_info WHERE user_name = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -609,7 +610,21 @@ const popupModel = {
                 return "현재 작성된 리뷰가 없습니다. 예약 후 작성해보세요!";
             }
 
-            return results;
+            const reviewData = await Promise.all(results.map(async (review) => {
+                const userImage = await new Promise((resolve, reject) => {
+                    db.query(getUserImage_query, [review.user_name], (err, user) => {
+                        if (err) reject(err);
+                        resolve(user[0]?.user_image || null);
+                    });
+                });
+    
+                return {
+                    ...review,
+                    user_image: userImage
+                };
+            }));
+
+            return reviewData;
         } catch (err) {
             throw err;
         }
@@ -629,7 +644,21 @@ const popupModel = {
                 return "현재 작성된 리뷰가 없습니다. 예약 후 작성해보세요!";
             }
 
-            return results;
+            const reviewData = await Promise.all(results.map(async (review) => {
+                const userImage = await new Promise((resolve, reject) => {
+                    db.query(getUserImage_query, [review.user_name], (err, user) => {
+                        if (err) reject(err);
+                        resolve(user[0]?.user_image || null);
+                    });
+                });
+    
+                return {
+                    ...review,
+                    user_image: userImage
+                };
+            }));
+
+            return reviewData;
         } catch (err) {
             throw err;
         }
