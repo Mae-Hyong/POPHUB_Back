@@ -16,7 +16,7 @@ const alarmController = {
     try {
       const { userName, type, alarmDetails } = req.body;
       await alarmModel.alarmAddModel(userName, type, alarmDetails);
-      res.status(201).send(`알람이 성공적으로 추가되었습니다: ${alarmRef.id}`);
+      res.status(201).send(`알람이 성공적으로 추가되었습니다`);
     } catch (error) {
       console.error("알람 추가 오류:", error);
       res.status(500).send("알람 추가 오류");
@@ -39,9 +39,7 @@ const alarmController = {
     try {
       const { userName, storeId, date, desiredTime } = req.body;
       await alarmModel.waitListAddModel(userName, storeId, date, desiredTime);
-      res
-        .status(201)
-        .send(`대기 알림이 성공적으로 추가되었습니다: ${waitlistDoc.id}`);
+      res.status(201).send(`대기 알림이 성공적으로 추가되었습니다`);
     } catch (error) {
       console.error("대기 알림 추가 오류:", error);
       res.status(500).send("대기 알림 추가 오류");
