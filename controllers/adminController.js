@@ -81,7 +81,7 @@ const adminController = {
             const noticeId = req.query.notice_id;
             if (!noticeId) {
                 const searchResult = await adminModel.searchNotice();
-                const results = await Promise.all(searchResult.map(async (result) => {
+                const results = await Promise.all(searchResult.map(async (searchResult) => {
                     return {
                         noticeId: searchResult.notice_id,
                         userName: searchResult.user_name,
