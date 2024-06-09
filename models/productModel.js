@@ -6,15 +6,23 @@ const getstoreId_query = 'SELECT store_id FROM products WHERE product_id = ?';
 const userNameCheck_query = 'SELECT user_name FROM popup_stores WHERE store_id = ?';
 const storeProducts_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN images pi ON p.product_id = pi.product_id WHERE p.store_id = ? GROUP BY p.product_id';
 const getProduct_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN images pi ON p.product_id = pi.product_id WHERE p.product_id = ? GROUP BY p.product_id';
+const checkBookmark_query = 'SELECT * FROM BookMark WHERE product_id = ? AND user_name = ?';
+const likeProductSelect_query = 'SELECT * FROM BookMark WHERE user_name = ? AND product_id = ?';
+const likeDelete_query = 'DELETE FROM BookMark WHERE user_name = ? AND product_id = ?';
+const likeProductCheck_query = 'SELECT product_mark_number FROM products WHERE product_id = ?';
+const bookmark_query = 'SELECT mark_id, user_name, product_id FROM BookMark WHERE user_name = ?';
 
 // ------- POST Query -------
 const createProduct_query = 'INSERT INTO products SET ?';
 const createImage_query = 'INSERT INTO images (product_id, image_url) VALUES (?, ?)';
+const likeProductInsert_query = 'INSERT INTO BookMark (user_name, product_id) VALUES (?, ?)';
 
 // ------- PUT Query -------
 const updateViewCount_query = 'UPDATE products SET product_view_count = product_view_count + 1 WHERE product_id = ?';
-const updateProduct_query = 'UPDATE products SET ? WHERE product_id = ?'
+const updateProduct_query = 'UPDATE products SET ? WHERE product_id = ?';
 const updateOrder_query = 'UPDATE products SET remaining_quantity = remaining_quantity - 1 WHERE product_id = ?';
+const likeProductUpdateMinus_query = 'UPDATE products SET product_mark_number = product_mark_number - 1 WHERE product_id = ?';
+const likeProductUpdatePlus_query = 'UPDATE products SET product_mark_number = product_mark_number + 1 WHERE product_id = ?';
 
 // ------- DELETE Query -------
 const deleteImage_query = 'DELETE FROM images WHERE product_id = ?';
@@ -152,7 +160,6 @@ const productModel = {
 
         const checkBookmark = (product_id, user_name) => {
             return new Promise((resolve, reject) => {
-                const checkBookmark_query = 'SELECT * FROM BookMark WHERE product_id = ? AND user_name = ?';
                 db.query(checkBookmark_query, [product_id, user_name], (err, result) => {
                     if (err) reject(err);
                     else resolve(result.length > 0);
@@ -241,7 +248,7 @@ const productModel = {
     // 굿즈 북마크
     likeProduct: async (user_name, product_id) => {
         try {
-            const likeProductSelect_query = 'SELECT * FROM BookMark WHERE user_name = ? AND product_id = ?';
+            
             const bookmarks = await new Promise((resolve, reject) => {
                 db.query(likeProductSelect_query, [user_name, product_id], (err, result) => {
                     if (err) reject(err);
@@ -250,14 +257,13 @@ const productModel = {
             });
 
             if (bookmarks.length > 0) {
-                const likeDelete_query = 'DELETE FROM BookMark WHERE user_name = ? AND product_id = ?';
                 await new Promise((resolve, reject) => {
                     db.query(likeDelete_query, [user_name, product_id], (err, result) => {
                         if (err) reject(err);
                         else resolve();
                     });
                 });
-                const likeProductUpdateMinus_query = 'UPDATE products SET product_mark_number = product_mark_number - 1 WHERE product_id = ?';
+            
                 await new Promise((resolve, reject) => {
                     db.query(likeProductUpdateMinus_query, product_id, (err, result) => {
                         if (err) reject(err);
@@ -267,7 +273,6 @@ const productModel = {
 
             } else {
                 await new Promise((resolve, reject) => {
-                    const likeProductInsert_query = 'INSERT INTO BookMark (user_name, product_id) VALUES (?, ?)';
                     db.query(likeProductInsert_query, [user_name, product_id], (err, result) => {
                         if (err) reject(err);
                         else resolve();
@@ -275,14 +280,13 @@ const productModel = {
                 });
 
                 await new Promise((resolve, reject) => {
-                    const likeProductUpdatePlus_query = 'UPDATE products SET product_mark_number = product_mark_number + 1 WHERE product_id = ?';
                     db.query(likeProductUpdatePlus_query, product_id, (err, result) => {
                         if (err) reject(err);
                         else resolve();
                     });
                 });
             }
-            const likeProductCheck_query = "SELECT product_mark_number FROM products WHERE product_id = ?"
+            
             const product_mark_number = await new Promise((resolve, reject) => {
                 db.query(likeProductCheck_query, product_id, (err, result) => {
                     if (err) reject(err);
@@ -303,7 +307,7 @@ const productModel = {
     // 굿즈 찜 조회
     likeUser: async (user_name) => {
         try {
-            const bookmark_query = 'SELECT mark_id, user_name, product_id FROM BookMark WHERE user_name = ?';
+            
             const bookmark = await new Promise((resolve, reject) => {
                 db.query(bookmark_query, user_name, (err, results) => {
                     if (err) reject(err);
