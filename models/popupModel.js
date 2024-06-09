@@ -36,6 +36,8 @@ const image_query = 'SELECT image_url FROM images WHERE store_id = ?';
 const getStoreName_query = 'SELECT store_name FROM popup_stores WHERE store_id = ?';
 const storeEndDate_query = 'SELECT store_end_date FROM popup_stores WHERE store_id = ?';
 const getUserImage_query = 'SELECT user_image FROM user_info WHERE user_name = ?';
+const checkReview_query = 'SELECT COUNT(*) AS count FROM store_review WHERE store_id = ? AND user_name = ?';
+const checkReservation_query = 'SELECT COUNT (*) AS count FROM reservation WHERE store_id = ? AND user_name = ? AND reservation_status = "completed"';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -481,15 +483,15 @@ const popupModel = {
         try {
 
             const product_ids = await new Promise((resolve, reject) => {
-                db.query(`SELECT product_id FROM products WHERE store_id = ?`, [store_id], (err, results) => {
+                db.query('SELECT product_id FROM products WHERE store_id = ?', store_id, (err, results) => {
                     if (err) reject(err);
                     else resolve(results.map(result => result.product_id));
                 });
             });
 
-            for (const productId of product_ids) {
+            for (const product_id of product_ids) {
                 await new Promise((resolve, reject) => {
-                    db.query(`DELETE FROM BookMark WHERE product_id = ?`, [productId], (err, result) => {
+                    db.query('DELETE FROM BookMark WHERE product_id = ?', product_id, (err, result) => {
                         if (err) reject(err);
                         else resolve();
                     });
@@ -703,6 +705,37 @@ const popupModel = {
         }
     },
 
+    // 리뷰 중복 체크
+    checkReview: async(store_id, user_name) => {
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query(checkReview_query, [store_id, user_name], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result[0].count > 0);
+                });
+            });
+
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 리뷰 권한 체크
+    checkReservation: async(store_id, user_name) => {
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query(checkReservation_query, [store_id, user_name], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result[0].count > 0);
+                });
+            });
+            
+            return result;
+        } catch(err) {
+            throw err;
+        }
+    },
     createReview: async (reviewdata) => { // 리뷰 생성
         try {
             const result = await new Promise((resolve, reject) => {
