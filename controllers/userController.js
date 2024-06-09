@@ -43,10 +43,7 @@ const authController = {
     certification: async (req, res) => {
         try {
             const phoneNumber = req.body.phoneNumber;
-            const Number = String(Math.floor(Math.random() * 1000000)).padStart(
-                6,
-                "0"
-            );
+            const Number = String(Math.floor(Math.random() * 1000000)).padStart(6, "0");
 
             sendMessage(phoneNumber, Number);
             return res.status(200).json({
