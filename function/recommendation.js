@@ -48,26 +48,26 @@ async function getRecommendation(user_name) {
             age: entry.age
         }));
 
-       // 클러스터 개수
-       const k = 3;
+        // 클러스터 개수
+        const k = 3;
 
-       // 초기 중심 설정 - 남성
-       const initialCentroidsMale = [
-           [1, 10],
-           [1, 20],
-           [1, 30],
-           [1, 40],
-           [1, 50]
-       ];
+        // 초기 중심 설정 - 남성
+        const initialCentroidsMale = [
+            [1, 10],
+            [1, 20],
+            [1, 30],
+            [1, 40],
+            [1, 50]
+        ];
 
-       // 초기 중심 설정 - 여성
-       const initialCentroidsFemale = [
-           [0, 10],
-           [0, 20],
-           [0, 30],
-           [0, 40],
-           [0, 50]
-       ];
+        // 초기 중심 설정 - 여성
+        const initialCentroidsFemale = [
+            [0, 10],
+            [0, 20],
+            [0, 30],
+            [0, 40],
+            [0, 50]
+        ];
 
         // 선택된 성별에 따라 초기 중심 설정
         const initialCentroids = userInfo.gender === 'M' ? initialCentroidsMale : initialCentroidsFemale;
@@ -114,8 +114,9 @@ async function getRecommendation(user_name) {
 
         console.log(`${userClusterIndex}번 클러스터`);
         console.log(`추천 카테고리: ${recommendedCategory}`);
+        const recommendedCategories = sortedCategories.slice(0, 2).map(category => category[0]);
 
-        return recommendedCategory;
+        return recommendedCategories;
     } catch (err) {
         throw err;
     }

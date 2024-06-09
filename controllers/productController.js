@@ -29,11 +29,9 @@ const productController = {
     // 굿즈 생성
     createProduct: async (req, res) => {
         try {
-
             const product_id = uuidv4();
             const body = req.body;
             const store_id = req.params.store_id;
-
             const productData = {
                 product_id,
                 store_id,
@@ -64,11 +62,12 @@ const productController = {
         }
     },
 
-    // 특정 굿즈 상세 조회 및 수정시 기본 정보 보내기
+    // 특정 굿즈 상세 조회
     getProduct: async (req, res) => {
         try {
             const product_id = req.params.product_id;
-            const result = await productModel.getProduct(product_id);
+            const user_name = req.params.user_name || null;
+            const result = await productModel.getProduct(product_id, user_name);
             res.status(200).json(result);
         } catch (err) {
             console.log(err);
@@ -121,6 +120,31 @@ const productController = {
             res.status(500).send("오류가 발생하였습니다.");
         }
     },
+
+    // 굿즈 찜
+    likeProduct: async (req, res) => {
+        try {
+            const product_id = req.params.product_id;
+            const user_name = req.body.user_name;
+            const like = await productModel.likeProduct(user_name, product_id);
+            res.status(201).json(like);
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("오류가 발생하였습니다.");
+        }
+    },
+
+    // 유저별 찜 조회
+    likeUser: async (req, res) => {
+        try {
+            const user_name = req.params.user_name;
+            const result = await productModel.likeUser(user_name);
+            res.status(200).json(result);
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("사용자별 찜 조회 중 오류가 발생하였습니다.");
+        }
+    } 
 
     // // 주문
     // orderProduct: async (req, res) => {

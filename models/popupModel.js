@@ -20,17 +20,22 @@ const popupStoreUser_query = 'SELECT store_id, store_name FROM popup_stores WHER
 const storeSchedules_query = 'SELECT * FROM store_schedules WHERE store_id = ?';
 const checkCapacity_query = 'SELECT max_capacity, current_capacity FROM store_capacity WHERE store_id = ? AND reservation_date = ? AND reservation_time = ?';
 const maxCapacity_query = 'SELECT max_capacity FROM popup_stores WHERE store_id = ?';
-const getReservationUser_query = 'SELECT * FROM reservation WHERE user_name = ?';
-const getReservationPresident_query = 'SELECT * FROM reservation WHERE store_id = ?';
+const getReservationUser_query = 'SELECT * FROM reservation WHERE user_name = ? ORDER BY reservation_date ASC, reservation_time ASC';
+const getReservationPresident_query = 'SELECT * FROM reservation WHERE store_id = ? ORDER BY reservation_date ASC, reservation_time ASC';
 const getcapacityByReservationId_query = 'SELECT * FROM reservation WHERE reservation_id = ?';
 const bookmark_query = 'SELECT mark_id, user_name, store_id FROM BookMark WHERE user_name = ?';
 const checkBookmark_query = 'SELECT * FROM BookMark WHERE store_id = ? AND user_name = ?';
 const reservationStatus_query = 'SELECT * FROM store_capacity WHERE store_id = ?';
-const getpopupByPresident_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.user_name = ? GROUP BY ps.store_id';
-const scheduledToOpen_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 14 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_start_date ASC';
-const scheduledToClose_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" GROUP BY ps.store_id ORDER BY ps.store_end_date ASC';
-const recommendation_query = 'SELECT popup_stores.*, GROUP_CONCAT(images.image_url) AS image_urls FROM popup_stores JOIN images ON popup_stores.store_id = images.store_id WHERE popup_stores.category_id = ? GROUP BY popup_stores.store_id ORDER BY RAND() LIMIT 5';
-
+const getpopupByPresident_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.user_name = ? AND ps.deleted = "false" GROUP BY ps.store_id';
+const scheduledToOpen_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_start_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 14 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" AND ps.store_status = "오픈 예정" GROUP BY ps.store_id ORDER BY ps.store_start_date ASC';
+const scheduledToClose_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS imageUrls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_end_date BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND ps.approval_status = "check" AND ps.deleted = "false" AND ps.store_status = "오픈" GROUP BY ps.store_id ORDER BY ps.store_end_date ASC';
+const recommendation_query = 'SELECT popup_stores.*, GROUP_CONCAT(images.image_url) AS image_urls FROM popup_stores JOIN images ON popup_stores.store_id = images.store_id WHERE popup_stores.category_id = ? AND popup_stores.deleted = "false" AND (store_status = "오픈" OR store_status = "오픈 예정") GROUP BY popup_stores.store_id ORDER BY RAND() LIMIT 5';
+const searchByname_query = 'SELECT * FROM popup_stores WHERE deleted ="false" AND store_name LIKE ? ';
+const searchByCategory_query = 'SELECT * FROM popup_stores WHERE deleted = "false" AND category_id = ?';
+const image_query = 'SELECT image_url FROM images WHERE store_id = ?';
+const getStoreName_query = 'SELECT store_name FROM popup_stores WHERE store_id = ?';
+const storeEndDate_query = 'SELECT store_end_date FROM popup_stores WHERE store_id = ?';
+const getUserImage_query = 'SELECT user_image FROM user_info WHERE user_name = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -52,6 +57,7 @@ const updateWaitStatus_query = 'UPDATE popup_stores SET store_wait_status = ? WH
 const updateWaitListStatus_query = 'UPDATE wait_list SET wait_status = ? WHERE wait_id = ?';
 const updateCapacity_query = 'UPDATE store_capacity SET current_capacity = ? WHERE store_id = ? AND reservation_date = ? AND reservation_time = ?';
 const updateCapacityMinus_query = 'UPDATE store_capacity SET current_capacity = current_capacity - ? WHERE store_id = ? AND reservation_date = ? AND reservation_time = ?';
+
 // ------- DELETE Query -------
 const deleteImage_query = 'DELETE FROM images WHERE store_id = ?';
 const deleteSchedule_query = 'DELETE FROM store_schedules WHERE store_id = ?';
@@ -259,6 +265,72 @@ const popupModel = {
         }
     },
 
+    // 검색어로 스토어 이름 검색
+    searchStoreName: async (store_name) => {
+        try {
+            const name = await new Promise((resolve, reject) => {
+                db.query(searchByname_query, `%${store_name}%`, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
+            });
+
+            if (name.length === 0) {
+                return { message: '검색 결과가 없습니다.' };
+            }
+
+            const result = await Promise.all(name.map(async (popup) => {
+
+                const images = await new Promise((resolve, reject) => {
+                    db.query(image_query, popup.store_id, (err, images) => {
+                        if (err) reject(err);
+                        else resolve(images.map(image => image.image_url));
+                    });
+                });
+                return {
+                    ...popup,
+                    images
+                };
+            }));
+
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 카테고리로 팝업 검색
+    searchCategory: async (category_id) => {
+        try {
+            const category = await new Promise((resolve, reject) => {
+                db.query(searchByCategory_query, category_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                })
+            })
+
+            if (category.length === 0) {
+                return { message: '해당 카테고리의 팝업이 존재하지 않습니다.' };
+            }
+            const results = await Promise.all(category.map(async (store) => {
+                const images = await new Promise((resolve, reject) => {
+                    db.query(image_query, store.store_id, (err, images) => {
+                        if (err) reject(err);
+                        else resolve(images.map(image => image.image_url));
+                    });
+                });
+                return {
+                    ...store,
+                    images
+                };
+            }));
+
+            return results;
+        } catch (err) {
+            throw err;
+        }
+    },
+
     // 이미지 업로드
     uploadImage: async (store_id, imagePath) => {
         try {
@@ -315,7 +387,7 @@ const popupModel = {
 
     // 하나의 팝업 정보 조회
     getPopup: async (store_id, user_name) => {
-
+        
         // 조회수
         const updateViewCount = (store_id) => {
             return new Promise((resolve, reject) => {
@@ -405,33 +477,51 @@ const popupModel = {
 
     // 팝업 정보 삭제
     deletePopup: async (store_id) => {
-        //const tables = ['BookMark', 'products', 'store_review', 'store_schedules', 'wait_list', 'images', 'payment_details', 'popup_stores'];
-        // try {
-        //     for (const tableName of tables) { // 해당 테이블에 store_id값 확인
-        //         const yes = await new Promise((resolve, reject) => {
-        //             db.query(`SELECT COUNT(*) AS count FROM ${tableName} WHERE store_id = ?`, [store_id], (err, result) => {
-        //                 if (err) reject(err);
-        //                 else resolve(result[0].count > 0); // 값 존재 여부 반환
-        //             });
-        //         });
-
-        //         if (yes) {
-        //             await new Promise((resolve, reject) => {
-        //                 db.query(`DELETE FROM ${tableName} WHERE store_id = ?`, [store_id], (err, result) => {
-        //                     if (err) reject(err);
-        //                     else resolve();
-        //                 });
-        //             });
-        //         }
-        //     }
-        //     return true;
+        const tables = ['BookMark', 'store_review'];
         try {
-            await new Promise((resolve, reject) => {
-                db.query('UPDATE popup_stores SET deleted = "true" WHERE store_id = ?', store_id, (err, result) => {
+
+            const product_ids = await new Promise((resolve, reject) => {
+                db.query(`SELECT product_id FROM products WHERE store_id = ?`, [store_id], (err, results) => {
                     if (err) reject(err);
-                    else resolve();
+                    else resolve(results.map(result => result.product_id));
+                });
+            });
+
+            for (const productId of product_ids) {
+                await new Promise((resolve, reject) => {
+                    db.query(`DELETE FROM BookMark WHERE product_id = ?`, [productId], (err, result) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+            };
+
+
+            for (const tableName of tables) { // 해당 테이블에 store_id값 확인
+                const yes = await new Promise((resolve, reject) => {
+                    db.query(`SELECT COUNT(*) AS count FROM ${tableName} WHERE store_id = ?`, [store_id], (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result[0].count > 0); // 값 존재 여부 반환
+                    });
+                });
+
+                if (yes) {
+                    await new Promise((resolve, reject) => {
+                        db.query(`DELETE FROM ${tableName} WHERE store_id = ?`, [store_id], (err, result) => {
+                            if (err) reject(err);
+                            else resolve();
+                        });
+                    });
+                }
+
+                await new Promise((resolve, reject) => {
+                    db.query('UPDATE popup_stores SET deleted = "true" WHERE store_id = ?', store_id, (err, result) => {
+                        if (err) reject(err);
+                        else resolve();
+                    })
                 })
-            })
+            }
+            return true;
         } catch (err) {
             throw err;
         }
@@ -518,7 +608,12 @@ const popupModel = {
                     resolve(results);
                 })
             })
-            return bookmark;
+
+            if (bookmark.length > 0) {
+                return bookmark;
+            } else {
+                return '찜한 내역이 없습니다.';
+            }
         } catch (err) {
             throw err;
         }
@@ -538,7 +633,21 @@ const popupModel = {
                 return "현재 작성된 리뷰가 없습니다. 예약 후 작성해보세요!";
             }
 
-            return results;
+            const reviewData = await Promise.all(results.map(async (review) => {
+                const userImage = await new Promise((resolve, reject) => {
+                    db.query(getUserImage_query, [review.user_name], (err, user) => {
+                        if (err) reject(err);
+                        resolve(user[0]?.user_image || null);
+                    });
+                });
+    
+                return {
+                    ...review,
+                    user_image: userImage
+                };
+            }));
+
+            return reviewData;
         } catch (err) {
             throw err;
         }
@@ -558,7 +667,21 @@ const popupModel = {
                 return "현재 작성된 리뷰가 없습니다. 예약 후 작성해보세요!";
             }
 
-            return results;
+            const reviewData = await Promise.all(results.map(async (review) => {
+                const userImage = await new Promise((resolve, reject) => {
+                    db.query(getUserImage_query, [review.user_name], (err, user) => {
+                        if (err) reject(err);
+                        resolve(user[0]?.user_image || null);
+                    });
+                });
+    
+                return {
+                    ...review,
+                    user_image: userImage
+                };
+            }));
+
+            return reviewData;
         } catch (err) {
             throw err;
         }
@@ -796,12 +919,35 @@ const popupModel = {
                     else resolve(result);
                 });
             });
-
-            const status = results.map(item => {
-                item.status = item.current_capacity >= item.max_capacity;
-                return item;
+            
+            const date = await new Promise((resolve, reject) => {
+                db.query(storeEndDate_query, store_id, (err, result) => {
+                    if(err) reject(err);
+                    else resolve(result);
+                })
             });
-            return status;
+
+            const day = await new Promise((resolve, reject) => {
+                db.query(storeSchedules_query, store_id, (err, result) => {
+                    if(err) reject(err);
+                    else resolve(result);
+                })
+            })
+
+            const common = {
+                store_id: results[0].store_id,
+                max_capacity: results[0].max_capacity,
+                store_end_date: date[0].store_end_date,
+                day: day.map(({ schedule_id, store_id, ...dayData }) => dayData)
+            };
+
+            const status = results.map(({ max_capacity, store_id, ...rest }) => {
+                rest.status = rest.current_capacity >= common.max_capacity;
+                return rest;
+            });
+
+            return {common, status};
+
         } catch (err) {
             throw err;
         }
@@ -872,76 +1018,125 @@ const popupModel = {
         }
     },
 
+    // 유저별 예약 조회
     getReservationUser: async (user_name) => {
-        const results = await new Promise((resolve, reject) => {
-            db.query(getReservationUser_query, user_name, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query(getReservationUser_query, user_name, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
             });
-        });
 
-        return results;
+            if (results.length === 0) {
+                return '예약 정보가 없습니다.';
+            }
+
+            const reservation = await Promise.all(results.map(async (data) => {
+                const store_name = await new Promise((resolve, reject) => {
+                    db.query(getStoreName_query, [data.store_id], (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result.map(name => name.store_name)[0]);
+                    });
+                });
+                return {
+                    ...data,
+                    store_name
+                };
+            }));
+
+            return reservation;
+
+        } catch (err) {
+            throw err;
+        }
     },
 
+    // 스토어별 예약 조회
     getReservationPresident: async (store_id) => {
-        const results = await new Promise((resolve, reject) => {
-            db.query(getReservationPresident_query, store_id, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query(getReservationPresident_query, store_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
             });
-        });
 
-        return results;
+            return results;
+        } catch (err) {
+            throw err;
+        }
     },
 
+    // 예약 취소
     deleteReservation: async (reservation_id) => {
-        const getCapacity = await new Promise((resolve, reject) => {
-            db.query(getcapacityByReservationId_query, reservation_id, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
+        try {
+            const getCapacity = await new Promise((resolve, reject) => {
+                db.query(getcapacityByReservationId_query, reservation_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
             });
-        });
 
-        const { store_id, reservation_date, reservation_time, capacity } = getCapacity[0];
+            const { store_id, reservation_date, reservation_time, capacity } = getCapacity[0];
 
-        await new Promise((resolve, reject) => {
-            db.query(updateCapacityMinus_query, [capacity, store_id, reservation_date, reservation_time], (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
+            await new Promise((resolve, reject) => {
+                db.query(updateCapacityMinus_query, [capacity, store_id, reservation_date, reservation_time], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
             });
-        });
 
-        await new Promise((resolve, reject) => {
-            db.query(deleteReservation_query, reservation_id, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
+            await new Promise((resolve, reject) => {
+                db.query(deleteReservation_query, reservation_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                })
             })
-        })
+        } catch (err) {
+            throw err;
+        }
+
     },
 
     // 추천 시스템
     recommendationData: async (user_recommendation) => {
         try {
-            const results = await new Promise((resolve, reject) => {
-                db.query(recommendation_query, user_recommendation, async (err, result) => {
-                    if (err) reject(err);
-                    else {
-                        try {
-                            for (const popup of result) {
-                                if (popup.image_urls) {
-                                    popup.imageUrls = popup.image_urls.split(',');
-                                    delete popup.image_urls;
-                                } else {
-                                    popup.imageUrls = [];
+            const getCategoryData = async (category) => {
+                return new Promise((resolve, reject) => {
+                    db.query(recommendation_query, [category], (err, result) => {
+                        if (err) reject(err);
+                        else {
+                            try {
+                                for (const popup of result) {
+                                    if (popup.image_urls) {
+                                        popup.imageUrls = popup.image_urls.split(',');
+                                        delete popup.image_urls;
+                                    } else {
+                                        popup.imageUrls = [];
+                                    }
                                 }
+                                resolve(result);
+                            } catch (err) {
+                                reject(err);
                             }
-                            resolve(result); // 이 부분이 빠졌었습니다.
-                        } catch (err) {
-                            reject(err);
                         }
-                    }
+                    });
                 });
-            });
+            };
+    
+            // 첫 번째 카테고리 데이터
+            const firstCategoryData = await getCategoryData(user_recommendation[0]);
+    
+            // 첫 번째 카테고리 5개 이하일 경우,
+            let results = firstCategoryData;
+            if (results.length < 5 && user_recommendation.length > 1) {
+                const count = 5 - results.length;
+                const secondCategoryData = await getCategoryData(user_recommendation[1]);
+                const slice = Math.min(count, secondCategoryData.length);
+                results = results.concat(secondCategoryData.slice(0, slice));
+            }
+    
             return results.length > 0 ? results : '해당 카테고리의 팝업이 존재하지 않습니다.';
         } catch (err) {
             throw err;
