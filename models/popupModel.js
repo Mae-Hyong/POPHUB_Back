@@ -387,7 +387,7 @@ const popupModel = {
 
     // 하나의 팝업 정보 조회
     getPopup: async (store_id, user_name) => {
-
+        
         // 조회수
         const updateViewCount = (store_id) => {
             return new Promise((resolve, reject) => {
@@ -590,7 +590,12 @@ const popupModel = {
                     resolve(results);
                 })
             })
-            return bookmark;
+
+            if (bookmark.length > 0) {
+                return bookmark;
+            } else {
+                return '찜한 내역이 없습니다.';
+            }
         } catch (err) {
             throw err;
         }

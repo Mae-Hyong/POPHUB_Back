@@ -14,7 +14,6 @@ router.get('/scheduledToclose', popupController.scheduledToClose); // 마감 임
 router.get('/searchStoreName', popupController.searchStoreName); // 스토어 이름으로 팝업 검색
 router.get('/searchCategory/:category_id', popupController.searchCategory); // 카테고리로 팝업 검색
 
-
 router.post('/review/create/:store_id', popupController.createReview); // 팝업 리뷰 생성
 router.get('/reviews/store/:store_id', popupController.storeReview); // 특정 팝업 리뷰 조회
 router.get('/reviews/user/:user_name', popupController.storeUserReview); // 특정 아이디별 리뷰 조회
