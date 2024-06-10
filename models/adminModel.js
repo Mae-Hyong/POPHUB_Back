@@ -1,7 +1,7 @@
 const db = require('../config/mysqlDatabase');
 
 // ------- GET Query -------
-const pending_query = 'SELECT * FROM popup_stores WHERE approval_status = "pending"';
+const pending_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.approval_status = "pending" AND deleted = "false" GROUP BY ps.store_id';
 const search_notice_query = 'SELECT * FROM notice'
 const select_notice_query = 'SELECT * FROM notice WHERE notice_id = ?'
 // ------- POST Query -------
@@ -70,7 +70,13 @@ const adminModel = {
             const pendingList = await new Promise((resolve, reject) => {
                 db.query(pending_query, (err, result) => {
                     if (err) reject(err);
-                    else resolve(result);
+                    else {
+                        const pendingData = result.map(data => ({
+                            ...data,
+                            image_urls: data.image_urls ? data.image_urls.split(',') : []
+                        }));
+                        resolve(pendingData);
+                    }
                 });
             });
             return pendingList;
