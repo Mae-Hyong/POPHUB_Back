@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const unless = require('express-unless');
 require('dotenv').config();
 
 // JWT를 생성하는 함수
