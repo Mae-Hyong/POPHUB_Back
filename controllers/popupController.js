@@ -300,8 +300,19 @@ const popupController = {
                 review_content: body.review_content,
                 review_date,
             }
-            await popupModel.createReview(reviewData);
-            res.status(201).json('리뷰가 등록되었습니다.');
+
+            // 예약 확인
+            const checkReservation = await popupModel.checkReservation(store_id, body.user_name);
+            if (checkReservation) {
+                const checkReview = await popupModel.checkReview(store_id, body.user_name);
+                if (checkReview) { // 리뷰 중복 체크
+                    return res.status(400).json('이미 리뷰를 작성하셨습니다.');
+                }
+                await popupModel.createReview(reviewData);
+                return res.status(201).json('리뷰가 등록되었습니다.');
+            }
+
+            res.status(400).json('리뷰 작성 권한이 없습니다.');
         } catch (err) {
             console.log(err);
             res.status(500).send("리뷰 생성 중 오류가 발생하였습니다.");
