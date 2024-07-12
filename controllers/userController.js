@@ -323,9 +323,7 @@ const userController = {
                 writeDate: result.write_date,
             });
         } catch (err) {
-            return res
-                .status(500)
-                .send("문의 내역을 가져오는 중 오류가 발생했습니다.");
+            return res.status(500).send("문의 내역을 가져오는 중 오류가 발생했습니다.");
         }
     },
 };
