@@ -8,7 +8,6 @@ const alarmController = {
       await alarmModel.tokenResetModel(userName, fcmToken);
       res.status(201).send(`사용자 ${userName} 및 FCM 토큰 저장 성공`);
     } catch (error) {
-      console.error("사용자 추가 오류:", error);
       res.status(500).send("사용자 추가 오류");
     }
   },
@@ -18,7 +17,6 @@ const alarmController = {
       await alarmModel.alarmAddModel(userName, type, alarmDetails);
       res.status(201).send(`알람이 성공적으로 추가되었습니다`);
     } catch (error) {
-      console.error("알람 추가 오류:", error);
       res.status(500).send("알람 추가 오류");
     }
   },
@@ -31,7 +29,6 @@ const alarmController = {
       await alarmModel.tokenSaveModel(userName, fcmToken);
       res.status(201).send("토큰이 성공적으로 저장됨");
     } catch (error) {
-      console.error("토큰 저장 오류:", error);
       res.status(500).send("토큰 저장 오류");
     }
   },
@@ -41,7 +38,6 @@ const alarmController = {
       await alarmModel.waitListAddModel(userName, storeId, date, desiredTime);
       res.status(201).send(`대기 알림이 성공적으로 추가되었습니다`);
     } catch (error) {
-      console.error("대기 알림 추가 오류:", error);
       res.status(500).send("대기 알림 추가 오류");
     }
   },
@@ -61,7 +57,6 @@ const alarmController = {
           .send("예약 가능한 수량이 없어 알림을 전송하지 않았습니다.");
       }
     } catch (error) {
-      console.error("알림 전송 오류:", error);
       res.status(500).send("알림 전송 오류");
     }
   },

@@ -85,9 +85,8 @@ const alarmModel = {
 
           try {
             await admin.messaging().send(message);
-            console.log("성공적으로 메시지가 보내짐:", message);
           } catch (error) {
-            console.error("메시지 보내는 중 오류남", error);
+            throw new Error(`메시지 보내기 오류: ${error}`);
           }
         }
       }

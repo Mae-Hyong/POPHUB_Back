@@ -31,5 +31,4 @@ cron.schedule("0 0 * * *", async () => {
   });
 
   await batch.commit();
-  console.log("만료된 토큰 처리 완료");
 });
