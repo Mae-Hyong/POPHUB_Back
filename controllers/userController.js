@@ -74,10 +74,7 @@ const userController = {
 
             // 아이디가 안담겨 왔을때
             if (!userId) {
-                return res.status(400).json({
-                    resultCode: 400,
-                    resultMsg: "사용자 ID를 제공해야 합니다.",
-                });
+                return res.status(400).json({resultMsg: "사용자 ID를 제공해야 합니다."});
             }
 
             const result = await userModel.searchUser(userId);
@@ -107,10 +104,7 @@ const userController = {
 
             // 아이디 혹은 유저 네임이 안담겨 왔을때
             if (!userId && !userName) {
-                return res.status(400).json({
-                    resultCode: 400,
-                    resultMsg: "사용자 userName 혹은 Id를 제공해야 합니다.",
-                });
+                return res.status(400).json({resultMsg: "사용자 userName 혹은 Id를 제공해야 합니다."});
             }
 
             if (userId) {
@@ -130,15 +124,11 @@ const userController = {
     searchId: async (req, res) => {
         try {
             const phoneNumber = req.params.phoneNumber;
-            if (!phoneNumber)
-                return res.send("사용자의 Phone Number을 제공해야 합니다.").status(400);
+            if (!phoneNumber) return res.send("사용자의 Phone Number을 제공해야 합니다.").status(400);
 
             const result = await userModel.searchId(phoneNumber);
 
-            if (result.length === 0) {
-                res.status(404).send("User not found");
-                return;
-            }
+            if (result.length === 0) return res.status(404).send("User not found");
             return res.status(200).json({ userId: result.user_id });
         } catch (err) {
             return res.status(500).send("ID 검색 중 오류가 발생했습니다.");
@@ -150,13 +140,11 @@ const userController = {
             const { userId, userPassword } = req.body;
             const hashedPassword = await bcrypt.hash(userPassword, 10);
 
-            if (!userId)
-                return res.send("사용자의 Id를 제공해야 합니다.").status(400);
+            if (!userId) return res.send("사용자의 Id를 제공해야 합니다.").status(400);
 
             await userModel.changePassword(userId, hashedPassword);
             return res.status(200).send("Password Change successfully");
         } catch (err) {
-            console.error(err);
             return res.status(500).send("비밀번호 변경 중 오류가 발생했습니다.");
         }
     },
@@ -168,22 +156,12 @@ const userController = {
                 let userImage = null;
                 if (req.file) userImage = req.file.path;
 
-                await userModel.createProfile(
-                    userId,
-                    userName,
-                    phoneNumber,
-                    Gender,
-                    Age,
-                    userImage
-                );
+                await userModel.createProfile( userId, userName, phoneNumber, Gender, Age, userImage );
 
                 return res.status(201).send("Profile added successfully");
             } catch (error) {
-                console.error("Error uploading image to Cloudinary:", error);
                 return res.status(500).json({
-                    resultCode: 500,
-                    resultMsg:
-                        "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
+                    resultMsg:"이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
                     error: error.message,
                 });
             }
@@ -212,11 +190,8 @@ const userController = {
 
                 return res.status(200).send("Profile Modify successfully");
             } catch (error) {
-                console.error("Error uploading image to Cloudinary:", error);
                 return res.status(500).json({
-                    resultCode: 500,
-                    resultMsg:
-                        "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
+                    resultMsg: "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
                     error: error.message,
                 });
             }
@@ -243,17 +218,10 @@ const userController = {
     createInquiry: async (req, res) => {
         try {
             const { userName, categoryId, title, content } = req.body;
-            console.log(req.body);
             let userImage = null;
             if (req.file) userImage = req.file.path;
 
-            await userModel.createInquiry(
-                userName,
-                categoryId,
-                title,
-                content,
-                userImage
-            );
+            await userModel.createInquiry( userName, categoryId, title, content, userImage );
             res.status(201).send("Inquiry added successfully");
         } catch (err) {
             return res.status(500).send("문의 생성 중 오류가 발생했습니다.");
@@ -308,10 +276,7 @@ const userController = {
         try {
             const inquiryId = req.query.inquiryId;
             if (!inquiryId) {
-                return res.status(400).json({
-                    resultCode: 400,
-                    resultMsg: "문의 Id를 제공해야합니다.",
-                });
+                return res.status(400).json({resultMsg: "문의 Id를 제공해야합니다."});
             }
             const result = await userModel.searchAnswer(inquiryId);
             if (!result) return res.status(404).send("Answer not found");
