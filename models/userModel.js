@@ -77,9 +77,9 @@ const userModel = {
         })
     },
 
-    createProfile: (userId, userName, phoneNumber, Gender, Age, userImage) => {
+    createProfile: (userId, userName, phoneNumber, Gender, age, userImage) => {
         return new Promise((resolve, reject) => {
-            db.query(profile_add_query, [userId, userName, phoneNumber, Gender, Age, userImage], (err, result) => {
+            db.query(profile_add_query, [userId, userName, phoneNumber, Gender, age, userImage], (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             });
@@ -149,18 +149,18 @@ const userModel = {
         })
     },
 
-    selectInquiry: (inquiry_id) => {
+    selectInquiry: (inquiryId) => {
         return new Promise((resolve, reject) => {
-            db.query(inquiry_select_query, inquiry_id, (err, result) => {
+            db.query(inquiry_select_query, inquiryId, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })
         })
     },
 
-    searchAnswer: (inquiry_id) => {
+    searchAnswer: (inquiryId) => {
         return new Promise((resolve, reject) => {
-            db.query(answer_search_query, inquiry_id, (err, result) => {
+            db.query(answer_search_query, inquiryId, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })

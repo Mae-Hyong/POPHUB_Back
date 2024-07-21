@@ -123,7 +123,7 @@ const userController = {
 
     searchId: async (req, res) => {
         try {
-            const phoneNumber = req.params.phoneNumber;
+            const phoneNumber = req.query.phoneNumber;
             if (!phoneNumber) return res.send("사용자의 Phone Number을 제공해야 합니다.").status(400);
 
             const result = await userModel.searchId(phoneNumber);

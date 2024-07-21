@@ -38,18 +38,18 @@ const adminModel = {
         })
     },
 
-    createAnswer: (inquiry_id, user_name, content) => {
+    createAnswer: (inquiryId, user_name, content) => {
         return new Promise((resolve, reject) => {
-            db.query(create_answer_query, [inquiry_id, user_name, content], (err, result) => {
+            db.query(create_answer_query, [inquiryId, user_name, content], (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             });
         })
     },
 
-    updateInquiry: (inquiry_id) => {
+    updateInquiry: (inquiryId) => {
         return new Promise((resolve, reject) => {
-            db.query(update_inquiry_query, ['complete', inquiry_id], (err, result) => {
+            db.query(update_inquiry_query, ['complete', inquiryId], (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             });
