@@ -1,11 +1,17 @@
 const kMeans = require('kmeans-js');
 const db = require('../config/mysqlDatabase');
 
+const loginUser_query = `SELECT gender, age FROM user_info WHERE user_name = ?`;
+const reservationUser_query = `
+            SELECT rv.user_name, ps.category_id, ui.gender, ui.age
+            FROM reservation as rv
+            LEFT JOIN popup_stores as ps ON rv.store_id = ps.store_id
+            LEFT JOIN user_info as ui ON rv.user_name = ui.user_name `;
+
 // 사용자 정보를 가져오는 함수
 async function loginUserInfo(user_name) {
     return new Promise((resolve, reject) => {
-        const query = `SELECT gender, age FROM user_info WHERE user_name = ?`;
-        db.query(query, [user_name], (err, result) => {
+        db.query(loginUser_query, [user_name], (err, result) => {
             if (err) reject(err);
             else resolve(result[0]);
         });
@@ -14,13 +20,7 @@ async function loginUserInfo(user_name) {
 
 function getUserInfo() {
     return new Promise((resolve, reject) => {
-        const query = `
-            SELECT rv.user_name, ps.category_id, ui.gender, ui.age
-            FROM reservation as rv
-            LEFT JOIN popup_stores as ps ON rv.store_id = ps.store_id
-            LEFT JOIN user_info as ui ON rv.user_name = ui.user_name
-        `;
-        db.query(query, (err, result) => {
+        db.query(reservationUser_query, (err, result) => {
             if (err) reject(err);
             else resolve(result);
         });
@@ -52,22 +52,10 @@ async function getRecommendation(user_name) {
         const k = 3;
 
         // 초기 중심 설정 - 남성
-        const initialCentroidsMale = [
-            [1, 10],
-            [1, 20],
-            [1, 30],
-            [1, 40],
-            [1, 50]
-        ];
+        const initialCentroidsMale = [[1, 10], [1, 20], [1, 30], [1, 40], [1, 50]];
 
         // 초기 중심 설정 - 여성
-        const initialCentroidsFemale = [
-            [0, 10],
-            [0, 20],
-            [0, 30],
-            [0, 40],
-            [0, 50]
-        ];
+        const initialCentroidsFemale = [[0, 10], [0, 20], [0, 30], [0, 40], [0, 50]];
 
         // 선택된 성별에 따라 초기 중심 설정
         const initialCentroids = userInfo.gender === 'M' ? initialCentroidsMale : initialCentroidsFemale;
@@ -80,9 +68,6 @@ async function getRecommendation(user_name) {
             init: initialCentroids,
             normalize: false
         });
-
-        // 클러스터링 결과 출력
-        console.log("클러스터 중심:", centroids);
 
         // 해당 사용자가 속한 클러스터 찾기
         let userClusterIndex = -1;
