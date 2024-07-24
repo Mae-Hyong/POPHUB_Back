@@ -35,6 +35,9 @@ const searchByCategory_query = 'SELECT * FROM popup_stores WHERE deleted = "fals
 const image_query = 'SELECT image_url FROM images WHERE store_id = ?';
 const getStoreName_query = 'SELECT store_name FROM popup_stores WHERE store_id = ?';
 const storeEndDate_query = 'SELECT store_end_date FROM popup_stores WHERE store_id = ?';
+const getUserImage_query = 'SELECT user_image FROM user_info WHERE user_name = ?';
+const checkReview_query = 'SELECT COUNT(*) AS count FROM store_review WHERE store_id = ? AND user_name = ?';
+const checkReservation_query = 'SELECT COUNT (*) AS count FROM reservation WHERE store_id = ? AND user_name = ? AND reservation_status = "completed"';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -386,7 +389,7 @@ const popupModel = {
 
     // 하나의 팝업 정보 조회
     getPopup: async (store_id, user_name) => {
-
+        
         // 조회수
         const updateViewCount = (store_id) => {
             return new Promise((resolve, reject) => {
@@ -476,33 +479,51 @@ const popupModel = {
 
     // 팝업 정보 삭제
     deletePopup: async (store_id) => {
-        //const tables = ['BookMark', 'products', 'store_review', 'store_schedules', 'wait_list', 'images', 'payment_details', 'popup_stores'];
-        // try {
-        //     for (const tableName of tables) { // 해당 테이블에 store_id값 확인
-        //         const yes = await new Promise((resolve, reject) => {
-        //             db.query(`SELECT COUNT(*) AS count FROM ${tableName} WHERE store_id = ?`, [store_id], (err, result) => {
-        //                 if (err) reject(err);
-        //                 else resolve(result[0].count > 0); // 값 존재 여부 반환
-        //             });
-        //         });
-
-        //         if (yes) {
-        //             await new Promise((resolve, reject) => {
-        //                 db.query(`DELETE FROM ${tableName} WHERE store_id = ?`, [store_id], (err, result) => {
-        //                     if (err) reject(err);
-        //                     else resolve();
-        //                 });
-        //             });
-        //         }
-        //     }
-        //     return true;
+        const tables = ['BookMark', 'store_review'];
         try {
-            await new Promise((resolve, reject) => {
-                db.query('UPDATE popup_stores SET deleted = "true" WHERE store_id = ?', store_id, (err, result) => {
+
+            const product_ids = await new Promise((resolve, reject) => {
+                db.query('SELECT product_id FROM products WHERE store_id = ?', store_id, (err, results) => {
                     if (err) reject(err);
-                    else resolve();
+                    else resolve(results.map(result => result.product_id));
+                });
+            });
+
+            for (const product_id of product_ids) {
+                await new Promise((resolve, reject) => {
+                    db.query('DELETE FROM BookMark WHERE product_id = ?', product_id, (err, result) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+            };
+
+
+            for (const tableName of tables) { // 해당 테이블에 store_id값 확인
+                const yes = await new Promise((resolve, reject) => {
+                    db.query(`SELECT COUNT(*) AS count FROM ${tableName} WHERE store_id = ?`, [store_id], (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result[0].count > 0); // 값 존재 여부 반환
+                    });
+                });
+
+                if (yes) {
+                    await new Promise((resolve, reject) => {
+                        db.query(`DELETE FROM ${tableName} WHERE store_id = ?`, [store_id], (err, result) => {
+                            if (err) reject(err);
+                            else resolve();
+                        });
+                    });
+                }
+
+                await new Promise((resolve, reject) => {
+                    db.query('UPDATE popup_stores SET deleted = "true" WHERE store_id = ?', store_id, (err, result) => {
+                        if (err) reject(err);
+                        else resolve();
+                    })
                 })
-            })
+            }
+            return true;
         } catch (err) {
             throw err;
         }
@@ -589,7 +610,12 @@ const popupModel = {
                     resolve(results);
                 })
             })
-            return bookmark;
+
+            if (bookmark.length > 0) {
+                return bookmark;
+            } else {
+                return '찜한 내역이 없습니다.';
+            }
         } catch (err) {
             throw err;
         }
@@ -609,7 +635,21 @@ const popupModel = {
                 return "현재 작성된 리뷰가 없습니다. 예약 후 작성해보세요!";
             }
 
-            return results;
+            const reviewData = await Promise.all(results.map(async (review) => {
+                const userImage = await new Promise((resolve, reject) => {
+                    db.query(getUserImage_query, [review.user_name], (err, user) => {
+                        if (err) reject(err);
+                        resolve(user[0]?.user_image || null);
+                    });
+                });
+    
+                return {
+                    ...review,
+                    user_image: userImage
+                };
+            }));
+
+            return reviewData;
         } catch (err) {
             throw err;
         }
@@ -629,7 +669,21 @@ const popupModel = {
                 return "현재 작성된 리뷰가 없습니다. 예약 후 작성해보세요!";
             }
 
-            return results;
+            const reviewData = await Promise.all(results.map(async (review) => {
+                const userImage = await new Promise((resolve, reject) => {
+                    db.query(getUserImage_query, [review.user_name], (err, user) => {
+                        if (err) reject(err);
+                        resolve(user[0]?.user_image || null);
+                    });
+                });
+    
+                return {
+                    ...review,
+                    user_image: userImage
+                };
+            }));
+
+            return reviewData;
         } catch (err) {
             throw err;
         }
@@ -651,6 +705,37 @@ const popupModel = {
         }
     },
 
+    // 리뷰 중복 체크
+    checkReview: async(store_id, user_name) => {
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query(checkReview_query, [store_id, user_name], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result[0].count > 0);
+                });
+            });
+
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 리뷰 권한 체크
+    checkReservation: async(store_id, user_name) => {
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query(checkReservation_query, [store_id, user_name], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result[0].count > 0);
+                });
+            });
+            
+            return result;
+        } catch(err) {
+            throw err;
+        }
+    },
     createReview: async (reviewdata) => { // 리뷰 생성
         try {
             const result = await new Promise((resolve, reject) => {

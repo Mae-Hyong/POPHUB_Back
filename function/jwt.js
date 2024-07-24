@@ -1,5 +1,4 @@
 const jwt = require('jsonwebtoken');
-const unless = require('express-unless');
 require('dotenv').config();
 
 // JWT를 생성하는 함수
@@ -12,14 +11,10 @@ generateToken = userId => {
 verifyToken = (req, res, next) => {
   const token = req.headers['authorization']; // 헤더에서 토큰 추출
 
-  if (!token) {
-      return res.status(401).json({ message: '토큰이 존재하지 않습니다.' });
-  }
+  if (!token) return res.status(401).json({ message: '토큰이 존재하지 않습니다.' });
 
   jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
-      if (err) {
-          return res.status(403).json({ message: '토큰이 유효하지 않습니다.' });
-      }
+      if (err) return res.status(403).json({ message: '토큰이 유효하지 않습니다.' });
       req.decoded = decoded;
       next();
   });

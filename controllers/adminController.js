@@ -10,7 +10,6 @@ const adminController = {
 
             if (categoryId) {
                 results = await adminModel.selectCategory(categoryId);
-                console.log(results);
             } else {
                 const result = await adminModel.searchCategory();
                 results = await Promise.all(result.map(async (result) => {
@@ -19,14 +18,12 @@ const adminController = {
                         categoryName: result.category_name
                     };
                 }));
-                console.log(results);
             }
 
-            if (results) res.status(200).json(results);
-            else res.status(203).json({ msg: "해당 카테고리 미존재" });
+            if (results) return res.status(200).json(results);
+            else return res.status(203).json({ msg: "해당 카테고리 미존재" });
         } catch (err) {
-            console.log(err);
-            res.status(500).send("카테고리 조회 중 오류가 발생했습니다.");
+            return res.status(500).send("카테고리 조회 중 오류가 발생했습니다.");
         }
     },
 
@@ -37,9 +34,9 @@ const adminController = {
             await adminModel.createAnswer(inquiryId, userName, content);
             await adminModel.updateInquiry(inquiryId)
             const result = await userModel.selectInquiry(inquiryId);
-            res.status(201).json({ msg: `답변 작성이 완료되었습니다.`, userName: result.user_name });
+            return res.status(201).json({ msg: `답변 작성이 완료되었습니다.`, userName: result.user_name });
         } catch (err) {
-            res.status(500).send("답변 작성 중 오류가 발생했습니다.");
+            return res.status(500).send("답변 작성 중 오류가 발생했습니다.");
         }
     },
 
@@ -57,7 +54,7 @@ const adminController = {
             }));
             return res.status(200).json(results);
         } catch (err) {
-            res.status(500).send("문의 전체 조회 중 오류가 발생했습니다.");
+            return res.status(500).send("문의 전체 조회 중 오류가 발생했습니다.");
         }
     },
 
@@ -70,9 +67,9 @@ const adminController = {
             }
 
             await adminModel.createNotice(noticeData);
-            res.status(201).send("공지사항 작성 완료")
+            return res.status(201).send("공지사항 작성 완료")
         } catch (err) {
-            res.status(500).send("공지사항 작성 중 오류가 발생했습니다.");
+            return res.status(500).send("공지사항 작성 중 오류가 발생했습니다.");
         }
     },
 
@@ -81,7 +78,7 @@ const adminController = {
             const noticeId = req.query.notice_id;
             if (!noticeId) {
                 const searchResult = await adminModel.searchNotice();
-                const results = await Promise.all(searchResult.map(async (result) => {
+                const results = await Promise.all(searchResult.map(async (searchResult) => {
                     return {
                         noticeId: searchResult.notice_id,
                         userName: searchResult.user_name,
@@ -97,7 +94,7 @@ const adminController = {
             }
 
         } catch (err) {
-            res.status(500).send("공지사항 조회 중 오류가 발생했습니다.");
+            return res.status(500).send("공지사항 조회 중 오류가 발생했습니다.");
         }
     },
 
@@ -105,7 +102,7 @@ const adminController = {
     popupPendingList: async (req, res) => {
         try {
             const pendingList = await adminModel.popupPendingList();
-            res.status(200).json(pendingList);
+            return res.status(200).json(pendingList);
         } catch (err) {
             throw err;
         }
@@ -116,10 +113,9 @@ const adminController = {
         try {
             const store_id = req.body.store_id;
             const user_name = await adminModel.popupPendingCheck(store_id);
-            res.status(200).json(user_name);
+            return res.status(200).json(user_name);
         } catch (err) {
-            console.log(err);
-            res.status(500).send("오류 발생");
+            return res.status(500).send("오류 발생");
         }
     },
 
@@ -134,10 +130,9 @@ const adminController = {
                 denial_date
             }
             const user_name = await adminModel.popupPendingDeny(denialData);
-            res.status(201).json(user_name);
+            return res.status(201).json(user_name);
         } catch (err) {
-            console.log(err);
-            res.status(500).send("오류 발생");
+            return res.status(500).send("오류 발생");
         }
     },
 }

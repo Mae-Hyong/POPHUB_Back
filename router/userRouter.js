@@ -7,8 +7,8 @@ const router = express.Router();
 const { signController, authController, userController } = require('../controllers/userController');
 
 // sign route
-router.post("/sign_up", signController.signUp);
-router.post("/sign_in", signController.signIn);
+router.post("/signUp", signController.signUp);
+router.post("/signIn", signController.signIn);
 
 // auth route
 router.post("/certification", authController.certification);
@@ -16,17 +16,17 @@ router.post("/verify", authController.verifyCertification);
 
 // user route
 router.get("/check", userController.doubleCheck);
-router.get("/search_id/:phoneNumber", userController.searchId);
-router.post("/change_password", userController.changePassword);
-router.get("/search_inquiry", userController.searchInquiry);
-router.get("/search_answer", token.verifyToken, userController.searchAnswer);
-router.post("/create_profile", token.verifyToken, upload.single("file"), userController.createProfile);
-router.post("/update_profile", token.verifyToken, upload.single("file"), userController.updateProfile);
+router.get("/searchId", userController.searchId);
+router.post("/changePassword", userController.changePassword);
+router.get("/inquiry/search", userController.searchInquiry);
+router.get("/searchAnswer", token.verifyToken, userController.searchAnswer);
+router.post("/profile/create", token.verifyToken, upload.single("file"), userController.createProfile);
+router.post("/profile/update", token.verifyToken, upload.single("file"), userController.updateProfile);
 
 // 토큰 검증 필요
 router.get("/:userId", token.verifyToken, userController.searchUser);
-router.post("/create_inquiry", token.verifyToken, upload.single("file"), userController.createInquiry);
+router.post("/inquiry/create", token.verifyToken, upload.single("file"), userController.createInquiry);
 
-router.post("/user_delete", token.verifyToken, userController.deleteUser);
+router.post("/userDelete", token.verifyToken, userController.deleteUser);
 
 module.exports = router;

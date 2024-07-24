@@ -6,15 +6,23 @@ const getstoreId_query = 'SELECT store_id FROM products WHERE product_id = ?';
 const userNameCheck_query = 'SELECT user_name FROM popup_stores WHERE store_id = ?';
 const storeProducts_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN images pi ON p.product_id = pi.product_id WHERE p.store_id = ? GROUP BY p.product_id';
 const getProduct_query = 'SELECT p.*, GROUP_CONCAT(pi.image_url) AS image_urls FROM products p LEFT JOIN images pi ON p.product_id = pi.product_id WHERE p.product_id = ? GROUP BY p.product_id';
+const checkBookmark_query = 'SELECT * FROM BookMark WHERE product_id = ? AND user_name = ?';
+const likeProductSelect_query = 'SELECT * FROM BookMark WHERE user_name = ? AND product_id = ?';
+const likeDelete_query = 'DELETE FROM BookMark WHERE user_name = ? AND product_id = ?';
+const likeProductCheck_query = 'SELECT product_mark_number FROM products WHERE product_id = ?';
+const bookmark_query = 'SELECT mark_id, user_name, product_id FROM BookMark WHERE user_name = ?';
 
 // ------- POST Query -------
 const createProduct_query = 'INSERT INTO products SET ?';
 const createImage_query = 'INSERT INTO images (product_id, image_url) VALUES (?, ?)';
+const likeProductInsert_query = 'INSERT INTO BookMark (user_name, product_id) VALUES (?, ?)';
 
 // ------- PUT Query -------
 const updateViewCount_query = 'UPDATE products SET product_view_count = product_view_count + 1 WHERE product_id = ?';
-const updateProduct_query = 'UPDATE products SET ? WHERE product_id = ?'
+const updateProduct_query = 'UPDATE products SET ? WHERE product_id = ?';
 const updateOrder_query = 'UPDATE products SET remaining_quantity = remaining_quantity - 1 WHERE product_id = ?';
+const likeProductUpdateMinus_query = 'UPDATE products SET product_mark_number = product_mark_number - 1 WHERE product_id = ?';
+const likeProductUpdatePlus_query = 'UPDATE products SET product_mark_number = product_mark_number + 1 WHERE product_id = ?';
 
 // ------- DELETE Query -------
 const deleteImage_query = 'DELETE FROM images WHERE product_id = ?';
@@ -123,37 +131,57 @@ const productModel = {
 
 
     // 하나의 굿즈 정보 조회
-    getProduct: async (product_id) => {
-        try {
-            const result = await new Promise((resolve, reject) => {
+    getProduct: async (product_id, user_name) => {
+        
+        // 조회수
+        const updateViewCount = (product_id) => {
+            return new Promise((resolve, reject) => {
                 db.query(updateViewCount_query, product_id, (err, result) => {
                     if (err) reject(err);
-                    else {
-                        db.query(getProduct_query, product_id, (err, results) => {
-                            if (err) reject(err);
-                            else {
-                                results.forEach(result => {
-                                    if (result.image_urls) {
-                                        result.imageUrls = result.image_urls.split(',');
-                                        delete result.image_urls;
-                                    } else {
-                                        result.imageUrls = [];
-                                    }
-                                });
-                                resolve(results);
-                            }
-                        });
-                    }
-                })
-                
+                    else resolve(result);
+                });
             });
-            return result;
+        };
+
+        // 굿즈 정보
+        const getProductInfo = (product_id) => {
+            return new Promise((resolve, reject) => {
+                db.query(getProduct_query, product_id, (err, results) => {
+                    if (err) reject(err);
+                    else {
+                        const productInfo = { ...results[0] };
+                        productInfo.imageUrls = productInfo.image_urls.split(',');
+                        delete productInfo.image_urls;
+                        resolve(productInfo);
+                    }
+                });
+            });
+        };
+
+        const checkBookmark = (product_id, user_name) => {
+            return new Promise((resolve, reject) => {
+                db.query(checkBookmark_query, [product_id, user_name], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result.length > 0);
+                });
+            });
+        };
+
+        try {
+            await updateViewCount(product_id);
+            const productInfo = await getProductInfo(product_id);
+            if (user_name) {
+                productInfo.is_bookmarked = await checkBookmark(product_id, user_name);
+            } else {
+                productInfo.is_bookmarked = false;
+            }
+            return productInfo;
         } catch (err) {
             throw err;
         }
     },
 
-     // 굿즈 수정
+    // 굿즈 수정
     updateProduct: async (productData, user_name) => {
         try {
             const popup_id = await new Promise((resolve, reject) => {
@@ -217,90 +245,171 @@ const productModel = {
         }
     },
 
-    // 주문
-    orderProduct: async (product_id) => {
+    // 굿즈 북마크
+    likeProduct: async (user_name, product_id) => {
         try {
-            await new Promise((resolve, reject) => {
-                db.query(updateOrder_query, product_id, (err, result) => {
+            
+            const bookmarks = await new Promise((resolve, reject) => {
+                db.query(likeProductSelect_query, [user_name, product_id], (err, result) => {
                     if (err) reject(err);
-                    else resolve();
-                })
-            })
+                    else resolve(result);
+                });
+            });
+
+            if (bookmarks.length > 0) {
+                await new Promise((resolve, reject) => {
+                    db.query(likeDelete_query, [user_name, product_id], (err, result) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+            
+                await new Promise((resolve, reject) => {
+                    db.query(likeProductUpdateMinus_query, product_id, (err, result) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+
+            } else {
+                await new Promise((resolve, reject) => {
+                    db.query(likeProductInsert_query, [user_name, product_id], (err, result) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+
+                await new Promise((resolve, reject) => {
+                    db.query(likeProductUpdatePlus_query, product_id, (err, result) => {
+                        if (err) reject(err);
+                        else resolve();
+                    });
+                });
+            }
+            
+            const product_mark_number = await new Promise((resolve, reject) => {
+                db.query(likeProductCheck_query, product_id, (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result[0].prodcut_mark_number);
+                });
+            });
+
+            if (bookmarks.length > 0) {
+                return { message: '찜이 취소되었습니다.', mark_number: product_mark_number };
+            } else {
+                return { message: '찜이 추가되었습니다.', mark_number: product_mark_number };
+            }
         } catch (err) {
             throw err;
         }
     },
 
-    productReview: async (product_id) => { // 특정 굿즈 리뷰 조회
+    // 굿즈 찜 조회
+    likeUser: async (user_name) => {
         try {
-            const results = await new Promise((resolve, reject) => {
-                db.query('SELECT * FROM product_review WHERE product_id = ?', product_id, (err, results) => {
+            
+            const bookmark = await new Promise((resolve, reject) => {
+                db.query(bookmark_query, user_name, (err, results) => {
                     if (err) reject(err);
                     resolve(results);
-                });
+                })
             });
-            return results;
+            console.log(bookmark);
+
+            if (bookmark.length > 0) {
+                return bookmark;
+            } else {
+                return '찜한 내역이 없습니다.';
+            }
         } catch (err) {
             throw err;
         }
     },
 
-    productReviewDetail: async (review_id) => { // 특정 굿즈 리뷰 상세 조회
-        try {
-            const result = await new Promise((resolve, reject) => {
-                db.query('SELECT * FROM product_review WHERE review_id = ?', review_id, (err, result) => {
-                    if (err) reject(err);
-                    resolve(result[0]);
-                });
-            });
-            return result;
-        } catch (err) {
-            throw err;
-        }
-    },
+    // // 주문
+    // orderProduct: async (product_id) => {
+    //     try {
+    //         await new Promise((resolve, reject) => {
+    //             db.query(updateOrder_query, product_id, (err, result) => {
+    //                 if (err) reject(err);
+    //                 else resolve();
+    //             })
+    //         })
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
 
-    createReview: async (reviewdata) => { // 굿즈 리뷰 생성
-        try {
-            const result = await new Promise((resolve, reject) => {
-                db.query('INSERT INTO product_review SET ?', reviewdata, (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result);
-                });
-            });
+    // productReview: async (product_id) => { // 특정 굿즈 리뷰 조회
+    //     try {
+    //         const results = await new Promise((resolve, reject) => {
+    //             db.query('SELECT * FROM product_review WHERE product_id = ?', product_id, (err, results) => {
+    //                 if (err) reject(err);
+    //                 resolve(results);
+    //             });
+    //         });
+    //         return results;
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
 
-            const review_id = result.insertId;
-            return { ...reviewdata, review_id };
-        } catch (err) {
-            throw err;
-        }
-    },
+    // productReviewDetail: async (review_id) => { // 특정 굿즈 리뷰 상세 조회
+    //     try {
+    //         const result = await new Promise((resolve, reject) => {
+    //             db.query('SELECT * FROM product_review WHERE review_id = ?', review_id, (err, result) => {
+    //                 if (err) reject(err);
+    //                 resolve(result[0]);
+    //             });
+    //         });
+    //         return result;
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
 
-    updateReview: async (reviewdata, review_id) => { // 굿즈 리뷰 수정
-        try {
-            await new Promise((resolve, reject) => {
-                db.query('UPDATE product_review SET ?  WHERE review_id = ?', [reviewdata, review_id], (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result);
-                });
-            });
-            return reviewdata;
-        } catch (err) {
-            throw err;
-        }
-    },
+    // createReview: async (reviewdata) => { // 굿즈 리뷰 생성
+    //     try {
+    //         const result = await new Promise((resolve, reject) => {
+    //             db.query('INSERT INTO product_review SET ?', reviewdata, (err, result) => {
+    //                 if (err) reject(err);
+    //                 else resolve(result);
+    //             });
+    //         });
 
-    deleteReview: async (review_id) => { // 굿즈 리뷰 삭제
-        try {
-            await new Promise((resolve, reject) => {
-                db.query('DELETE FROM product_review WHERE review_id = ?', review_id, (err, result) => {
-                    if (err) reject(err);
-                    else resolve();
-                });
-            });
-        } catch (err) {
-            throw err;
-        }
-    }
+    //         const review_id = result.insertId;
+    //         return { ...reviewdata, review_id };
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
+
+    // updateReview: async (reviewdata, review_id) => { // 굿즈 리뷰 수정
+    //     try {
+    //         await new Promise((resolve, reject) => {
+    //             db.query('UPDATE product_review SET ?  WHERE review_id = ?', [reviewdata, review_id], (err, result) => {
+    //                 if (err) reject(err);
+    //                 else resolve(result);
+    //             });
+    //         });
+    //         return reviewdata;
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
+
+    // deleteReview: async (review_id) => { // 굿즈 리뷰 삭제
+    //     try {
+    //         await new Promise((resolve, reject) => {
+    //             db.query('DELETE FROM product_review WHERE review_id = ?', review_id, (err, result) => {
+    //                 if (err) reject(err);
+    //                 else resolve();
+    //             });
+    //         });
+    //     } catch (err) {
+    //         throw err;
+    //     }
+    // },
 }
 
 module.exports = productModel;
