@@ -20,6 +20,16 @@ const alarmController = {
             res.status(500).send("알람 추가 오류");
         }
     },
+    sellerAlarmAdd: async (req, res) => {
+        try {
+            const { storeId, type, alarmDetails } = req.body;
+            const userName = await alarmModel.getUserNameByStoreId(storeId);
+            await alarmModel.alarmAddModel(userName, type, alarmDetails);
+            res.status(201).send(`판매자 알림이 성공적으로 추가되었습니다`);
+        } catch (error) {
+            res.status(500).send("판매자 알림 추가 오류");
+        }
+    },
     tokenSave: async (req, res) => {
         try {
             const { userName, fcmToken } = req.body;

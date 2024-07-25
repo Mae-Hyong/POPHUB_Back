@@ -1,6 +1,32 @@
 const admin = require("firebase-admin");
-
+const db = require("../config/mysqlDatabase");
 const db = admin.firestore();
+
+// ------- GET Query -------
+const select_userNamebystoreId_query =
+    "SELECT user_name FROM popup_stores WHERE store_id = ?";
+
+const addAlarm = async (userName, type, alarmDetails) => {
+    const userRef = db.collection("users").doc(userName).collection(type);
+
+    const existingAlarms = await userRef
+        .where("time", "==", alarmDetails.time)
+        .where("label", "==", alarmDetails.label)
+        .get();
+
+    if (!existingAlarms.empty) {
+        throw new Error("동일한 알람이 이미 존재합니다.");
+    }
+
+    const alarmRef = await userRef.add({
+        time: alarmDetails.time,
+        label: alarmDetails.label,
+        title: alarmDetails.title,
+        active: alarmDetails.active,
+    });
+
+    return alarmRef.id;
+};
 
 const alarmModel = {
     tokenResetModel: async (userName, fcmToken) => {
@@ -11,25 +37,12 @@ const alarmModel = {
     },
 
     alarmAddModel: async (userName, type, alarmDetails) => {
-        const userRef = db.collection("users").doc(userName).collection(type);
+        return addAlarm(userName, type, alarmDetails);
+    },
 
-        const existingAlarms = await userRef
-            .where("time", "==", alarmDetails.time)
-            .where("label", "==", alarmDetails.label)
-            .get();
-
-        if (!existingAlarms.empty) {
-            throw new Error("동일한 알람이 이미 존재합니다.");
-        }
-
-        const alarmRef = await userRef.add({
-            time: alarmDetails.time,
-            label: alarmDetails.label,
-            title: alarmDetails.title,
-            active: alarmDetails.active,
-        });
-
-        return alarmRef.id;
+    sellerAlarmAddModel: async (storeId, type, alarmDetails) => {
+        const userName = await alarmModel.getUserNameByStoreId(storeId);
+        return addAlarm(userName, type, alarmDetails);
     },
 
     tokenSaveModel: async (userName, fcmToken) => {
@@ -95,6 +108,28 @@ const alarmModel = {
         });
 
         await batch.commit();
+    },
+    // store_id로 userName 조회 메서드 추가
+    getUserNameByStoreId: async (storeId) => {
+        await new Promise((resolve, reject) => {
+            db.query(
+                select_userNamebystoreId_query,
+                storeId,
+                (error, results) => {
+                    if (error) {
+                        reject(error);
+                    } else if (results.length === 0) {
+                        reject(
+                            new Error(
+                                "해당 store_id에 대한 판매자를 찾을 수 없음."
+                            )
+                        );
+                    } else {
+                        resolve(results[0].user_name);
+                    }
+                }
+            );
+        });
     },
 };
 
