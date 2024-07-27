@@ -7,8 +7,8 @@ require('dotenv').config();
 const s3 = new S3Client({
   region: 'us-east-1',
   credentials: {
-    accessKeyId: process.env.accessKey,
-    secretAccessKey: process.env.secretKey,
+    accessKeyId: process.env.ACCESSKEY,
+    secretAccessKey: process.env.SECRETKEY,
   },
 });
 
@@ -16,7 +16,7 @@ const s3 = new S3Client({
 const upload = multer({
   storage: multerS3({
     s3: s3,
-    bucket: 'pophub2024',
+    bucket: process.env.BUCKET,
     key: function (req, file, cb) {
       cb(null, Date.now().toString()); // 업로드 시 파일명 변경
     },

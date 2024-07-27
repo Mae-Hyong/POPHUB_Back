@@ -154,7 +154,7 @@ const userController = {
             const { userId, userName, phoneNumber, Gender, Age } = req.body;
             try {
                 let userImage = null;
-                if (req.file) userImage = req.file.path;
+                if (req.file) userImage = req.file ? req.file.location : '';
 
                 await userModel.createProfile( userId, userName, phoneNumber, Gender, Age, userImage );
 
@@ -175,7 +175,7 @@ const userController = {
             const { userId, userName } = req.body;
             try {
                 let userImage = null;
-                if (req.file) userImage = req.file.path;
+                if (req.file) userImage = req.file ? req.file.location : '';
 
                 if (!userName) {
                     await userModel.updateImage(userId, userImage);
@@ -219,7 +219,7 @@ const userController = {
         try {
             const { userName, categoryId, title, content } = req.body;
             let userImage = null;
-            if (req.file) userImage = req.file.path;
+            if (req.file) userImage = req.file ? req.file.location : '';
 
             await userModel.createInquiry( userName, categoryId, title, content, userImage );
             res.status(201).send("Inquiry added successfully");
