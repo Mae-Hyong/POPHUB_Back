@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { popupController } = require('../controllers/popupController');
-const upload = require('../function/multer');
+const multerimg = require('../function/multer');
 const token = require('../function/jwt');
 
 
@@ -22,8 +22,8 @@ router.put('/review/update/:reviewId', popupController.updateReview);  // 팝업
 router.delete('/review/delete/:reviewId', popupController.deleteReview); // 팝업 리뷰 삭제
 
 
-router.post('/', upload.array("files", 5), popupController.createPopup); // 팝업 생성
-router.put('/update/:storeId', upload.array("files", 5), popupController.updatePopup); // 팝업 수정
+router.post('/', multerimg.upload.array("files", 5), popupController.createPopup); // 팝업 생성
+router.put('/update/:storeId', multerimg.upload.array("files", 5), popupController.updatePopup); // 팝업 수정
 router.delete('/delete/:storeId', popupController.deletePopup); // 팝업 삭제
 
 router.get('/viewDenialReason/:storeId', popupController.viewDenialReason); // 팝업 등록 거부 이유 확인

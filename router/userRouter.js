@@ -1,4 +1,4 @@
-const upload = require('../function/multer');
+const multerimg = require('../function/multer');
 const token = require('../function/jwt');
 
 const express = require('express');
@@ -20,12 +20,12 @@ router.get("/searchId", userController.searchId);
 router.post("/changePassword", userController.changePassword);
 router.get("/inquiry/search", userController.searchInquiry);
 router.get("/searchAnswer", token.verifyToken, userController.searchAnswer);
-router.post("/profile/create", token.verifyToken, upload.single("file"), userController.createProfile);
-router.post("/profile/update", token.verifyToken, upload.single("file"), userController.updateProfile);
+router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"), userController.createProfile);
+router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"), userController.updateProfile);
 
 // 토큰 검증 필요
 router.get("/:userId", token.verifyToken, userController.searchUser);
-router.post("/inquiry/create", token.verifyToken, upload.single("file"), userController.createInquiry);
+router.post("/inquiry/create", token.verifyToken, multerimg.upload.single("file"), userController.createInquiry);
 
 router.post("/userDelete", token.verifyToken, userController.deleteUser);
 
