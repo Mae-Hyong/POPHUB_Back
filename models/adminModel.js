@@ -11,6 +11,7 @@ const search_inquiry_query = 'SELECT * FROM inquiry'
 // ------- POST Query -------
 const create_answer_query = 'INSERT INTO answer(inquiry_id, user_name, content) VALUES (?, ?, ?)'
 const create_notice_query = 'INSERT INTO notice SET ?'
+const create_event_query = 'INSERT INTO event SET ?'
 // ------- PUT Query -------
 const update_inquiry_query = 'UPDATE inquiry SET status = ? WHERE inquiry_id = ?'
 const pendingCheck_query = 'UPDATE popup_stores SET approval_status = "check" WHERE store_id = ?';
@@ -92,8 +93,13 @@ const adminModel = {
         })
     },
 
-    createEvent: () => {
-
+    createEvent: (eventData) => {
+        return new Promise((resolve, reject) => {
+            db.query(create_event_query, eventData, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
     },
 
     // 관리자 pending List 출력

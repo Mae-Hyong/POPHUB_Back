@@ -60,10 +60,11 @@ const adminController = {
 
     createNotice: async (req, res) => {
         try {
+            const body = req.body;
             const noticeData = {
-                title: title,
-                content: content,
-                usesr_name: userName
+                title: body.title,
+                content: body.content,
+                usesr_name: body.userName
             }
 
             await adminModel.createNotice(noticeData);
@@ -100,13 +101,16 @@ const adminController = {
 
     createEvent: async (req, res) => {
         try {
+            let img = req.file ? req.file.location : null;
+            const body = req.body;
             const eventData = {
-                title: title,
-                content: content,
-                usesr_name: userName
+                title: body.title,
+                content: body.content,
+                img: img,
+                usesr_name: body.userName
             }
 
-            await adminModel.createNotice(noticeData);
+            await adminModel.createEvent(eventData);
             return res.status(201).send("공지사항 작성 완료")
         } catch (err) {
             return res.status(500).send("공지사항 작성 중 오류가 발생했습니다.");

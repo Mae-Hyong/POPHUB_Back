@@ -1,4 +1,5 @@
 const token = require('../function/jwt');
+const multerimg = require('../function/multer');
 const express = require('express');
 const router = express.Router();
 
@@ -7,6 +8,7 @@ const adminController = require('../controllers/adminController');
 router.get("/category", adminController.searchCategory);
 router.get("/notice", adminController.searchNotice);
 router.get("/search_inquiry", adminController.searchInquiry);
+router.post("/event/create", multerimg.upload.single("file"), adminController.createEvent);
 router.post("/answer", token.verifyToken, adminController.createAnswer);
 router.post("/notice/create", token.verifyToken, adminController.createNotice);
 router.get('/popupPendingList', token.verifyToken, adminController.popupPendingList); // pendingList 조회
