@@ -92,6 +92,10 @@ const adminModel = {
         })
     },
 
+    createEvent: () => {
+
+    },
+
     // 관리자 pending List 출력
     popupPendingList: async (user_name) => {
         try {

@@ -98,6 +98,21 @@ const adminController = {
         }
     },
 
+    createEvent: async (req, res) => {
+        try {
+            const eventData = {
+                title: title,
+                content: content,
+                usesr_name: userName
+            }
+
+            await adminModel.createNotice(noticeData);
+            return res.status(201).send("공지사항 작성 완료")
+        } catch (err) {
+            return res.status(500).send("공지사항 작성 중 오류가 발생했습니다.");
+        }
+    },
+
     // 관리자 pending List 조회
     popupPendingList: async (req, res) => {
         try {
