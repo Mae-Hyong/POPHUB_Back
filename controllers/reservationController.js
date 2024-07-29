@@ -1,4 +1,4 @@
-const reservationModel = require('../models/reservationModel');
+const reservationModel = require("../models/reservationModel");
 
 const reservationController = {
     searchWaitList: async (req, res) => {
@@ -6,14 +6,18 @@ const reservationController = {
             const { userName, storeId } = req.query;
 
             if (userName) {
-                const userResult = await reservationModel.searchUserWait(userName);
+                const userResult = await reservationModel.searchUserWait(
+                    userName
+                );
                 res.status(200).json(userResult);
             } else if (storeId) {
-                const storeResult = await reservationModel.searchStoreWait(storeId);
+                const storeResult = await reservationModel.searchStoreWait(
+                    storeId
+                );
                 res.status(200).json(storeResult);
             }
         } catch (err) {
-            res.status(500).send('현장 대기 검색 중 오류가 발생했습니다.');
+            res.status(500).send("현장 대기 검색 중 오류가 발생했습니다.");
         }
     },
 
@@ -23,12 +27,14 @@ const reservationController = {
             const insertData = {
                 user_name: body.userName,
                 store_id: body.storeId,
+                reservation_time: body.reservationTime,
+                fcm_token: body.fcmToken,
             };
 
             await reservationModel.createWaitList(insertData);
             res.status(201);
         } catch (err) {
-            res.status(500).send('현장 대기 신청 중 오류가 발생했습니다.');
+            res.status(500).send("현장 대기 신청 중 오류가 발생했습니다.");
         }
     },
 
@@ -40,7 +46,9 @@ const reservationController = {
             await reservationModel.createStand(userName, storeId);
             res.status(201);
         } catch (err) {
-            res.status(500).send('입장 수락 및 입장 데이터 입력 중 오류가 발생했습니다.');
+            res.status(500).send(
+                "입장 수락 및 입장 데이터 입력 중 오류가 발생했습니다."
+            );
         }
     },
 
@@ -51,7 +59,9 @@ const reservationController = {
             await reservationModel.cancelWaitList(userName, storeId);
             res.status(200);
         } catch (err) {
-            res.status(500).send('현장 대기 예약을 취소하는 중 오류가 발생했습니다.');
+            res.status(500).send(
+                "현장 대기 예약을 취소하는 중 오류가 발생했습니다."
+            );
         }
     },
 };

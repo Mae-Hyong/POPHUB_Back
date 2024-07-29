@@ -1,5 +1,6 @@
 const alarmModel = require("../models/alarmModel");
 const popupModel = require("../models/popupModel");
+const crypto = require("crypto");
 
 const alarmController = {
     tokenReset: async (req, res) => {
@@ -73,6 +74,23 @@ const alarmController = {
             }
         } catch (error) {
             res.status(500).send("알림 전송 오류");
+        }
+    },
+    generateRandomToken: () => {
+        return crypto.randomBytes(16).toString("hex"); // 16바이트의 랜덤 문자열 생성
+    },
+
+    tokenCreate: async (req, res) => {
+        try {
+            const { userName } = req.body;
+            const fcmToken = alarmController.generateRandomToken();
+
+            await alarmModel.tokenSaveModel(userName, fcmToken);
+            res.status(201).send(
+                `토큰이 성공적으로 생성 및 저장되었습니다: ${fcmToken}`
+            );
+        } catch (error) {
+            res.status(500).send("토큰 생성 오류");
         }
     },
 };
