@@ -88,8 +88,7 @@ const adminController = {
                     };
                 }));
                 return res.status(200).json(results);
-            }
-            else {
+            } else {
                 const result = await adminModel.selectNotice(noticeId);
                 return res.status(200).json(result);
             }
@@ -114,6 +113,31 @@ const adminController = {
             return res.status(201).send("공지사항 작성 완료")
         } catch (err) {
             return res.status(500).send("공지사항 작성 중 오류가 발생했습니다.");
+        }
+    },
+
+    searchEvent: async (req, res) => {
+        try {
+            const eventId = req.query.eventId;
+            if (!eventId) {
+                const searchResult = await adminModel.searchNotice();
+                const results = await Promise.all(searchResult.map(async (searchResult) => {
+                    return {
+                        noticeId: searchResult.event_id,
+                        userName: searchResult.user_name,
+                        title: searchResult.title,
+                        content: searchResult.content,
+                        img: searchResult.img
+                    };
+                }));
+                return res.status(200).json(results);
+            } else {
+                const result = await adminModel.selectNotice(eventId);
+                return res.status(200).json(result);
+            }
+
+        } catch (err) {
+            return res.status(500).send("이벤트 조회 중 오류가 발생했습니다.");
         }
     },
 

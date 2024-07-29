@@ -102,6 +102,24 @@ const adminModel = {
         })
     },
 
+    searchEvent: () => {
+        return new Promise((resolve, reject) => {
+            db.query(search_event_query, (err, result) => {
+                if(err) reject(err);
+                else resolve(result);
+            })
+        })
+    },
+
+    selectEvent: (eventId) => {
+        return new Promise((resolve, reject) => {
+            db.query(select_event_query, eventId, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
+            })
+        })
+    },
+
     // 관리자 pending List 출력
     popupPendingList: async (user_name) => {
         try {
