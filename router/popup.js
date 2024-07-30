@@ -44,8 +44,7 @@ router.get('/view/:storeId', popupController.getPopup); // 특정 팝업 조회
 router.get('/popular', popupController.popularPopups); // 인기 팝업 조회
 router.get('/president/:userName', popupController.popupByPresident); // 팝업 등록자별 조회
 router.get('/scheduledPopups', popupController.scheduledPopups); // 오픈 예정 팝업 조회
-router.get('/searchStoreName', popupController.searchStoreName); // 스토어 이름으로 팝업 검색
-router.get('/searchCategory/:categoryId', popupController.searchCategory); // 카테고리로 팝업 검색
+router.get('/searchPopups', popupController.searchPopups); // 스토어 검색
 
 router.post('/review/create/:storeId', popupController.createReview); // 팝업 리뷰 생성
 router.get('/reviews/store/:storeId', popupController.storeReview); // 특정 팝업 리뷰 조회

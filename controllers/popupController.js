@@ -56,26 +56,23 @@ const popupController = {
         }
     },
 
-    // 스토어 이름으로 팝업 검색
-    searchStoreName: async (req, res) => {
+    // 스토어 이름 - 카테고리 검색
+    searchPopups: async (req, res) => {
         try {
-            const storeName = req.query.storeName;
-            const result = await popupModel.searchStoreName(storeName);
-            res.status(200).json(result);
-            console.log(storeName);
-        } catch (err) {
-            res.status(500).send("오류가 발생하였습니다.");
-        }
-    },
+            const { type, storeName, categoryId } = req.query;
+            let result;
 
-    // 스토어 카테고리로 팝업 검색
-    searchCategory: async (req, res) => {
-        try {
-            const categoryId = req.params.categoryId;
-            const result = await popupModel.searchCategory(categoryId);
+            if(type == 'storeName' && storeName) {
+                result = await popupModel.searchStoreName(storeName);
+            } else if (type == 'category' && categoryId) {
+                result = await popupModel.searchCategory(categoryId);
+            } else {
+                return res.status(400).send("검색된 팝업이 없습니다.");
+            }
+
             res.status(200).json(result);
-        } catch (err) {
-            res.status(500).send("오류가 발생하였습니다.");
+        } catch(err) {
+            res.status(500).send("팝업 검색 중 오류가 발생하였습니다.");
         }
     },
 
