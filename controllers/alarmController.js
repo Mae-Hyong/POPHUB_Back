@@ -3,6 +3,10 @@ const popupModel = require("../models/popupModel");
 const crypto = require("crypto");
 
 const alarmController = {
+    generateRandomToken: () => {
+        return crypto.randomBytes(16).toString("hex"); // 16바이트의 랜덤 문자열 생성
+    },
+
     tokenReset: async (req, res) => {
         try {
             const { userName, fcmToken } = req.body;
@@ -16,6 +20,10 @@ const alarmController = {
         try {
             const { userName, type, alarmDetails } = req.body;
             await alarmModel.alarmAddModel(userName, type, alarmDetails);
+
+            const fcmToken = alarmController.generateRandomToken();
+            await alarmModel.tokenSaveModel(userName, fcmToken);
+
             res.status(201).send(`알람이 성공적으로 추가되었습니다`);
         } catch (error) {
             res.status(500).send("알람 추가 오류");
@@ -26,23 +34,27 @@ const alarmController = {
             const { storeId, type, alarmDetails } = req.body;
             const userName = await alarmModel.getUserNameByStoreId(storeId);
             await alarmModel.alarmAddModel(userName, type, alarmDetails);
+
+            const fcmToken = alarmController.generateRandomToken();
+            await alarmModel.tokenSaveModel(userName, fcmToken);
+
             res.status(201).send(`판매자 알림이 성공적으로 추가되었습니다`);
         } catch (error) {
             res.status(500).send("판매자 알림 추가 오류");
         }
     },
-    tokenSave: async (req, res) => {
-        try {
-            const { userName, fcmToken } = req.body;
-            const expiresIn = 14; // 토큰 유효 기간 (14일)
-            const expirationDate = new Date();
-            expirationDate.setDate(expirationDate.getDate() + expiresIn); // 현재 날짜에 + 14일
-            await alarmModel.tokenSaveModel(userName, fcmToken);
-            res.status(201).send("토큰이 성공적으로 저장됨");
-        } catch (error) {
-            res.status(500).send("토큰 저장 오류");
-        }
-    },
+    // tokenSave: async (req, res) => {
+    //     try {
+    //         const { userName, fcmToken } = req.body;
+    //         const expiresIn = 14; // 토큰 유효 기간 (14일)
+    //         const expirationDate = new Date();
+    //         expirationDate.setDate(expirationDate.getDate() + expiresIn); // 현재 날짜에 + 14일
+    //         await alarmModel.tokenSaveModel(userName, fcmToken);
+    //         res.status(201).send("토큰이 성공적으로 저장됨");
+    //     } catch (error) {
+    //         res.status(500).send("토큰 저장 오류");
+    //     }
+    // },
     waitlistAdd: async (req, res) => {
         try {
             const { userName, storeId, date, desiredTime } = req.body;
@@ -52,6 +64,10 @@ const alarmController = {
                 date,
                 desiredTime
             );
+
+            const fcmToken = alarmController.generateRandomToken();
+            await alarmModel.tokenSaveModel(userName, fcmToken);
+
             res.status(201).send(`대기 알림이 성공적으로 추가되었습니다`);
         } catch (error) {
             res.status(500).send("대기 알림 추가 오류");
@@ -75,9 +91,6 @@ const alarmController = {
         } catch (error) {
             res.status(500).send("알림 전송 오류");
         }
-    },
-    generateRandomToken: () => {
-        return crypto.randomBytes(16).toString("hex"); // 16바이트의 랜덤 문자열 생성
     },
 
     tokenCreate: async (req, res) => {

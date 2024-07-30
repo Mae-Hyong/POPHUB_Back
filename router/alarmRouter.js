@@ -9,6 +9,6 @@ router.post("/seller_alarm_add", alarmController.sellerAlarmAdd);
 router.post("/token_save", alarmController.tokenSave);
 router.post("/waitlist_add", alarmController.waitlistAdd);
 router.post("/check_and_notify", alarmController.checkNotify);
-router.post("/token/create", alarmController.tokenCreate);
+router.post("/token_create", alarmController.tokenCreate);
 
 module.exports = router;
