@@ -36,23 +36,23 @@ const popupController = {
         }
     },
 
-    // 오픈 예정 팝업 조회
-    scheduledToOpen: async (req, res) => {
+    // 오픈 - 마감 예정 팝업 조회
+    scheduledPopups: async (req, res) => {
         try {
-            const result = await popupModel.scheduledToOpen();
-            res.status(200).json(result);
-        } catch (err) {
-            res.status(500).send("오픈 예정 팝업 조회 중 오류가 발생하였습니다.");
-        }
-    },
+            const type = req.query.type;
+            let result;
 
-    // 마감 임박 팝업 조회
-    scheduledToClose: async (req, res) => {
-        try {
-            const result = await popupModel.scheduledToClose();
+            if (type == 'open') {
+                result = await popupModel.scheduledToOpen();
+            } else if (type == 'close') {
+                result = await popupModel.scheduledToClose();
+            } else {
+                return res.status(400).send(" 'open' 또는 'close'를 사용하세요.");
+            }
+
             res.status(200).json(result);
         } catch (err) {
-            res.status(500).send("마감 임박 팝업 조회 중 오류가 발생하였습니다.");
+            res.status(500).send("팝업 조회 중 오류가 발생하였습니다.");
         }
     },
 
@@ -134,7 +134,7 @@ const popupController = {
     getPopup: async (req, res) => {
         try {
             const storeId = req.params.storeId;
-            const userName = req.params.userName || null;
+            const userName = req.query.userName || null;
             const result = await popupModel.getPopup(storeId, userName);
             res.status(200).json(result);
         } catch (err) {

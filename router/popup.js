@@ -4,13 +4,46 @@ const { popupController } = require('../controllers/popupController');
 const upload = require('../function/multer');
 const token = require('../function/jwt');
 
+/**
+ * @swagger
+ * /popup/:
+ *   get:
+ *     summary: 모든 팝업 전체 조회
+ *     description: 모든 팝업 전체 조회
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+
+/**
+ * @swagger
+ * /popup/view/{storeId}:
+ *   get:
+ *     summary: 특정 팝업 조회
+ *     description: 특정 storeId와 선택적 userName에 해당하는 팝업을 조회합니다.
+ *     parameters:
+ *       - in: path
+ *         name: storeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: 조회할 스토어의 ID
+ *       - in: query
+ *         name: userName
+ *         required: false
+ *         schema:
+ *           type: string
+ *         description: 조회할 사용자의 이름 (선택 사항)
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
 
 router.get('/', popupController.allPopups); // 모든 팝업 조회
-router.get('/view/:storeId/:userName?', popupController.getPopup); // 특정 팝업 조회
+router.get('/view/:storeId', popupController.getPopup); // 특정 팝업 조회
 router.get('/popular', popupController.popularPopups); // 인기 팝업 조회
 router.get('/president/:userName', popupController.popupByPresident); // 팝업 등록자별 조회
-router.get('/scheduledToOpen', popupController.scheduledToOpen); // 오픈 예정 팝업 조회
-router.get('/scheduledToclose', popupController.scheduledToClose); // 마감 임박 팝업 조회
+router.get('/scheduledPopups', popupController.scheduledPopups); // 오픈 예정 팝업 조회
 router.get('/searchStoreName', popupController.searchStoreName); // 스토어 이름으로 팝업 검색
 router.get('/searchCategory/:categoryId', popupController.searchCategory); // 카테고리로 팝업 검색
 
