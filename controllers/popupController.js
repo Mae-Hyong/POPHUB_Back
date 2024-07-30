@@ -18,9 +18,15 @@ const popupController = {
     // 인기 팝업 조회
     popularPopups: async (req, res) => {
         try {
-            const popular = await popupModel.popularPopups();
-            res.status(200).json(popular);
+            const allPopups = await popupModel.allPopups();
+
+            
+            const sortedPopups = allPopups.sort((a, b) => b.store_view_count - a.store_view_count);
+
+            const popularPopups = sortedPopups.slice(0, 5);
+            res.status(200).json(popularPopups);
         } catch (err) {
+            console.log(err);
             res.status(500).send("인기 팝업 조회 중 오류가 발생하였습니다.");
         }
     },

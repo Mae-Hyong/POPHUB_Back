@@ -8,8 +8,7 @@ const token = require('../function/jwt');
  * @swagger
  * /popup/:
  *   get:
- *     summary: 모든 팝업 전체 조회
- *     description: 모든 팝업 전체 조회
+ *     summary: 팝업 전체 조회
  *     responses:
  *       200:
  *         description: 성공
@@ -20,20 +19,20 @@ const token = require('../function/jwt');
  * /popup/view/{storeId}:
  *   get:
  *     summary: 특정 팝업 조회
- *     description: 특정 storeId와 선택적 userName에 해당하는 팝업을 조회합니다.
+ *     description: 특정 팝업 조회 & 유저별 북마크 여부
  *     parameters:
  *       - in: path
  *         name: storeId
  *         required: true
  *         schema:
  *           type: string
- *         description: 조회할 스토어의 ID
+ *         description: storeId
  *       - in: query
  *         name: userName
  *         required: false
  *         schema:
  *           type: string
- *         description: 조회할 사용자의 이름 (선택 사항)
+ *         description: userName (선택 사항)
  *     responses:
  *       200:
  *         description: 성공
