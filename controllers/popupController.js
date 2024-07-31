@@ -18,9 +18,15 @@ const popupController = {
     // 인기 팝업 조회
     popularPopups: async (req, res) => {
         try {
-            const popular = await popupModel.popularPopups();
-            res.status(200).json(popular);
+            const allPopups = await popupModel.allPopups();
+
+            
+            const sortedPopups = allPopups.sort((a, b) => b.store_view_count - a.store_view_count);
+
+            const popularPopups = sortedPopups.slice(0, 5);
+            res.status(200).json(popularPopups);
         } catch (err) {
+            console.log(err);
             res.status(500).send("인기 팝업 조회 중 오류가 발생하였습니다.");
         }
     },
@@ -36,46 +42,43 @@ const popupController = {
         }
     },
 
-    // 오픈 예정 팝업 조회
-    scheduledToOpen: async (req, res) => {
+    // 오픈 - 마감 예정 팝업 조회
+    scheduledPopups: async (req, res) => {
         try {
-            const result = await popupModel.scheduledToOpen();
+            const type = req.query.type;
+            let result;
+
+            if (type == 'open') {
+                result = await popupModel.scheduledToOpen();
+            } else if (type == 'close') {
+                result = await popupModel.scheduledToClose();
+            } else {
+                return res.status(400).send(" 'open' 또는 'close'를 사용하세요.");
+            }
+
             res.status(200).json(result);
         } catch (err) {
-            res.status(500).send("오픈 예정 팝업 조회 중 오류가 발생하였습니다.");
+            res.status(500).send("팝업 조회 중 오류가 발생하였습니다.");
         }
     },
 
-    // 마감 임박 팝업 조회
-    scheduledToClose: async (req, res) => {
+    // 스토어 이름 - 카테고리 검색
+    searchPopups: async (req, res) => {
         try {
-            const result = await popupModel.scheduledToClose();
-            res.status(200).json(result);
-        } catch (err) {
-            res.status(500).send("마감 임박 팝업 조회 중 오류가 발생하였습니다.");
-        }
-    },
+            const { type, storeName, categoryId } = req.query;
+            let result;
 
-    // 스토어 이름으로 팝업 검색
-    searchStoreName: async (req, res) => {
-        try {
-            const storeName = req.query.storeName;
-            const result = await popupModel.searchStoreName(storeName);
-            res.status(200).json(result);
-            console.log(storeName);
-        } catch (err) {
-            res.status(500).send("오류가 발생하였습니다.");
-        }
-    },
+            if(type == 'storeName' && storeName) {
+                result = await popupModel.searchStoreName(storeName);
+            } else if (type == 'category' && categoryId) {
+                result = await popupModel.searchCategory(categoryId);
+            } else {
+                return res.status(400).send("검색된 팝업이 없습니다.");
+            }
 
-    // 스토어 카테고리로 팝업 검색
-    searchCategory: async (req, res) => {
-        try {
-            const categoryId = req.params.categoryId;
-            const result = await popupModel.searchCategory(categoryId);
             res.status(200).json(result);
-        } catch (err) {
-            res.status(500).send("오류가 발생하였습니다.");
+        } catch(err) {
+            res.status(500).send("팝업 검색 중 오류가 발생하였습니다.");
         }
     },
 
@@ -134,7 +137,7 @@ const popupController = {
     getPopup: async (req, res) => {
         try {
             const storeId = req.params.storeId;
-            const userName = req.params.userName || null;
+            const userName = req.query.userName || null;
             const result = await popupModel.getPopup(storeId, userName);
             res.status(200).json(result);
         } catch (err) {
