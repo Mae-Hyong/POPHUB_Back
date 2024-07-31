@@ -3,6 +3,7 @@ const userModel = require("../models/userModel");
 
 const Token = require("../function/jwt");
 const sendMessage = require("../function/message");
+const multerimg = require("../function/multer");
 
 const bcrypt = require("bcrypt");
 const { v1 } = require("uuid");
@@ -73,9 +74,7 @@ const userController = {
             const userId = req.params.userId;
 
             // 아이디가 안담겨 왔을때
-            if (!userId) {
-                return res.status(400).json({resultMsg: "사용자 ID를 제공해야 합니다."});
-            }
+            if (!userId) return res.status(400).json({resultMsg: "사용자 ID를 제공해야 합니다."});
 
             const result = await userModel.searchUser(userId);
             const role = await userModel.searchJoin(userId);
@@ -153,9 +152,7 @@ const userController = {
         try {
             const { userId, userName, phoneNumber, Gender, Age } = req.body;
             try {
-                let userImage = null;
-                if (req.file) userImage = req.file.path;
-
+                let userImage = req.file ? req.file.location : null;
                 await userModel.createProfile( userId, userName, phoneNumber, Gender, Age, userImage );
 
                 return res.status(201).send("Profile added successfully");
@@ -174,18 +171,21 @@ const userController = {
         try {
             const { userId, userName } = req.body;
             try {
-                let userImage = null;
-                if (req.file) userImage = req.file.path;
+                let userImage = req.file ? req.file.location : null;
 
                 if (!userName) {
+                    const result = await userModel.searchUser(userId);
+                    await multerimg.deleted(result.user_image);
                     await userModel.updateImage(userId, userImage);
                     return res.status(200).send("Profile userImage successfully");
                 } else if (!userImage) {
                     await userModel.updateName(userId, userName);
                     return res.status(200).send("Profile userName successfully");
                 } else {
-                    await userModel.updateImage(userId, userImage);
+                    const result = await userModel.searchUser(userId);              
+                    await multerimg.deleted(result.user_image);
                     await userModel.updateName(userId, userName);
+                    await userModel.updateImage(userId, userImage);
                 }
 
                 return res.status(200).send("Profile Modify successfully");
@@ -219,7 +219,7 @@ const userController = {
         try {
             const { userName, categoryId, title, content } = req.body;
             let userImage = null;
-            if (req.file) userImage = req.file.path;
+            if (req.file) userImage = req.file ? req.file.location : '';
 
             await userModel.createInquiry( userName, categoryId, title, content, userImage );
             res.status(201).send("Inquiry added successfully");

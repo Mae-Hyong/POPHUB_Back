@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const { productController } = require('../controllers/productController');
-const upload = require('../function/multer');
+const multerimg = require('../function/multer');
 
 router.get('/', productController.allProducts); // 모든 굿즈
 router.get('/store/:storeId', productController.storeProducts); // 스토어별 굿즈 조회
-router.post('/create/:storeId', upload.array("files", 5), productController.createProduct); // 굿즈 생성
+router.post('/create/:storeId', multerimg.upload.array("files", 5), productController.createProduct); // 굿즈 생성
 router.get('/view/:productId/:userName?', productController.getProduct); // 특정 굿즈 상세 조회
-router.put('/update/:productId', upload.array("files", 5), productController.updateProduct); // 굿즈 수정
+router.put('/update/:productId', multerimg.upload.array("files", 5), productController.updateProduct); // 굿즈 수정
 router.delete('/delete/:productId', productController.deleteProduct); // 굿즈 삭제
 router.post('/like/:productId', productController.likeProduct); // 굿즈 찜
 router.get('/likeUser/:userName', productController.likeUser); // 유저별 찜 조회

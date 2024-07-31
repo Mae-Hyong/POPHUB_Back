@@ -1,35 +1,50 @@
-const multer = require("multer");
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const { v4 } = require("uuid");
+const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+const { v1 } = require("uuid");
 require('dotenv').config();
 
-cloudinary.config({ 
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-    api_key: process.env.CLOUDINARY_KEY, 
-    api_secret: process.env.CLOUDINARY_SECRET 
-});
-
-const currentDate = new Date();
-const year = currentDate.getFullYear();
-const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-const day = currentDate.getDate().toString().padStart(2, '0');
-const hours = currentDate.getHours().toString().padStart(2, '0');
-const minutes = currentDate.getMinutes().toString().padStart(2, '0');
-const seconds = currentDate.getSeconds().toString().padStart(2, '0');
-const timestamp = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
-
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params:{
-      folder:'user_images',
-      allowedFormats: ['jpeg', 'png', 'jpg'],
-      public_id: (req, file) => {
-        return timestamp + "_" + v4()
-      },
+const s3 = new S3Client({
+  region: 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.ACCESSKEY,
+    secretAccessKey: process.env.SECRETKEY,
   },
 });
 
-const upload = multer({ storage: storage });
+const getFileKeyFromURL = (url) => {
+  const regex = /\/([^\/?#]+)$/i;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+};
 
-module.exports = upload;
+const multerimg ={ 
+  upload : multer({
+    storage: multerS3({
+      s3: s3,
+      bucket: process.env.BUCKET,
+      key: (req, file, cb) => {
+        cb(null, v1()); // 업로드 시 파일명 변경
+      },
+    }),
+  }),
+
+  deleted : (url) => {
+    try {
+      const key = getFileKeyFromURL(url);
+      if (!key) throw new Error('Invalid URL');
+  
+      const command = new DeleteObjectCommand({
+        Bucket: process.env.BUCKET,
+        Key: key,
+      });
+  
+      const result = s3.send(command);
+      return result; // 필요에 따라 결과 반환
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+
+module.exports = multerimg;
