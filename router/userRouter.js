@@ -27,6 +27,6 @@ router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"
 router.get("/:userId", token.verifyToken, userController.searchUser);
 router.post("/inquiry/create", token.verifyToken, multerimg.upload.single("file"), userController.createInquiry);
 
-router.post("/userDelete", token.verifyToken, userController.deleteUser);
+router.post("/delete", token.verifyToken, userController.deleteUser);
 
 module.exports = router;
