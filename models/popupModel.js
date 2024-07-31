@@ -2,7 +2,6 @@ const db = require('../config/mysqlDatabase');
 
 // ------- GET Query -------
 const allPopups_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.approval_status = "check" AND ps.deleted ="false" GROUP BY ps.store_id';
-const popularPopups_query = 'SELECT ps.*, GROUP_CONCAT(i.image_url) AS image_urls FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_status = "오픈" GROUP BY ps.store_id ORDER BY ps.store_view_count DESC LIMIT 3';
 const getImagePopup_query = 'SELECT ps.*, i.image_url FROM popup_stores ps LEFT JOIN images i ON ps.store_id = i.store_id WHERE ps.store_id = ?';
 const storeReview_query = 'SELECT * FROM store_review WHERE store_id = ?';
 const storeUserReview_query = 'SELECT * FROM store_review WHERE user_name = ?';
