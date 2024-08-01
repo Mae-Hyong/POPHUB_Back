@@ -8,7 +8,7 @@ const adminController = require('../controllers/adminController');
 router.get("/category", adminController.searchCategory);
 router.get("/notice", adminController.searchNotice);
 router.get("/event", adminController.searchNotice);
-router.get("/search_inquiry", adminController.searchInquiry);
+router.get("/inquiry/search", adminController.searchInquiry);
 router.post("/event/create", multerimg.upload.single("file"), adminController.createEvent);
 router.post("/answer", token.verifyToken, adminController.createAnswer);
 router.post("/notice/create", token.verifyToken, adminController.createNotice);
