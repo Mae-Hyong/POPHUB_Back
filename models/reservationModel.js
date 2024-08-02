@@ -46,11 +46,26 @@ const reservationModel = {
         });
     },
 
-    createStand: (userName, storeId) => {
+    createStand: (insertData) => {
         return new Promise((resolve, reject) => {
-            db.query(insert_stand_query, [userName, storeId], async (err, result) => {
+            db.query(insert_stand_query, [insertData.user_name, insertData.store_id], async (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
+            });
+        });
+    },
+
+    searchUserStoreWait: (userName, storeId) => {
+        return new Promise((resolve, reject) => {
+            const query = `
+                SELECT *, (SELECT COUNT(*) FROM wait_list AS wl WHERE wl.store_id = wait_list.store_id AND wl.status = 'waiting' AND wl.created_at <= wait_list.created_at) AS position
+                FROM wait_list
+                WHERE user_name = ? AND store_id = ? AND status = 'waiting'
+                ORDER BY created_at ASC
+            `;
+            db.query(query, [userName, storeId], (err, results) => {
+                if (err) reject(err);
+                resolve(results);
             });
         });
     },
