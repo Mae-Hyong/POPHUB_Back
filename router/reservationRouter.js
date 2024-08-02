@@ -1,7 +1,6 @@
-const reservationController = require('../controllers/reservationController');
-
 const express = require('express');
 const router = express.Router();
+const { reservationController } = require('../controllers/reservationController');
 
 router.get('/', reservationController.searchWaitList);
 router.post('/wait', reservationController.createWaitList);

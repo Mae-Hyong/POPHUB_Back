@@ -11,6 +11,8 @@ const reservationController = {
             } else if (storeId) {
                 const storeResult = await reservationModel.searchStoreWait(storeId);
                 res.status(200).json(storeResult);
+            } else {
+                res.status(404).json({ message: '현장 대기 중인 팝업이 없습니다. 지금 바로 등록해보세요!' });
             }
         } catch (err) {
             res.status(500).send('현장 대기 검색 중 오류가 발생했습니다.');
@@ -26,8 +28,9 @@ const reservationController = {
             };
 
             await reservationModel.createWaitList(insertData);
-            res.status(201);
+            res.status(201).send("현장 대기 신청이 완료되었습니다.");
         } catch (err) {
+            console.log(err);
             res.status(500).send('현장 대기 신청 중 오류가 발생했습니다.');
         }
     },
@@ -56,4 +59,4 @@ const reservationController = {
     },
 };
 
-module.exports = reservationController;
+module.exports = { reservationController };
