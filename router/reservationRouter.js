@@ -7,3 +7,5 @@ router.get('/', reservationController.searchWaitList);
 router.post('/wait', reservationController.createWaitList);
 router.post('/admission', reservationController.admissionWaitList);
 router.post('/cancel', reservationController.cancelWaitList);
+
+module.exports = router;
