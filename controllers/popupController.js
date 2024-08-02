@@ -26,7 +26,6 @@ const popupController = {
             const popularPopups = sortedPopups.slice(0, 5);
             res.status(200).json(popularPopups);
         } catch (err) {
-            console.log(err);
             res.status(500).send("인기 팝업 조회 중 오류가 발생하였습니다.");
         }
     },
@@ -120,10 +119,11 @@ const popupController = {
             await popupModel.uploadSchedule(storeId, popupSchedule.schedule); // 팝업 스케줄 정보
 
             let userImages = [];
+            
             if (req.files) {
                 await Promise.all(req.files.map(async (file) => {
-                    userImages.push(file.path);
-                    await popupModel.uploadImage(storeId, file.path);
+                    userImages.push(file.location);
+                    await popupModel.uploadImage(storeId, file.location);
                 }));
             }
 
@@ -178,8 +178,8 @@ const popupController = {
             await popupModel.uploadSchedule(storeId, popupSchedule.schedule);
             if (req.files) {
                 await Promise.all(req.files.map(async (file) => {
-                    userImages.push(file.path);
-                    await popupModel.uploadImage(storeId, file.path);
+                    userImages.push(file.location);
+                    await popupModel.uploadImage(storeId, file.location);
                 }));
             }
             res.status(200).json(`수정 요청이 접수되었습니다. 관리자 승인 결과를 기다려 주십시오.`);
