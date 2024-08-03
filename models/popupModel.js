@@ -81,38 +81,33 @@ const popupModel = {
         try {
             const results = await new Promise((resolve, reject) => {
                 db.query(allPopups_query, (err, popupResults) => {
-                    if (err) reject(err);
-                    if (!popupResults || popupResults.length === 0) {
-                        resolve("팝업스토어 정보가 존재하지 않습니다.");
-                    } else {
-                        resolve(popupResults);
-                    }
+                    if (err) return reject(err);
+                    if (popupResults.length === 0) return resolve([]);
+                    resolve(popupResults);
                 });
             });
 
-            const schedule = await Promise.all(results.map(async popup => {
+            if (results.length === 0) {
+                return "팝업스토어 정보가 존재하지 않습니다.";
+            }
+
+            const schedule = await Promise.all(results.map(async (popup) => {
                 const storeSchedules = await new Promise((resolve, reject) => {
                     db.query(storeSchedules_query, [popup.store_id], (err, scheduleResults) => {
-                        if (err) reject(err);
+                        if (err) return reject(err);
                         resolve(scheduleResults);
                     });
                 });
-    
+
                 const schedules = storeSchedules.map(schedule => ({
                     day_of_week: schedule.day_of_week,
                     open_time: schedule.open_time,
                     close_time: schedule.close_time
                 }));
-    
+
                 popup.store_schedules = schedules;
-    
-                if (popup.image_urls) {
-                    popup.imageUrls = popup.image_urls.split(',');
-                    delete popup.image_urls;
-                } else {
-                    popup.imageUrls = [];
-                }
-    
+                popup.imageUrls = popup.image_urls ? popup.image_urls.split(',') : [];
+                delete popup.image_urls;
                 return popup;
             }));
     

@@ -8,6 +8,7 @@ const token = require('../function/jwt');
  * @swagger
  * /popup/:
  *   get:
+ *     tags: [Popup]
  *     summary: 팝업 전체 목록 조회
  *     responses:
  *       200:
@@ -19,6 +20,7 @@ router.get('/', popupController.allPopups); // 모든 팝업 조회
  * @swagger
  * /popup/popular:
  *   get:
+ *     tags: [Popup]
  *     summary: 인기 팝업 목록 조회
  *     responses:
  *       200:
@@ -30,6 +32,7 @@ router.get('/popular', popupController.popularPopups); // 인기 팝업 조회
  * @swagger
  * /popup/view/{storeId}:
  *   get:
+ *     tags: [Popup]
  *     summary: 특정 팝업 조회
  *     description: 특정 팝업 조회 & 유저별 북마크 여부
  *     parameters:
@@ -56,6 +59,7 @@ router.get('/view/:storeId', popupController.getPopup); // 특정 팝업 조회
  * @swagger
  * /popup/president/{userName}:
  *  get:
+ *      tags: [Popup]
  *      summary: 팝업 등록자별 조회
  *      parameters:
  *          - in: path
@@ -68,12 +72,13 @@ router.get('/view/:storeId', popupController.getPopup); // 특정 팝업 조회
  *          200:
  *              description: 성공
  */
-router.get('/president/:userName', popupController.popupByPresident); // 팝
+router.get('/president/:userName', popupController.popupByPresident); // 팝업 등록자별 조회
 
 /**
  * @swagger
  * /popup/scheduledPopups:
  *  get:
+ *      tags: [Popup]
  *      summary: 오픈 - 마감 예정 팝업 조회
  *      parameters:
  *          - in: query
@@ -93,6 +98,7 @@ router.get('/scheduledPopups', popupController.scheduledPopups); // 팝업 오�
  * @swagger
  * /popup/searchPopups:
  *  get:
+ *      tags: [Popup]
  *      summary: 팝업 검색 (이름, 카테고리)
  *      parameters:
  *          - in: query
@@ -119,8 +125,77 @@ router.get('/scheduledPopups', popupController.scheduledPopups); // 팝업 오�
  *              description: 성공
  */
 router.get('/searchPopups', popupController.searchPopups); // 스토어 검색
+
+/**
+ * @swagger
+ * /popup:
+ *   post:
+ *     tags: [Popup]
+ *     summary: 팝업 생성 (아직 오류 이슈.. 이건 postman으로 ,,)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *                 example: John Doe
+ *               categoryId:
+ *                 type: integer
+ *                 example: 1
+ *               storeName:
+ *                 type: string
+ *                 example: My Popup Store
+ *               storeLocation:
+ *                 type: string
+ *               storeContactInfo:
+ *                 type: string
+ *               storeDescription:
+ *                 type: string
+ *               maxCapacity:
+ *                 type: integer
+ *                 example: 50
+ *               storeStartDate:
+ *                 type: string
+ *                 format: date
+ *                 example: '2024-08-01'
+ *               storeEndDate:
+ *                 type: string
+ *                 format: date
+ *                 example: '2024-08-15'
+ *               schedule:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     day_of_week:
+ *                       type: string
+ *                       enum: [Mon, Tue, Wed, Thu, Fri, Sat, Sun]
+ *                       example: Mon
+ *                     open_time:
+ *                       type: string
+ *                       format: time
+ *                       example: '09:00:00'
+ *                     close_time:
+ *                       type: string
+ *                       format: time
+ *                       example: '17:00:00'
+ *               files:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: binary
+ *     responses:
+ *       '201':
+ *         description: Popup store created successfully
+ */
 router.post('/', multerimg.upload.array("files", 5), popupController.createPopup); // 팝업 생성
+
 router.put('/update/:storeId', multerimg.upload.array("files", 5), popupController.updatePopup); // 팝업 수정
+
+
 router.delete('/delete/:storeId', popupController.deletePopup); // 팝업 삭제
 
 router.get('/viewDenialReason/:storeId', popupController.viewDenialReason); // 팝업 등록 거부 이유 확인
