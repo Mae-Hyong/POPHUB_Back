@@ -7,6 +7,10 @@ const search_category_query = 'SELECT * FROM category';
 const select_category_query = 'SELECT category_name FROM category WHERE category_id = ?';
 const search_notice_query = 'SELECT * FROM notice'
 const select_notice_query = 'SELECT * FROM notice WHERE notice_id = ?'
+const search_event_query = 'SELECT * FROM event'
+const select_event_query = 'SELECT * FROM event WHERE event_id = ?'
+const search_achieve_query = 'SELECT * FROM achieve'
+const select_achieve_query = 'SELECT * FROM achieve WHERE achieve_id = ?'
 const search_inquiry_query = 'SELECT * FROM inquiry'
 // ------- POST Query -------
 const create_answer_query = 'INSERT INTO answer(inquiry_id, user_name, content) VALUES (?, ?, ?)'
@@ -114,6 +118,24 @@ const adminModel = {
     selectEvent: (eventId) => {
         return new Promise((resolve, reject) => {
             db.query(select_event_query, eventId, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
+            })
+        })
+    },
+
+    searchAchive: () => {
+        return new Promise((resolve, reject) => {
+            db.query(search_achieve_query, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
+            })
+        })
+    },
+
+    selectAchive: (achiveId) => {
+        return new Promise((resolve, reject) => {
+            db.query(select_achieve_query, achiveId, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })
