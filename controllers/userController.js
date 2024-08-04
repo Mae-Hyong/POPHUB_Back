@@ -291,6 +291,38 @@ const userController = {
             return res.status(500).send("문의 내역을 가져오는 중 오류가 발생했습니다.");
         }
     },
+
+    clearAchieve: async (req, res) => { // 추후 조건에 맞춰 쪼개질 예정
+        try {
+            const { userName, achieveId } = req.body;
+            if(userName && achieveId){
+                await userModel.clearAchieve(userName, achieveId);
+                return res.status(201).json({Msg: "clear achieve"});
+            } else return res.status(404).send("userName or achieveId not found");
+        } catch (err) {
+            return res.status(500).send("achieve Hub에 입력 중 오류가 발생했습니다.");
+        }
+    },
+
+    searchAchiveHub: async (req, res) => {
+        try {
+            const { userName, achieveId } = req.body;
+            if(userName && achieveId){
+                const searchResult = await userModel.searchAchiveHub(userName, achieveId);
+                const results = await Promise.all(searchResult.map(async (searchResult) => {
+                    return {
+                        achiveId: searchResult.achive_id,
+                        userName: searchResult.user_name,
+                        completeAt: searchResult.complete_at
+                    };
+                }));
+                return res.status(200).json(results);
+            } else return res.status(404).send("userName or achieveId not found");
+
+        } catch (err) {
+            return res.status(500).send("이벤트 조회 중 오류가 발생했습니다.");
+        }
+    },
 };
 
 module.exports = {

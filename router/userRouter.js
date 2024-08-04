@@ -6,7 +6,7 @@ const router = express.Router();
 
 const { signController, authController, userController } = require('../controllers/userController');
 
-// sign route
+// sign routesearchAchiveHub
 router.post("/signUp", signController.signUp);
 router.post("/signIn", signController.signIn);
 
@@ -22,6 +22,7 @@ router.get("/inquiry/search", userController.searchInquiry);
 router.get("/searchAnswer", token.verifyToken, userController.searchAnswer);
 router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"), userController.createProfile);
 router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"), userController.updateProfile);
+router.post("/achieveHub", token.verifyToken, userController.searchAchiveHub);
 
 // 토큰 검증 필요
 router.get("/:userId", token.verifyToken, userController.searchUser);

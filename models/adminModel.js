@@ -133,9 +133,9 @@ const adminModel = {
         })
     },
 
-    selectAchive: (achiveId) => {
+    selectAchive: (achieveId) => {
         return new Promise((resolve, reject) => {
-            db.query(select_achieve_query, achiveId, (err, result) => {
+            db.query(select_achieve_query, achieveId, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })

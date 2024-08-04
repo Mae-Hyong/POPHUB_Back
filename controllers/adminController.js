@@ -141,6 +141,33 @@ const adminController = {
         }
     },
 
+    searchAchive: async (req, res) => {
+        try {
+            const achieveId = req.query.achieveId;
+            if (!achieveId) {
+                const searchResult = await adminModel.searchAchive();
+                const results = await Promise.all(searchResult.map(async (searchResult) => {
+                    return {
+                        achieveId: searchResult.achive_id,
+                        userName: searchResult.user_name,
+                        title: searchResult.title,
+                        content: searchResult.content,
+                        conditions: searchResult.conditions,
+                        score: searchResult.score
+                    };
+                }));
+                return res.status(200).json(results);
+            } else {
+                const result = await adminModel.selectAchive(achieveId);
+                return res.status(200).json(result);
+            }
+
+        } catch (err) {
+            return res.status(500).send("이벤트 조회 중 오류가 발생했습니다.");
+        }
+    },
+
+
     // 관리자 pending List 조회
     popupPendingList: async (req, res) => {
         try {
