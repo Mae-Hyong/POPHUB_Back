@@ -195,6 +195,15 @@ const userModel = {
             })
         })
     },
+
+    gainPoint: (insertData) => {
+        return new Promise((resolve, reject) => {
+            db.query(gain_point_query, insertData, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
+            })
+        })
+    }
 }
 
 module.exports = userModel;
