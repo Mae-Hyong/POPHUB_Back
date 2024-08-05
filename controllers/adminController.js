@@ -154,10 +154,11 @@ const adminController = {
     // 관리자 pending List에서 check값 부여 (승인)
     popupPendingCheck: async (req, res) => {
         try {
-            const store_id = req.body.store_id;
-            const user_name = await adminModel.popupPendingCheck(store_id);
+            const storeId = req.body.storeId;
+            const user_name = await adminModel.popupPendingCheck(storeId);
             return res.status(200).json(user_name);
         } catch (err) {
+            console.log(err);
             return res.status(500).send("오류 발생");
         }
     },
@@ -165,11 +166,11 @@ const adminController = {
     // 관리자 pending List에서 deny값 부여 (거부)
     popupPendingDeny: async (req, res) => {
         try {
-            const { store_id, denial_reason } = req.body;
+            const { storeId, denialReason } = req.body;
             const denial_date = moment().format('YYYY-MM-DD HH:mm:ss');
             const denialData = {
-                store_id,
-                denial_reason,
+                store_id: storeId,
+                denial_reason: denialReason,
                 denial_date
             }
             const user_name = await adminModel.popupPendingDeny(denialData);
