@@ -297,7 +297,7 @@ const popupController = {
                 await popupModel.createReview(reviewData);
                 return res.status(201).json('리뷰가 등록되었습니다.');
             }
-
+            
             res.status(400).json('리뷰 작성 권한이 없습니다.');
         } catch (err) {
             res.status(500).send("리뷰 생성 중 오류가 발생하였습니다.");
@@ -310,13 +310,13 @@ const popupController = {
             const body = req.body;
             const reviewId = req.params.reviewId;
             const reviewModifiedDate = moment().format('YYYY-MM-DD HH:mm:ss');
-            const reviewdata = {
-                userName: body.userName,
+            const reviewData = {
+                user_name: body.userName,
                 review_rating: body.reviewRating,
                 review_content: body.reviewContent,
                 review_modified_date: reviewModifiedDate,
             }
-            await popupModel.updateReview(reviewdata, reviewId);
+            await popupModel.updateReview(reviewData, reviewId);
             res.status(200).json('수정이 완료되었습니다.');
         } catch (err) {
             res.status(500).send("리뷰 수정 중 오류가 발생하였습니다.");
