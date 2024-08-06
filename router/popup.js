@@ -394,6 +394,115 @@ router.post('/like/:storeId', popupController.likePopup); // 팝업 찜 & 취소
  */
 router.get('/likeUser/:userName', popupController.likeUser); // 팝업 유저별 찜 조회
 
+/**
+ * @swagger
+ * /popup/reservationStatus/{storeId}:
+ *   get:
+ *     tags: [Popup]
+ *     summary: 스토어별 예약 상태
+ *     parameters:
+ *       - name: storeId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.get('/reservationStatus/:storeId', popupController.reservationStatus); // 스토어별 예약 상태
+
+/**
+ * @swagger
+ * /popup/reservation/{storeId}:
+ *   post:
+ *     tags: [Popup]
+ *     summary: 사전 예약 등록
+ *     parameters:
+ *       - name: storeId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *               reservationDate:
+ *                 type: string
+ *                 format: date
+ *                 example: '2024-08-15'
+ *               reservationTime:
+ *                 type: string
+ *                 format: time
+ *                 example: '15:00'
+ *               capacity:
+ *                 type: integer
+ *                 example: 5
+ *     responses:
+ *       201:
+ *         description: 예약 성공
+ */
+router.post('/reservation/:storeId', popupController.reservation); // 사전 예약
+
+/**
+ * @swagger
+ * /popup/getReservation/user/{userName}:
+ *  get:
+ *      tags: [Popup]
+ *      summary: "[사전 예약자] 사전 예약 조회"
+ *      parameters:
+ *          - in: path
+ *            name: userName
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *          200:
+ *              description: 성공
+ */
+router.get('/getReservation/user/:userName', popupController.getReservationUser); // 예약자 예약 조회
+
+/**
+ * @swagger
+ * /popup/getReservation/president/{storeId}:
+ *  get:
+ *      tags: [Popup]
+ *      summary: "[판매자] 팝업 사전 예약 조회"
+ *      parameters:
+ *          - in: path
+ *            name: storeId
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *          200:
+ *              description: 성공
+ */
+router.get('/getReservation/president/:storeId', popupController.getReservationPresident); // 팝업 등록자 스토어 예약 조회
+
+/**
+ * @swagger
+ * /popup/deleteReservation/{reservationId}:
+ *  delete:
+ *      tags: [Popup]
+ *      summary: 사전 예약 취소
+ *      parameters:
+ *          - in: path
+ *            name: reservationId
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *          200:
+ *              description: 성공
+ */
+router.delete('/deleteReservation/:reservationId', popupController.deleteReservation) // 예약 취소
 
 router.post('/review/create/:storeId', popupController.createReview); // 팝업 리뷰 생성
 router.get('/reviews/store/:storeId', popupController.storeReview); // 특정 팝업 리뷰 조회
@@ -402,11 +511,7 @@ router.get('/review/storeReview/:reviewId', popupController.storeReviewDetail); 
 router.put('/review/update/:reviewId', popupController.updateReview);  // 팝업 리뷰 수정
 router.delete('/review/delete/:reviewId', popupController.deleteReview); // 팝업 리뷰 삭제
 
-router.get('/reservationStatus/:storeId', popupController.reservationStatus); // 스토어별 예약 상태
-router.post('/reservation/:storeId', popupController.reservation); // 사전 예약
-router.get('/getReservation/user/:userName', popupController.getReservationUser); // 예약자 예약 조회
-router.get('/getReservation/president/:storeId', popupController.getReservationPresident); // 팝업 등록자 스토어 예약 조회
-router.delete('/deleteReservation/:reservationId', popupController.deleteReservation) // 예약 취소
+
 
 router.get('/recommendation/:userName?', popupController.recommendation); // 추천 시스템
 module.exports = router;

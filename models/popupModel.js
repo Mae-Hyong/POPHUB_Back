@@ -903,6 +903,10 @@ const popupModel = {
                     else resolve(result);
                 });
             });
+
+            if (!results.length) {
+                return { message: "현재 예약 정보가 없습니다." };
+            }
             
             const date = await new Promise((resolve, reject) => {
                 db.query(storeEndDate_query, store_id, (err, result) => {

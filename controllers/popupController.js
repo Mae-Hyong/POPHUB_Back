@@ -427,25 +427,24 @@ const popupController = {
     reservation: async (req, res) => {
         try {
             const storeId = req.params.storeId;
-            const body = req.body;
             const reservationId = uuidv4();
             const createdAt = moment().format('YYYY-MM-DD HH:mm:ss');
             let reservationData = {
                 reservation_id: reservationId,
                 store_id: storeId,
-                user_name: body.userName,
-                reservation_date: body.reservationDate,
-                reservation_time: body.reservationTime,
-                capacity: body.capacity,
+                user_name: req.body.userName,
+                reservation_date: req.body.reservationDate,
+                reservation_time: req.body.reservationTime,
+                capacity: req.body.capacity,
                 created_at: createdAt,
             };
 
             const result = await popupModel.reservation(reservationData);
 
             if (result.success == true) {
-                res.status(201).json(`예약 등록이 완료되었습니다. 현재 인원:${result.update_capacity}, 최대 인원: ${result.maxCapacity}`);
+                res.status(201).json(`예약 등록이 완료되었습니다. 현재 인원:${result.update_capacity}, 최대 인원: ${result.max_capacity}`);
             } else {
-                res.status(400).json(`최대 인원을 초과하였습니다. 시간당 최대 인원:${result.maxCapacity}`);
+                res.status(400).json(`최대 인원을 초과하였습니다. 시간당 최대 인원:${result.max_capacity}`);
             }
         } catch (err) {
             res.status(500).send("예약 중 오류가 발생하였습니다.");
