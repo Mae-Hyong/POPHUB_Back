@@ -398,7 +398,7 @@ router.get('/likeUser/:userName', popupController.likeUser); // 팝업 유저별
  * @swagger
  * /popup/reservationStatus/{storeId}:
  *   get:
- *     tags: [Popup]
+ *     tags: [Reservation]
  *     summary: 스토어별 예약 상태
  *     parameters:
  *       - name: storeId
@@ -416,7 +416,7 @@ router.get('/reservationStatus/:storeId', popupController.reservationStatus); //
  * @swagger
  * /popup/reservation/{storeId}:
  *   post:
- *     tags: [Popup]
+ *     tags: [Reservation]
  *     summary: 사전 예약 등록
  *     parameters:
  *       - name: storeId
@@ -454,7 +454,7 @@ router.post('/reservation/:storeId', popupController.reservation); // 사전 예
  * @swagger
  * /popup/getReservation/user/{userName}:
  *  get:
- *      tags: [Popup]
+ *      tags: [Reservation]
  *      summary: "[사전 예약자] 사전 예약 조회"
  *      parameters:
  *          - in: path
@@ -472,7 +472,7 @@ router.get('/getReservation/user/:userName', popupController.getReservationUser)
  * @swagger
  * /popup/getReservation/president/{storeId}:
  *  get:
- *      tags: [Popup]
+ *      tags: [Reservation]
  *      summary: "[판매자] 팝업 사전 예약 조회"
  *      parameters:
  *          - in: path
@@ -490,7 +490,7 @@ router.get('/getReservation/president/:storeId', popupController.getReservationP
  * @swagger
  * /popup/deleteReservation/{reservationId}:
  *  delete:
- *      tags: [Popup]
+ *      tags: [Reservation]
  *      summary: 사전 예약 취소
  *      parameters:
  *          - in: path
@@ -504,15 +504,158 @@ router.get('/getReservation/president/:storeId', popupController.getReservationP
  */
 router.delete('/deleteReservation/:reservationId', popupController.deleteReservation) // 예약 취소
 
+/**
+ * @swagger
+ * /popup/review/create/{storeId}:
+ *   post:
+ *     tags: [Review]
+ *     summary: 팝업 리뷰 작성
+ *     parameters:
+ *       - in: path
+ *         name: storeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *               reviewRating:
+ *                 type: integer
+ *               reviewContent:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
 router.post('/review/create/:storeId', popupController.createReview); // 팝업 리뷰 생성
+
+/**
+ * @swagger
+ * /popup/reviews/store/{storeId}:
+ *  get:
+ *      tags: [Review]
+ *      summary: 특정 팝업 리뷰 조회
+ *      parameters:
+ *          - in: path
+ *            name: storeId
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *          200:
+ *              description: 성공
+ */
 router.get('/reviews/store/:storeId', popupController.storeReview); // 특정 팝업 리뷰 조회
+
+/**
+ * @swagger
+ * /popup/reviews/user/{userName}:
+ *  get:
+ *      tags: [Review]
+ *      summary: 특정 아이디별 리뷰 조회
+ *      parameters:
+ *          - in: path
+ *            name: userName
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *          200:
+ *              description: 성공
+ */
 router.get('/reviews/user/:userName', popupController.storeUserReview); // 특정 아이디별 리뷰 조회
+
+/**
+ * @swagger
+ * /popup/review/storeReview/{reviewId}:
+ *  get:
+ *      tags: [Review]
+ *      summary: 특정 팝업 리뷰 상세 조회
+ *      parameters:
+ *          - in: path
+ *            name: reviewId
+ *            required: true
+ *            schema:
+ *              type: integer
+ *      responses:
+ *          200:
+ *              description: 성공
+ */
 router.get('/review/storeReview/:reviewId', popupController.storeReviewDetail); // 특정 팝업 리뷰 상세 조회
+
+/**
+ * @swagger
+ * /popup/review/update/{reviewId}:
+ *   put:
+ *     tags: [Review]
+ *     summary: 팝업 리뷰 수정
+ *     parameters:
+ *       - in: path
+ *         name: reviewId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *               reviewRating:
+ *                 type: integer
+ *               reviewContent:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
 router.put('/review/update/:reviewId', popupController.updateReview);  // 팝업 리뷰 수정
+
+
+/**
+ * @swagger
+ * /popup/review/delete/{reviewId}:
+ *  delete:
+ *      tags: [Review]
+ *      summary: 팝업 리뷰 삭제
+ *      parameters:
+ *          - in: path
+ *            name: reviewId
+ *            required: true
+ *            schema:
+ *              type: integer
+ *      responses:
+ *          200:
+ *              description: 성공
+ */
 router.delete('/review/delete/:reviewId', popupController.deleteReview); // 팝업 리뷰 삭제
 
 
-
+/**
+ * @swagger
+ * /popup/recommendation/{userName}:
+ *   get:
+ *     tags: [Recommendation]
+ *     summary: 추천 시스템 <-- ** 아직 데이터 부족으로 오류 **
+ *     parameters:
+ *       - in: path
+ *         name: userName
+ *         required: false
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 추천 데이터
+ */
 router.get('/recommendation/:userName?', popupController.recommendation); // 추천 시스템
 module.exports = router;
 
