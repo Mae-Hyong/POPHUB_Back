@@ -193,7 +193,7 @@ const popupController = {
         try {
             const storeId = req.params.storeId;
             await popupModel.deletePopup(storeId);
-            res.status(200).json(`해당 팝업스토어의 정보가 삭제되었습니다.`);
+            res.status(200).json({ message: "해당 팝업스토어의 정보가 삭제되었습니다." });
 
         } catch (err) {
             res.status(500).send("팝업 삭제 중 오류가 발생하였습니다.");
@@ -205,6 +205,11 @@ const popupController = {
         try {
             const storeId = req.params.storeId;
             const check = await popupModel.viewDenialReason(storeId);
+            
+            if (check.length === 0) {
+                return res.status(404).json({ message: "거부된 팝업 스토어가 존재하지 않습니다." });
+            }
+            
             res.status(200).json(check);
         } catch (err) {
             res.status(500).send("팝업 거부 조회 중 오류가 발생하였습니다.");
