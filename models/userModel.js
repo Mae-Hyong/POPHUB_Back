@@ -164,7 +164,7 @@ const userModel = {
         return new Promise((resolve, reject) => {
             db.query(answer_search_query, inquiryId, (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             })
         })
     },
@@ -191,7 +191,7 @@ const userModel = {
         return new Promise((resolve, reject) => {
             db.query(search_achieveHub_query, achieveId, (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             })
         })
     },
@@ -201,6 +201,15 @@ const userModel = {
             db.query(gain_point_query, insertData, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
+            })
+        })
+    },
+
+    searchPoint: (userName) => {
+        return new Promise((resolve, reject) => {
+            db.query(search_points_query, userName, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
             })
         })
     }

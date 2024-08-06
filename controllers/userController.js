@@ -74,7 +74,7 @@ const userController = {
             const userId = req.params.userId;
 
             // 아이디가 안담겨 왔을때
-            if (!userId) return res.status(400).json({resultMsg: "사용자 ID를 제공해야 합니다."});
+            if (!userId) return res.status(400).json({ resultMsg: "사용자 ID를 제공해야 합니다." });
 
             const result = await userModel.searchUser(userId);
             const role = await userModel.searchJoin(userId);
@@ -103,7 +103,7 @@ const userController = {
 
             // 아이디 혹은 유저 네임이 안담겨 왔을때
             if (!userId && !userName) {
-                return res.status(400).json({resultMsg: "사용자 userName 혹은 Id를 제공해야 합니다."});
+                return res.status(400).json({ resultMsg: "사용자 userName 혹은 Id를 제공해야 합니다." });
             }
 
             if (userId) {
@@ -153,12 +153,12 @@ const userController = {
             const { userId, userName, phoneNumber, Gender, Age } = req.body;
             try {
                 let userImage = req.file ? req.file.location : null;
-                await userModel.createProfile( userId, userName, phoneNumber, Gender, Age, userImage );
+                await userModel.createProfile(userId, userName, phoneNumber, Gender, Age, userImage);
 
                 return res.status(201).send("Profile added successfully");
             } catch (error) {
                 return res.status(500).json({
-                    resultMsg:"이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
+                    resultMsg: "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
                     error: error.message,
                 });
             }
@@ -182,7 +182,7 @@ const userController = {
                     await userModel.updateName(userId, userName);
                     return res.status(200).send("Profile userName successfully");
                 } else {
-                    const result = await userModel.searchUser(userId);              
+                    const result = await userModel.searchUser(userId);
                     await multerimg.deleted(result.user_image);
                     await userModel.updateName(userId, userName);
                     await userModel.updateImage(userId, userImage);
@@ -221,7 +221,7 @@ const userController = {
             let userImage = null;
             if (req.file) userImage = req.file ? req.file.location : '';
 
-            await userModel.createInquiry( userName, categoryId, title, content, userImage );
+            await userModel.createInquiry(userName, categoryId, title, content, userImage);
             res.status(201).send("Inquiry added successfully");
         } catch (err) {
             return res.status(500).send("문의 생성 중 오류가 발생했습니다.");
@@ -276,7 +276,7 @@ const userController = {
         try {
             const inquiryId = req.query.inquiryId;
             if (!inquiryId) {
-                return res.status(400).json({resultMsg: "문의 Id를 제공해야합니다."});
+                return res.status(400).json({ resultMsg: "문의 Id를 제공해야합니다." });
             }
             const result = await userModel.searchAnswer(inquiryId);
             if (!result) return res.status(404).send("Answer not found");
@@ -295,9 +295,9 @@ const userController = {
     clearAchieve: async (req, res) => { // 추후 조건에 맞춰 쪼개질 예정
         try {
             const { userName, achieveId } = req.body;
-            if(userName && achieveId){
+            if (userName && achieveId) {
                 await userModel.clearAchieve(userName, achieveId);
-                return res.status(201).json({Msg: "clear achieve"});
+                return res.status(201).json({ Msg: "clear achieve" });
             } else return res.status(404).send("userName or achieveId not found");
         } catch (err) {
             return res.status(500).send("achieve Hub에 입력 중 오류가 발생했습니다.");
@@ -307,7 +307,7 @@ const userController = {
     searchAchiveHub: async (req, res) => {
         try {
             const { userName, achieveId } = req.body;
-            if(userName && achieveId){
+            if (userName && achieveId) {
                 const searchResult = await userModel.searchAchiveHub(userName, achieveId);
                 const results = await Promise.all(searchResult.map(async (searchResult) => {
                     return {
@@ -324,7 +324,7 @@ const userController = {
         }
     },
 
-    gainPoint: async (req, res) => { // 추후 조건에 맞춰 쪼개질 예정
+    gainPoint: async (req, res) => {
         try {
             const body = req.body;
             const insertData = {
@@ -334,11 +334,29 @@ const userController = {
                 calcul: body.calcul
             };
             await userModel.gainPoint(insertData);
-            return res.status(201).json({Msg: "gainPoint"});
+            return res.status(201).json({ Msg: "gainPoint" });
         } catch (err) {
-            return res.status(500).send("achieve Hub에 입력 중 오류가 발생했습니다.");
+            return res.status(500).send("point 입력 중 오류가 발생했습니다.");
         }
     },
+
+    searchPoint: async (req, res) => {
+        try {
+            const userName = req.body.userName;
+            const searchResult = await userModel.searchPoint(userName);
+            const result = await Promise.all(searchResult.map(async (searchResult) => {
+                return {
+                    userName: searchResult.user_name,
+                    points: searchResult.points,
+                    description: searchResult.description,
+                    calcul: searchResult.calcul
+                };
+            }));
+            return res.status(200).json(result);
+        } catch (err) {
+            return res.status(500).send("point 조회 중 오류가 발생했습니다.");
+        }
+    }
 
 };
 
