@@ -323,6 +323,23 @@ const userController = {
             return res.status(500).send("이벤트 조회 중 오류가 발생했습니다.");
         }
     },
+
+    gainPoint: async (req, res) => { // 추후 조건에 맞춰 쪼개질 예정
+        try {
+            const body = req.body;
+            const insertData = {
+                user_name: body.userName,
+                points: body.points,
+                description: body.description,
+                calcul: body.calcul
+            };
+            await userModel.gainPoint(insertData);
+            return res.status(201).json({Msg: "gainPoint"});
+        } catch (err) {
+            return res.status(500).send("achieve Hub에 입력 중 오류가 발생했습니다.");
+        }
+    },
+
 };
 
 module.exports = {
