@@ -565,7 +565,7 @@ const popupModel = {
             if (bookmark.length > 0) {
                 return bookmark;
             } else {
-                return '찜한 내역이 없습니다.';
+                return { message: '찜 내역이 존재하지 않습니다.' };
             }
         } catch (err) {
             throw err;
@@ -903,6 +903,10 @@ const popupModel = {
                     else resolve(result);
                 });
             });
+
+            if (!results.length) {
+                return { message: "현재 예약 정보가 없습니다." };
+            }
             
             const date = await new Promise((resolve, reject) => {
                 db.query(storeEndDate_query, store_id, (err, result) => {
