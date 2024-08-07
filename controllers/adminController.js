@@ -1,7 +1,7 @@
 const adminModel = require("../models/adminModel");
 const { sendAlarm } = require("../utils/alarmService");
 const admin = require("firebase-admin");
-
+const db = admin.firestore();
 const moment = require("moment");
 const userModel = require("../models/userModel");
 
@@ -125,6 +125,9 @@ const adminController = {
                 img: img,
                 usesr_name: body.userName,
             };
+
+            await adminModel.createEvent(eventData);
+
             // 모든 사용자에게 알림 전송
             const users = await adminModel.getAllUsers(); // 모든 사용자 가져오기
             for (const user of users) {
@@ -147,7 +150,37 @@ const adminController = {
                 .send("공지사항 작성 중 오류가 발생했습니다.");
         }
     },
+    createPopupStoreNotification: async (req, res) => {
+        try {
+            const body = req.body;
+            const popupStoreData = {
+                store_id: body.storeId,
+                store_name: body.storeName,
+                opening_date: body.openingDate,
+                location: body.location,
+            };
 
+            // 모든 사용자에게 알림 전송
+            const users = await adminModel.getAllUsers(); // 모든 사용자 가져오기
+            for (const user of users) {
+                const alarmData = {
+                    user_name: user.user_name,
+                    title: "팝업 스토어 오픈 예정",
+                    content: `${popupStoreData.store_name}이 ${popupStoreData.opening_date}에 ${popupStoreData.location}에서 오픈할 예정입니다.`,
+                    notified_at: new Date(),
+                };
+
+                await sendAlarm(alarmData); // 알림 전송
+                await db.collection("Alarms").add(alarmData); // Firebase에 알림 저장
+            }
+
+            return res.status(201).send("팝업 스토어 알림 전송 완료");
+        } catch (err) {
+            return res
+                .status(500)
+                .send("팝업 스토어 알림 전송 중 오류가 발생했습니다.");
+        }
+    },
     searchEvent: async (req, res) => {
         try {
             const eventId = req.query.eventId;

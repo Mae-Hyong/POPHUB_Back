@@ -26,5 +26,10 @@ router.post(
     adminController.popupPendingDeny
 ); // 관리자 승인 deny, 거부 사유 등록
 router.post("/event/create", token.verifyToken, adminController.createEvent); // 이벤트 생성
+router.post(
+    "/popupStore/notification",
+    token.verifyToken,
+    adminController.createPopupStoreNotification
+); // 팝업 스토어 알림 생성
 
 module.exports = router;
