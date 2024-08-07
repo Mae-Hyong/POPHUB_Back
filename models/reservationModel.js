@@ -1,7 +1,9 @@
 const db = require("../config/mysqlDatabase");
 
-const search_userWait_query = "SELECT * FROM wait_list WHERE user_name = ?";
-const search_storeWait_query = "SELECT * FROM wait_list WHERE store_id = ?";
+const search_userWait_query =
+    "SELECT * FROM wait_list WHERE user_name = ? ORDER BY reservation_time ASC'";
+const search_storeWait_query =
+    "SELECT * FROM wait_list WHERE store_id = ? ORDER BY reservation_time ASC'";
 
 const insert_wait_query = "INSERT INTO wait_list SET ?";
 const insert_stand_query =
