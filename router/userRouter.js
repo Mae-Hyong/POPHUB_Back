@@ -20,10 +20,10 @@ router.get("/searchId", userController.searchId);
 router.get("/point", userController.searchPoint);
 router.post("/changePassword", userController.changePassword);
 router.get("/inquiry/search", userController.searchInquiry);
-router.get("/searchAnswer", token.verifyToken, userController.searchAnswer);
+router.get("/answer/search", token.verifyToken, userController.searchAnswer);
 router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"), userController.createProfile);
 router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"), userController.updateProfile);
-router.post("/achieveHub", token.verifyToken, userController.searchAchiveHub);
+router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
 router.post("/point/gain", token.verifyToken, userController.gainPoint);
 
 // 토큰 검증 필요

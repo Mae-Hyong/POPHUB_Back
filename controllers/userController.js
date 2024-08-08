@@ -347,7 +347,7 @@ const userController = {
             const result = await Promise.all(searchResult.map(async (searchResult) => {
                 return {
                     userName: searchResult.user_name,
-                    points: searchResult.points,
+                    point_score: searchResult.points,
                     description: searchResult.description,
                     calcul: searchResult.calcul
                 };
