@@ -10,6 +10,7 @@ const inquiry_search_query = 'SELECT * FROM inquiry WHERE user_name = ?';
 const inquiry_select_query = 'SELECT * FROM inquiry WHERE inquiry_id = ?';
 const answer_search_query = 'SELECT * FROM answer WHERE inquiry_id = ?';
 const search_category_query = 'SELECT category_name FROM category WHERE category_id = ?'
+const select_achieveHub_query = 'SELECT * FROM achieve_hub WHERE user_name = ? AND achieve_id = ?'
 
 // ------- POST Query -------
 const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE user_id = ?';
@@ -19,7 +20,8 @@ const image_change_query = 'UPDATE user_info SET user_image = ?  WHERE user_id =
 const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content, image) VALUES (?, ?, ?, ?, ?)';
 const delete_add_query = 'INSERT INTO user_delete(user_id, phone_number) VALUES (?, ?)'
 const delete_change_query = 'UPDATE user_info SET user_name = ?, withdrawal = ? WHERE user_id = ?'
-
+const insert_achieveHub_query = "INSERT INTO inquiry (user_name, achieve_id) VALUES (?, ?)"
+const gain_point_query = "INSERT INTO point_history SET ?";
 // ------- DELETE Query -------
 const user_delete_query = 'DELETE FROM user_join_info WHERE user_id = ?'
 
@@ -162,12 +164,12 @@ const userModel = {
         return new Promise((resolve, reject) => {
             db.query(answer_search_query, inquiryId, (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             })
         })
     },
 
-    category: async (categoryId) => {
+    category: (categoryId) => {
         return new Promise((resolve, reject) => {
             db.query(search_category_query, categoryId, (err, result) => {
                 if (err) reject(err);
@@ -175,6 +177,42 @@ const userModel = {
             })
         })
     },
+
+    clearAchieve: async (userName, achieveId) => {
+        return new Promise((resolve, reject) => {
+            db.query(insert_achieveHub_query, [userName, achieveId], (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    },
+
+    searchAchiveHub: (achieveId) => {
+        return new Promise((resolve, reject) => {
+            db.query(select_achieveHub_query, achieveId, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    },
+
+    gainPoint: (insertData) => {
+        return new Promise((resolve, reject) => {
+            db.query(gain_point_query, insertData, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
+            })
+        })
+    },
+
+    searchPoint: (userName) => {
+        return new Promise((resolve, reject) => {
+            db.query(search_points_query, userName, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    }
 }
 
 module.exports = userModel;
