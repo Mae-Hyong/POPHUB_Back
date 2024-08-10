@@ -193,7 +193,7 @@ const popupController = {
         try {
             const storeId = req.params.storeId;
             await popupModel.deletePopup(storeId);
-            res.status(200).json(`해당 팝업스토어의 정보가 삭제되었습니다.`);
+            res.status(200).json({ message: "해당 팝업스토어의 정보가 삭제되었습니다." });
 
         } catch (err) {
             res.status(500).send("팝업 삭제 중 오류가 발생하였습니다.");
@@ -205,6 +205,11 @@ const popupController = {
         try {
             const storeId = req.params.storeId;
             const check = await popupModel.viewDenialReason(storeId);
+            
+            if (check.length === 0) {
+                return res.status(404).json({ message: "거부된 팝업 스토어가 존재하지 않습니다." });
+            }
+            
             res.status(200).json(check);
         } catch (err) {
             res.status(500).send("팝업 거부 조회 중 오류가 발생하였습니다.");
@@ -292,7 +297,7 @@ const popupController = {
                 await popupModel.createReview(reviewData);
                 return res.status(201).json('리뷰가 등록되었습니다.');
             }
-
+            
             res.status(400).json('리뷰 작성 권한이 없습니다.');
         } catch (err) {
             res.status(500).send("리뷰 생성 중 오류가 발생하였습니다.");
@@ -305,13 +310,13 @@ const popupController = {
             const body = req.body;
             const reviewId = req.params.reviewId;
             const reviewModifiedDate = moment().format('YYYY-MM-DD HH:mm:ss');
-            const reviewdata = {
-                userName: body.userName,
+            const reviewData = {
+                user_name: body.userName,
                 review_rating: body.reviewRating,
                 review_content: body.reviewContent,
                 review_modified_date: reviewModifiedDate,
             }
-            await popupModel.updateReview(reviewdata, reviewId);
+            await popupModel.updateReview(reviewData, reviewId);
             res.status(200).json('수정이 완료되었습니다.');
         } catch (err) {
             res.status(500).send("리뷰 수정 중 오류가 발생하였습니다.");
@@ -422,25 +427,24 @@ const popupController = {
     reservation: async (req, res) => {
         try {
             const storeId = req.params.storeId;
-            const body = req.body;
             const reservationId = uuidv4();
             const createdAt = moment().format('YYYY-MM-DD HH:mm:ss');
             let reservationData = {
                 reservation_id: reservationId,
                 store_id: storeId,
-                user_name: body.userName,
-                reservation_date: body.reservationDate,
-                reservation_time: body.reservationTime,
-                capacity: body.capacity,
+                user_name: req.body.userName,
+                reservation_date: req.body.reservationDate,
+                reservation_time: req.body.reservationTime,
+                capacity: req.body.capacity,
                 created_at: createdAt,
             };
 
             const result = await popupModel.reservation(reservationData);
 
             if (result.success == true) {
-                res.status(201).json(`예약 등록이 완료되었습니다. 현재 인원:${result.update_capacity}, 최대 인원: ${result.maxCapacity}`);
+                res.status(201).json(`예약 등록이 완료되었습니다. 현재 인원:${result.update_capacity}, 최대 인원: ${result.max_capacity}`);
             } else {
-                res.status(400).json(`최대 인원을 초과하였습니다. 시간당 최대 인원:${result.maxCapacity}`);
+                res.status(400).json(`최대 인원을 초과하였습니다. 시간당 최대 인원:${result.max_capacity}`);
             }
         } catch (err) {
             res.status(500).send("예약 중 오류가 발생하였습니다.");

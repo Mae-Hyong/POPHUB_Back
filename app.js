@@ -21,11 +21,6 @@ const swaggerOptions = {
       version: '1.0.0',
       description: 'A simple Express API'
     },
-    servers: [
-      {
-        url: 'http://localhost:3000'
-      }
-    ]
   },
   apis: ['./router/*.js']
 };
