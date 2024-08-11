@@ -426,7 +426,7 @@ router.get('/reservationStatus/:storeId', popupController.reservationStatus); //
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -480,6 +480,23 @@ router.post('/reservation/:storeId', popupController.reservation); // 사전 예
  */
 router.get('/getReservation', popupController.getReservation); // 예약자 - 판매자 예약 조회
 
+/**
+ * @swagger
+ * /popup/completedReservation:
+ *  put:
+ *    tags: [Reservation - 사전 예약]
+ *    summary: "사전 예약 입장 수락"
+ *    parameters:
+ *      - in: query
+ *        name: reservationId
+ *        required: true
+ *        schema:
+ *          type: string
+ *    responses:
+ *      200:
+ *        description: 성공
+ */
+router.put('/completedReservation', popupController.completedReservation); // 사전 예약 입장 수락
 /**
  * @swagger
  * /popup/deleteReservation/{reservationId}:
