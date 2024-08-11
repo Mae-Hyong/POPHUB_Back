@@ -24,11 +24,12 @@ const reservationController = {
             const insertData = {
                 user_name: body.userName,
                 store_id: body.storeId,
+                capacity: body.capacity,
                 created_at: waitDate,
             };
             await reservationModel.createWaitList(insertData);
             const waitList = await reservationModel.searchUserStoreWait(body.userName, body.storeId);
-            res.status(201).send({message: "현장 대기 신청이 완료되었습니다.", waitList: waitList[0].position});
+            res.status(201).send({message: "현장 대기 신청이 완료되었습니다.", waitPosition: waitList[0].position});
         } catch (err) {
             res.status(500).send('현장 대기 신청 중 오류가 발생하였습니다.');
         }
@@ -48,10 +49,10 @@ const reservationController = {
 
     cancelWaitList: async (req, res) => {
         try {
-            const { userName, storeId } = req.body;
+            const { userName, storeId } = req.query;
 
             await reservationModel.cancelWaitList(userName, storeId);
-            res.status(200);
+            res.status(200).send('현장 대기 예약이 취소되었습니다.');
         } catch (err) {
             res.status(500).send('현장 대기 예약을 취소하는 중 오류가 발생했습니다.');
         }
