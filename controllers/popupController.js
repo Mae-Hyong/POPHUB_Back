@@ -424,6 +424,7 @@ const popupController = {
             const storeId = req.params.storeId;
             const reservationId = uuidv4();
             const createdAt = moment().format('YYYY-MM-DD HH:mm:ss');
+
             let reservationData = {
                 reservation_id: reservationId,
                 store_id: storeId,
@@ -462,6 +463,18 @@ const popupController = {
             res.status(200).json(result);
         } catch (err) {
             res.status(500).send("예약 조회 중 오류가 발생하였습니다.");
+        }
+    },
+
+    // 예약 입장 성공
+    completedReservation: async (req, res) => {
+        try {
+            const reservationId = req.query.reservationId;
+            const result = await popupModel.completedReservation(reservationId);
+            res.status(200).json({ message: "입장이 성공적으로 완료되었습니다.", userName: result});
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("사전 예약 입장 수락 중 오류가 발생하였습니다.");
         }
     },
 
