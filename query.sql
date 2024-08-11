@@ -169,17 +169,6 @@ CREATE TABLE BookMark (
     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
-CREATE TABLE wait_list ( -- 대기 상태
-	wait_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	store_id VARCHAR(50) NOT NULL,
-    user_name VARCHAR(50) NOT NULL,
-    wait_visitor_name VARCHAR(50) NOT NULL,
-    wait_visitor_number INT NOT NULL,
-    wait_reservation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    wait_status ENUM('waiting', 'queued', 'entered', 'skipped') DEFAULT 'queued', -- 대기 / 입장 대기 / 입장 완료 / 입장 X
-    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE
-);
 
 CREATE TABLE store_review (
     review_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -242,7 +231,8 @@ CREATE TABLE stand_store (
 CREATE TABLE wait_list (
     user_name VARCHAR(50) NOT NULL,
     store_id VARCHAR(50) NOT NULL,
-    status ENUM('waiting', 'completed', 'cancelled') NOT NULL,
+    status ENUM('waiting', 'completed', 'cancelled') DEFAULT 'waiting',
+    capacity INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_name, store_id)
 );
