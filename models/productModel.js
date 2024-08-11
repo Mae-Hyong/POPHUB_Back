@@ -20,7 +20,6 @@ const likeProductInsert_query = 'INSERT INTO BookMark (user_name, product_id) VA
 // ------- PUT Query -------
 const updateViewCount_query = 'UPDATE products SET product_view_count = product_view_count + 1 WHERE product_id = ?';
 const updateProduct_query = 'UPDATE products SET ? WHERE product_id = ?';
-const updateOrder_query = 'UPDATE products SET remaining_quantity = remaining_quantity - 1 WHERE product_id = ?';
 const likeProductUpdateMinus_query = 'UPDATE products SET product_mark_number = product_mark_number - 1 WHERE product_id = ?';
 const likeProductUpdatePlus_query = 'UPDATE products SET product_mark_number = product_mark_number + 1 WHERE product_id = ?';
 
@@ -37,7 +36,7 @@ const productModel = {
                 db.query(allProducts_query, (err, results) => {
                     if (err) reject(err);
                     if (results.length == 0) {
-                        return resolve('상품이 존재하지 않습니다.');
+                        return resolve('현재 상품이 존재하지 않습니다.');
                     } else {
                         results.forEach(result => {
                             if (result.image_urls) {
@@ -290,7 +289,7 @@ const productModel = {
             const product_mark_number = await new Promise((resolve, reject) => {
                 db.query(likeProductCheck_query, product_id, (err, result) => {
                     if (err) reject(err);
-                    else resolve(result[0].prodcut_mark_number);
+                    else resolve(result[0].product_mark_number);
                 });
             });
 
@@ -314,9 +313,8 @@ const productModel = {
                     resolve(results);
                 })
             });
-            console.log(bookmark);
 
-            if (bookmark.length > 0) {
+            if (bookmark.length > 0 && bookmark[0].product_id != null) {
                 return bookmark;
             } else {
                 return '찜한 내역이 없습니다.';
