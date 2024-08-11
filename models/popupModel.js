@@ -583,7 +583,7 @@ const popupModel = {
             });
 
             if (results.length === 0) {
-                return "현재 작성된 리뷰가 없습니다. 예약 후 작성해보세요!";
+                return "현재 작성된 리뷰가 없습니다.";
             }
 
             const reviewData = await Promise.all(results.map(async (review) => {
