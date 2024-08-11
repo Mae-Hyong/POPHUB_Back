@@ -531,39 +531,34 @@ router.post('/review/create/:storeId', popupController.createReview); // 팝업 
 
 /**
  * @swagger
- * /popup/reviews/store/{storeId}:
+ * /popup/getReviews:
  *  get:
  *      tags: [Review]
- *      summary: 특정 팝업 리뷰 조회
+ *      summary: "리뷰 조회 (팝업별 & 아이디별)"
  *      parameters:
- *          - in: path
+ *          - in: query
+ *            name: type
+ *            required: true
+ *            schema:
+ *              type: string
+ *              enum: [store, user]
+ *          - in: query
  *            name: storeId
- *            required: true
+ *            required: false
  *            schema:
  *              type: string
- *      responses:
- *          200:
- *              description: 성공
- */
-router.get('/reviews/store/:storeId', popupController.storeReview); // 특정 팝업 리뷰 조회
-
-/**
- * @swagger
- * /popup/reviews/user/{userName}:
- *  get:
- *      tags: [Review]
- *      summary: 특정 아이디별 리뷰 조회
- *      parameters:
- *          - in: path
+ *              description: "type: store일 경우"
+ *          - in: query
  *            name: userName
- *            required: true
+ *            required: false
  *            schema:
  *              type: string
+ *              description: "type: user일 경우"
  *      responses:
  *          200:
  *              description: 성공
  */
-router.get('/reviews/user/:userName', popupController.storeUserReview); // 특정 아이디별 리뷰 조회
+router.get('/getReviews', popupController.storeReview); // 특정 팝업 리뷰 조회
 
 /**
  * @swagger
