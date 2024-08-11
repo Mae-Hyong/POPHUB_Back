@@ -397,7 +397,7 @@ router.get('/likeUser/:userName', popupController.likeUser); // 팝업 유저별
  * @swagger
  * /popup/reservationStatus/{storeId}:
  *   get:
- *     tags: [Reservation]
+ *     tags: [Reservation - 사전 예약]
  *     summary: 스토어별 예약 상태
  *     parameters:
  *       - name: storeId
@@ -415,7 +415,7 @@ router.get('/reservationStatus/:storeId', popupController.reservationStatus); //
  * @swagger
  * /popup/reservation/{storeId}:
  *   post:
- *     tags: [Reservation]
+ *     tags: [Reservation - 사전 예약]
  *     summary: 사전 예약 등록
  *     parameters:
  *       - name: storeId
@@ -453,7 +453,7 @@ router.post('/reservation/:storeId', popupController.reservation); // 사전 예
  * @swagger
  * /popup/getReservation:
  *  get:
- *      tags: [Reservation]
+ *      tags: [Reservation - 사전 예약]
  *      summary: "사전 예약 조회 (예약자 & 판매자)"
  *      parameters:
  *          - in: query
@@ -484,7 +484,7 @@ router.get('/getReservation', popupController.getReservation); // 예약자 - �
  * @swagger
  * /popup/deleteReservation/{reservationId}:
  *  delete:
- *      tags: [Reservation]
+ *      tags: [Reservation - 사전 예약]
  *      summary: 사전 예약 취소
  *      parameters:
  *          - in: path
