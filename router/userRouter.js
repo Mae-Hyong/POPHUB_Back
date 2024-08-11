@@ -15,7 +15,7 @@ const { signController, authController, userController } = require('../controlle
  * @swagger
  * /signUp:
  *   post:
- *     summary: Sign up a new user
+ *     summary: 회원가입
  *     tags: [User]
  *     requestBody:
  *       required: true
@@ -24,15 +24,17 @@ const { signController, authController, userController } = require('../controlle
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               userId:
  *                 type: string
- *               password:
+ *               userPassword:
+ *                 type: string
+ *               userRole:
  *                 type: string
  *     responses:
- *       200:
- *         description: User created successfully
- *       400:
- *         description: Invalid input
+ *       201:
+ *         description: 회원가입 성공
+ *       500:
+ *         description: 오류 발생
  */
 router.post("/signUp", signController.signUp);
 
@@ -40,7 +42,7 @@ router.post("/signUp", signController.signUp);
  * @swagger
  * /signIn:
  *   post:
- *     summary: Sign in an existing user
+ *     summary: 로그인
  *     tags: [User]
  *     requestBody:
  *       required: true
@@ -49,15 +51,15 @@ router.post("/signUp", signController.signUp);
  *           schema:
  *             type: object
  *             properties:
- *               username:
+ *               userId:
  *                 type: string
- *               password:
+ *               authPassword:
  *                 type: string
  *     responses:
  *       200:
- *         description: Signed in successfully
- *       401:
- *         description: Unauthorized
+ *         description: 로그인 성공
+ *       500:
+ *         description: 오류 발생
  */
 router.post("/signIn", signController.signIn);
 
@@ -65,13 +67,22 @@ router.post("/signIn", signController.signIn);
  * @swagger
  * /certification:
  *   post:
- *     summary: Send certification
+ *     summary: 인증 코드 메세지 전송
  *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               phoneNumber:
+ *                 type: integer
  *     responses:
  *       200:
- *         description: Certification sent
- *       400:
- *         description: Error occurred
+ *         description: 메세지 전공 성공
+ *       500:
+ *         description: 오류 발생
  */
 router.post("/certification", authController.certification);
 
@@ -79,13 +90,24 @@ router.post("/certification", authController.certification);
  * @swagger
  * /verify:
  *   post:
- *     summary: Verify certification
+ *     summary: 인증 코드 비교
  *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               authCode:
+ *                 type: integer
+ *              expectedCode:
+ *                 type: integer
  *     responses:
  *       200:
- *         description: Certification verified
- *       400:
- *         description: Verification failed
+ *         description: 인증 성공
+ *       500:
+ *         description: 오류 발생
  */
 router.post("/verify", authController.verifyCertification);
 
@@ -93,14 +115,26 @@ router.post("/verify", authController.verifyCertification);
  * @swagger
  * /check:
  *   get:
- *     summary: Check if the username is available
+ *     summary: 사용자 아이디 혹은 닉네임 체크
  *     tags: [User]
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: false
+ *       - in: query
+ *         name: userName
+ *         schema:
+ *           type: string
+ *         required: false
  *     responses:
  *       200:
- *         description: Username available
+ *         description: POSTMAN으로 확인 필요
  *       400:
- *         description: Username not available
- */
+ *         description: 사용자 userName 혹은 Id를 제공 필요
+ *       500:
+ *         description: 오류 발생
 router.get("/check", userController.doubleCheck);
 
 /**
@@ -121,21 +155,7 @@ router.get("/searchId", userController.searchId);
  * @swagger
  * /point:
  *   get:
- *     summary: Get user's points
- *     tags: [User]
- *     responses:
- *       200:
- *         description: Points retrieved successfully
- *       400:
- *         description: Error occurred
- */
-router.get("/point", userController.searchPoint);
-
-/**
- * @swagger
- * /changePassword:
- *   post:
- *     summary: Change user's password
+ *     summary: 포인트 내역 조회
  *     tags: [User]
  *     requestBody:
  *       required: true
@@ -144,15 +164,40 @@ router.get("/point", userController.searchPoint);
  *           schema:
  *             type: object
  *             properties:
- *               oldPassword:
- *                 type: string
- *               newPassword:
+ *               userName:
  *                 type: string
  *     responses:
  *       200:
- *         description: Password changed successfully
+ *         description: 조회 성공
+ *       500:
+ *         description: 오류 발생
+ */
+router.get("/point", userController.searchPoint);
+
+/**
+ * @swagger
+ * /changePassword:
+ *   post:
+ *     summary: 비밀번호 변경
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               userPassword:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 변경 성공
  *       400:
- *         description: Error occurred
+ *         description: User ID 제공 필요
+ *       500:
+ *         description: 오류 발생
  */
 router.post("/changePassword", userController.changePassword);
 
@@ -160,13 +205,24 @@ router.post("/changePassword", userController.changePassword);
  * @swagger
  * /inquiry/search:
  *   get:
- *     summary: Search for inquiries
+ *     summary: 문의 조회
  *     tags: [User]
+ *     parameters:
+ *       - in: query
+ *         name: userName
+ *         required: false
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: inquiryId
+ *         required: false
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Inquiries retrieved successfully
- *       400:
- *         description: Error occurred
+ *         description: 문의 조회 성공
+ *       500:
+ *         description: 오류 발생
  */
 router.get("/inquiry/search", userController.searchInquiry);
 
@@ -174,15 +230,23 @@ router.get("/inquiry/search", userController.searchInquiry);
  * @swagger
  * /answer/search:
  *   get:
- *     summary: Search for answers
+ *     summary: 문의 답변 조회
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: inquiryId
+ *         required: true
+ *         schema:
+ *           type: number
  *     responses:
  *       200:
- *         description: Answers retrieved successfully
+ *         description: 조회 성공
  *       400:
- *         description: Error occurred
+ *         description: 문의 ID 미존재
+ *       404:
+ *         description: 문의 미존재
+ *       500:
+ *         description: 오류 발생
  */
 router.get("/answer/search", token.verifyToken, userController.searchAnswer);
 
@@ -190,10 +254,8 @@ router.get("/answer/search", token.verifyToken, userController.searchAnswer);
  * @swagger
  * /profile/create:
  *   post:
- *     summary: Create a new profile
+ *     summary:프로필 생성
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -201,14 +263,24 @@ router.get("/answer/search", token.verifyToken, userController.searchAnswer);
  *           schema:
  *             type: object
  *             properties:
+ *               userId:
+ *                 type: string
+ *               userName:
+ *                 type: string
+ *               phoneNumber:
+ *                 type: string
+ *               Gender:
+ *                 type: string
+ *               Age:
+ *                 type: integer
  *               file:
  *                 type: string
  *                 format: binary
  *     responses:
- *       200:
- *         description: Profile created successfully
- *       400:
- *         description: Error occurred
+ *       201:
+ *         description: 프로필 생성
+ *       500:
+ *         description: 오류 발생
  */
 router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"), userController.createProfile);
 
@@ -216,10 +288,8 @@ router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"
  * @swagger
  * /profile/update:
  *   post:
- *     summary: Update a profile
+ *     summary: Update an existing profile
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -227,14 +297,18 @@ router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"
  *           schema:
  *             type: object
  *             properties:
+ *               userId:
+ *                 type: string
+ *               userName:
+ *                 type: string
  *               file:
  *                 type: string
  *                 format: binary
  *     responses:
  *       200:
- *         description: Profile updated successfully
- *       400:
- *         description: Error occurred
+ *         description: 프로필 업데이트 성공
+ *       500:
+ *         description: 오류 발생
  */
 router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"), userController.updateProfile);
 
@@ -242,15 +316,26 @@ router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"
  * @swagger
  * /achieveHub:
  *   get:
- *     summary: Search for achievements
+ *     summary: 업적 조회
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *               achieveId:
+ *                 type: number
  *     responses:
  *       200:
- *         description: Achievements retrieved successfully
- *       400:
- *         description: Error occurred
+ *         description: 조회 성공
+ *       404:
+ *         description: UserName 혹은 achieveId 미존재
+ *       500:
+ *         description: 오류 발생
  */
 router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
 
@@ -258,15 +343,28 @@ router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
  * @swagger
  * /point/gain:
  *   post:
- *     summary: Gain points
+ *     summary: 포인트 추가
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *               points:
+ *                 type: number
+ *               description:
+ *                 type: string
+ *               calcul:
+ *                 type: string
  *     responses:
- *       200:
- *         description: Points gained successfully
- *       400:
- *         description: Error occurred
+ *       201:
+ *         description: 포인트 추가 성공
+ *       500:
+ *         description: 오류 발생
  */
 router.post("/point/gain", token.verifyToken, userController.gainPoint);
 
@@ -274,10 +372,8 @@ router.post("/point/gain", token.verifyToken, userController.gainPoint);
  * @swagger
  * /{userId}:
  *   get:
- *     summary: Get user information by ID
+ *     summary: 사용자 정보 조회
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -286,9 +382,9 @@ router.post("/point/gain", token.verifyToken, userController.gainPoint);
  *           type: string
  *     responses:
  *       200:
- *         description: User information retrieved successfully
- *       400:
- *         description: Error occurred
+ *         description: 사용자 정보 조회 성공
+ *       500:
+ *         description: 오류 발생
  */
 router.get("/:userId", token.verifyToken, userController.searchUser);
 
@@ -296,10 +392,8 @@ router.get("/:userId", token.verifyToken, userController.searchUser);
  * @swagger
  * /inquiry/create:
  *   post:
- *     summary: Create a new inquiry
+ *     summary: 문의 생성
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -307,14 +401,22 @@ router.get("/:userId", token.verifyToken, userController.searchUser);
  *           schema:
  *             type: object
  *             properties:
+ *               userName:
+ *                 type: string
+ *               categoryId:
+ *                 type: number
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
  *               file:
  *                 type: string
  *                 format: binary
  *     responses:
- *       200:
- *         description: Inquiry created successfully
- *       400:
- *         description: Error occurred
+ *       201:
+ *         description: 문의 생성 성공
+ *       500:
+ *         description: 오류 발생
  */
 router.post("/inquiry/create", token.verifyToken, multerimg.upload.single("file"), userController.createInquiry);
 
@@ -322,15 +424,24 @@ router.post("/inquiry/create", token.verifyToken, multerimg.upload.single("file"
  * @swagger
  * /delete:
  *   post:
- *     summary: Delete a user
+ *     summary: 유저 삭제
  *     tags: [User]
- *     security:
- *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               phoneNumber:
+ *                 type: string
  *     responses:
  *       200:
- *         description: User deleted successfully
- *       400:
- *         description: Error occurred
+ *         description: 유저 삭제 성공
+ *       500:
+ *         description: 오류 발생
  */
 router.post("/delete", token.verifyToken, userController.deleteUser);
 
