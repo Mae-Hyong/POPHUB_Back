@@ -87,7 +87,6 @@ router.get('/president/:userName', popupController.popupByPresident); // 팝업 
  *              type: string
  *              enum: [open, close]
  *            required: true
- *            description: "'open' : 오픈 예정 팝업 조회, 'close': 마감 예정 팝업 조회"
  *      responses:
  *          200:
  *              description: 성공
@@ -113,13 +112,13 @@ router.get('/scheduledPopups', popupController.scheduledPopups); // 팝업 오�
  *            schema:
  *              type: string
  *            required: false
- *            description: "검색할 팝업 이름 (type: storeName일 경우)"
+ *            description: "type: storeName일 경우"
  *          - in: query
  *            name: categoryId
  *            schema:
  *              type: string
  *            required: false
- *            description: "검색할 카테고리 ID (type: categoryId일 경우)"
+ *            description: "type: categoryId일 경우"
  *      responses:
  *          200:
  *              description: 성공
@@ -452,39 +451,34 @@ router.post('/reservation/:storeId', popupController.reservation); // 사전 예
 
 /**
  * @swagger
- * /popup/getReservation/user/{userName}:
+ * /popup/getReservation:
  *  get:
  *      tags: [Reservation]
- *      summary: "[사전 예약자] 사전 예약 조회"
+ *      summary: "사전 예약 조회 (예약자 & 판매자)"
  *      parameters:
- *          - in: path
+ *          - in: query
+ *            name: type
+ *            required: true
+ *            schema:
+ *              type: string
+ *              enum: [user, president]
+ *          - in: query
  *            name: userName
- *            required: true
+ *            required: false
  *            schema:
  *              type: string
- *      responses:
- *          200:
- *              description: 성공
- */
-router.get('/getReservation/user/:userName', popupController.getReservationUser); // 예약자 예약 조회
-
-/**
- * @swagger
- * /popup/getReservation/president/{storeId}:
- *  get:
- *      tags: [Reservation]
- *      summary: "[판매자] 팝업 사전 예약 조회"
- *      parameters:
- *          - in: path
+ *            description: "type: userName일 경우"
+ *          - in: query
  *            name: storeId
- *            required: true
+ *            required: false
  *            schema:
  *              type: string
+ *            description: "type: president일 경우"
  *      responses:
  *          200:
  *              description: 성공
  */
-router.get('/getReservation/president/:storeId', popupController.getReservationPresident); // 팝업 등록자 스토어 예약 조회
+router.get('/getReservation', popupController.getReservation); // 예약자 - 판매자 예약 조회
 
 /**
  * @swagger

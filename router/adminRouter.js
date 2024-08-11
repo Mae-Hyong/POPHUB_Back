@@ -17,7 +17,7 @@ router.post("/notice/create", token.verifyToken, adminController.createNotice);
  * @swagger
  * /admin/popupPendingList:
  *  get:
- *    tags: [admin]
+ *    tags: [Admin]
  *    summary: 팝업 pendingList 조회
  *    responses:
  *      200:
@@ -30,7 +30,7 @@ router.get('/popupPendingList', adminController.popupPendingList); // pendingLis
  * /admin/popupPendingCheck:
  *   put:
  *     summary: 관리자 승인 pending -> check
- *     tags: [admin]
+ *     tags: [Admin]
  *     requestBody:
  *       required: true
  *       content:
@@ -60,7 +60,7 @@ router.put('/popupPendingCheck', adminController.popupPendingCheck); // 관리�
  * /admin/popupPendingDeny:
  *   post:
  *     summary: 관리자 승인 요청 거부 및 거부 사유 등록
- *     tags: [admin]
+ *     tags: [Admin]
  *     requestBody:
  *       required: true
  *       content:

@@ -451,25 +451,22 @@ const popupController = {
         }
     },
 
-    // 예약 조회 - 유저
-    getReservationUser: async (req, res) => {
+    // 예약 조회 - 유저 & 판매자
+    getReservation: async (req, res) => {
         try {
-            const userName = req.params.userName;
-            const result = await popupModel.getReservationUser(userName);
+            const {type, userName, storeId} = req.query;
+            let result;
+            if (type == 'user' && userName) {
+                result = await popupModel.getReservationUser(userName);
+            } else if ( type == 'president' && storeId) {
+                result = await popupModel.getReservationPresident(storeId);
+            } else {
+                return res.status(400).send("예약 조회 값이 없습니다.");
+            }
+
             res.status(200).json(result);
         } catch (err) {
             res.status(500).send("예약 조회 중 오류가 발생하였습니다.");
-        }
-    },
-
-    // 예약 조회 - 스토어 (팝업 등록자가 볼 것)
-    getReservationPresident: async (req, res) => {
-        try {
-            const storeId = req.params.storeId;
-            const result = await popupModel.getReservationPresident(storeId);
-            res.status(200).json(result);
-        } catch (err) {
-            res.status(500).send("예약 조회 오류가 발생하였습니다.");
         }
     },
 
