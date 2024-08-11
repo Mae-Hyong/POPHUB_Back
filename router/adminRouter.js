@@ -5,12 +5,145 @@ const router = express.Router();
 
 const adminController = require('../controllers/adminController');
 
+/**
+ * @swagger
+ * tags:
+ *   name: Admin
+ *   description: Admin management and operations
+ */
+
+/**
+ * @swagger
+ * /category:
+ *   get:
+ *     summary: Get a list of categories
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: List of categories retrieved successfully
+ *       400:
+ *         description: Error occurred while retrieving categories
+ */
 router.get("/category", adminController.searchCategory);
+
+/**
+ * @swagger
+ * /notice:
+ *   get:
+ *     summary: Get a list of notices
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: List of notices retrieved successfully
+ *       400:
+ *         description: Error occurred while retrieving notices
+ */
 router.get("/notice", adminController.searchNotice);
+
+/**
+ * @swagger
+ * /event:
+ *   get:
+ *     summary: Get a list of events
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: List of events retrieved successfully
+ *       400:
+ *         description: Error occurred while retrieving events
+ */
 router.get("/event", adminController.searchNotice);
+
+/**
+ * @swagger
+ * /inquiry/search:
+ *   get:
+ *     summary: Search inquiries
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: Inquiries retrieved successfully
+ *       400:
+ *         description: Error occurred while retrieving inquiries
+ */
 router.get("/inquiry/search", adminController.searchInquiry);
+
+/**
+ * @swagger
+ * /event/create:
+ *   post:
+ *     summary: Create a new event
+ *     tags: [Admin]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Event created successfully
+ *       400:
+ *         description: Error occurred while creating the event
+ */
 router.post("/event/create", multerimg.upload.single("file"), adminController.createEvent);
+
+/**
+ * @swagger
+ * /answer:
+ *   post:
+ *     summary: Create an answer to an inquiry
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               inquiryId:
+ *                 type: string
+ *               answer:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Answer created successfully
+ *       400:
+ *         description: Error occurred while creating the answer
+ */
 router.post("/answer", token.verifyToken, adminController.createAnswer);
+
+/**
+ * @swagger
+ * /notice/create:
+ *   post:
+ *     summary: Create a new notice
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Notice created successfully
+ *       400:
+ *         description: Error occurred while creating the notice
+ */
 router.post("/notice/create", token.verifyToken, adminController.createNotice);
 
 /**

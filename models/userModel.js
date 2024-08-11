@@ -21,7 +21,7 @@ const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, c
 const delete_add_query = 'INSERT INTO user_delete(user_id, phone_number) VALUES (?, ?)'
 const delete_change_query = 'UPDATE user_info SET user_name = ?, withdrawal = ? WHERE user_id = ?'
 const insert_achieveHub_query = "INSERT INTO inquiry (user_name, achieve_id) VALUES (?, ?)"
-
+const gain_point_query = "INSERT INTO point_history SET ?";
 // ------- DELETE Query -------
 const user_delete_query = 'DELETE FROM user_join_info WHERE user_id = ?'
 
@@ -164,7 +164,7 @@ const userModel = {
         return new Promise((resolve, reject) => {
             db.query(answer_search_query, inquiryId, (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             })
         })
     },
@@ -189,9 +189,9 @@ const userModel = {
 
     searchAchiveHub: (achieveId) => {
         return new Promise((resolve, reject) => {
-            db.query(search_achieveHub_query, achieveId, (err, result) => {
+            db.query(select_achieveHub_query, achieveId, (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             })
         })
     },
@@ -201,6 +201,15 @@ const userModel = {
             db.query(gain_point_query, insertData, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
+            })
+        })
+    },
+
+    searchPoint: (userName) => {
+        return new Promise((resolve, reject) => {
+            db.query(search_points_query, userName, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
             })
         })
     }
