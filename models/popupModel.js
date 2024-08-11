@@ -58,6 +58,7 @@ const updateWaitStatus_query = 'UPDATE popup_stores SET store_wait_status = ? WH
 const updateWaitListStatus_query = 'UPDATE wait_list SET wait_status = ? WHERE wait_id = ?';
 const updateCapacity_query = 'UPDATE store_capacity SET current_capacity = ? WHERE store_id = ? AND reservation_date = ? AND reservation_time = ?';
 const updateCapacityMinus_query = 'UPDATE store_capacity SET current_capacity = current_capacity - ? WHERE store_id = ? AND reservation_date = ? AND reservation_time = ?';
+const completedReservation_query = 'UPDATE reservation SET reservation_status = ? WHERE reservation_id = ?';
 
 // ------- DELETE Query -------
 const deleteImage_query = 'DELETE FROM images WHERE store_id = ?';
@@ -583,7 +584,7 @@ const popupModel = {
             });
 
             if (results.length === 0) {
-                return "현재 작성된 리뷰가 없습니다. 예약 후 작성해보세요!";
+                return "현재 작성된 리뷰가 없습니다.";
             }
 
             const reviewData = await Promise.all(results.map(async (review) => {
@@ -959,9 +960,9 @@ const popupModel = {
                 });
             });
 
-            const current_capacity = check.length > 0 ? check[0].current_capacity : 0;
+            const current_capacity = check.length > 0 ? parseInt(check[0].current_capacity, 10) : 0;
             const max_capacity = popup_capacity[0].max_capacity;
-            const update_capacity = current_capacity + reservationData.capacity;
+            const update_capacity = current_capacity + parseInt(reservationData.capacity, 0);
 
             if (update_capacity <= max_capacity) {
 
@@ -1051,6 +1052,36 @@ const popupModel = {
             });
 
             return results;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    completedReservation: async (reservation_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query(completedReservation_query, ["completed", reservation_id], (err, result) => {
+                    if (err) reject (err);
+                    else resolve(result);
+                })
+            })
+
+            const userName = await new Promise((resolve, reject) => {
+                const getUserName_query = "SELECT user_name FROM reservation WHERE reservation_id = ?";
+                db.query(getUserName_query, reservation_id, (err, result) => {
+                    if(err) reject(err);
+                    else {
+                        if(result.length > 0) {
+                            resolve(result[0].user_name);
+                        } else {
+                            resolve(null);
+                        }
+                    }
+                })
+            })
+
+            return userName;
+
         } catch (err) {
             throw err;
         }
