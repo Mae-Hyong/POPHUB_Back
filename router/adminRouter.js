@@ -1,9 +1,9 @@
-const token = require('../function/jwt');
-const multerimg = require('../function/multer');
-const express = require('express');
+const token = require("../function/jwt");
+const multerimg = require("../function/multer");
+const express = require("express");
 const router = express.Router();
 
-const adminController = require('../controllers/adminController');
+const adminController = require("../controllers/adminController");
 
 /**
  * @swagger
@@ -90,7 +90,11 @@ router.get("/inquiry/search", adminController.searchInquiry);
  *       400:
  *         description: Error occurred while creating the event
  */
-router.post("/event/create", multerimg.upload.single("file"), adminController.createEvent);
+router.post(
+    "/event/create",
+    multerimg.upload.single("file"),
+    adminController.createEvent
+);
 
 /**
  * @swagger
@@ -156,7 +160,7 @@ router.post("/notice/create", token.verifyToken, adminController.createNotice);
  *      200:
  *        description: 성공
  */
-router.get('/popupPendingList', adminController.popupPendingList); // pendingList 조회
+router.get("/popupPendingList", adminController.popupPendingList); // pendingList 조회
 
 /**
  * @swagger
@@ -186,7 +190,7 @@ router.get('/popupPendingList', adminController.popupPendingList); // pendingLis
  *                   type: string
  *                   description: 승인된 사용자 이름
  */
-router.put('/popupPendingCheck', adminController.popupPendingCheck); // 관리자 승인 pending -> check
+router.put("/popupPendingCheck", adminController.popupPendingCheck); // 관리자 승인 pending -> check
 
 /**
  * @swagger
@@ -222,6 +226,11 @@ router.put('/popupPendingCheck', adminController.popupPendingCheck); // 관리�
  *                   type: string
  *                   description: 거부된 요청의 사용자 이름
  */
-router.post('/popupPendingDeny', adminController.popupPendingDeny); // 관리자 승인 deny, 거부 사유 등록
+router.post("/popupPendingDeny", adminController.popupPendingDeny); // 관리자 승인 deny, 거부 사유 등록
+router.post(
+    "/popupStore/notification",
+    token.verifyToken,
+    adminController.createPopupStoreNotification
+); // 팝업 스토어 알림 생성
 
 module.exports = router;
