@@ -14,7 +14,7 @@ const adminController = require('../controllers/adminController');
 
 /**
  * @swagger
- * /category:
+ * /admin/category:
  *   get:
  *     summary: Get a list of categories
  *     tags: [Admin]
@@ -28,7 +28,7 @@ router.get("/category", adminController.searchCategory);
 
 /**
  * @swagger
- * /notice:
+ * /admin/notice:
  *   get:
  *     summary: Get a list of notices
  *     tags: [Admin]
@@ -42,7 +42,7 @@ router.get("/notice", adminController.searchNotice);
 
 /**
  * @swagger
- * /event:
+ * /admin/event:
  *   get:
  *     summary: Get a list of events
  *     tags: [Admin]
@@ -56,7 +56,7 @@ router.get("/event", adminController.searchNotice);
 
 /**
  * @swagger
- * /inquiry/search:
+ * /admin/inquiry/search:
  *   get:
  *     summary: Search inquiries
  *     tags: [Admin]
@@ -70,7 +70,7 @@ router.get("/inquiry/search", adminController.searchInquiry);
 
 /**
  * @swagger
- * /event/create:
+ * /admin/event/create:
  *   post:
  *     summary: Create a new event
  *     tags: [Admin]
@@ -94,7 +94,7 @@ router.post("/event/create", multerimg.upload.single("file"), adminController.cr
 
 /**
  * @swagger
- * /answer:
+ * /admin/answer:
  *   post:
  *     summary: Create an answer to an inquiry
  *     tags: [Admin]
@@ -121,7 +121,7 @@ router.post("/answer", token.verifyToken, adminController.createAnswer);
 
 /**
  * @swagger
- * /notice/create:
+ * /admin/notice/create:
  *   post:
  *     summary: Create a new notice
  *     tags: [Admin]
