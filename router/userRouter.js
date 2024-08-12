@@ -6,14 +6,7 @@ const { signController, authController, userController } = require('../controlle
 
 /**
  * @swagger
- * tags:
- *   name: User
- *   description: User management and authentication
- */
-
-/**
- * @swagger
- * /signUp:
+ * /user/signUp:
  *   post:
  *     summary: 회원가입
  *     tags: [User]
@@ -40,7 +33,7 @@ router.post("/signUp", signController.signUp);
 
 /**
  * @swagger
- * /signIn:
+ * /user/signIn:
  *   post:
  *     summary: 로그인
  *     tags: [User]
@@ -65,7 +58,7 @@ router.post("/signIn", signController.signIn);
 
 /**
  * @swagger
- * /certification:
+ * /user/certification:
  *   post:
  *     summary: 인증 코드 메세지 전송
  *     tags: [User]
@@ -88,7 +81,7 @@ router.post("/certification", authController.certification);
 
 /**
  * @swagger
- * /verify:
+ * /user/verify:
  *   post:
  *     summary: 인증 코드 비교
  *     tags: [User]
@@ -113,7 +106,7 @@ router.post("/verify", authController.verifyCertification);
 
 /**
  * @swagger
- * /check:
+ * /user/check:
  *   get:
  *     summary: 사용자 아이디 혹은 닉네임 체크
  *     tags: [User]
@@ -139,7 +132,7 @@ router.get("/check", userController.doubleCheck);
 
 /**
  * @swagger
- * /searchId:
+ * /user/searchId:
  *   get:
  *     summary: Search for a user ID
  *     tags: [User]
@@ -153,7 +146,7 @@ router.get("/searchId", userController.searchId);
 
 /**
  * @swagger
- * /point:
+ * /user/point:
  *   get:
  *     summary: 포인트 내역 조회
  *     tags: [User]
@@ -176,7 +169,7 @@ router.get("/point", userController.searchPoint);
 
 /**
  * @swagger
- * /changePassword:
+ * /user/changePassword:
  *   post:
  *     summary: 비밀번호 변경
  *     tags: [User]
@@ -203,7 +196,7 @@ router.post("/changePassword", userController.changePassword);
 
 /**
  * @swagger
- * /inquiry/search:
+ * /user/inquiry/search:
  *   get:
  *     summary: 문의 조회
  *     tags: [User]
@@ -228,7 +221,7 @@ router.get("/inquiry/search", userController.searchInquiry);
 
 /**
  * @swagger
- * /answer/search:
+ * /user/answer/search:
  *   get:
  *     summary: 문의 답변 조회
  *     tags: [User]
@@ -252,7 +245,7 @@ router.get("/answer/search", token.verifyToken, userController.searchAnswer);
 
 /**
  * @swagger
- * /profile/create:
+ * /user/profile/create:
  *   post:
  *     summary:프로필 생성
  *     tags: [User]
@@ -286,7 +279,7 @@ router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"
 
 /**
  * @swagger
- * /profile/update:
+ * /user/profile/update:
  *   post:
  *     summary: Update an existing profile
  *     tags: [User]
@@ -314,7 +307,7 @@ router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"
 
 /**
  * @swagger
- * /achieveHub:
+ * /user/achieveHub:
  *   get:
  *     summary: 업적 조회
  *     tags: [User]
@@ -341,7 +334,7 @@ router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
 
 /**
  * @swagger
- * /point/gain:
+ * /user/point/gain:
  *   post:
  *     summary: 포인트 추가
  *     tags: [User]
@@ -370,7 +363,7 @@ router.post("/point/gain", token.verifyToken, userController.gainPoint);
 
 /**
  * @swagger
- * /{userId}:
+ * /user/{userId}:
  *   get:
  *     summary: 사용자 정보 조회
  *     tags: [User]
@@ -390,7 +383,7 @@ router.get("/:userId", token.verifyToken, userController.searchUser);
 
 /**
  * @swagger
- * /inquiry/create:
+ * /user/inquiry/create:
  *   post:
  *     summary: 문의 생성
  *     tags: [User]
@@ -422,7 +415,7 @@ router.post("/inquiry/create", token.verifyToken, multerimg.upload.single("file"
 
 /**
  * @swagger
- * /delete:
+ * /user/delete:
  *   post:
  *     summary: 유저 삭제
  *     tags: [User]
