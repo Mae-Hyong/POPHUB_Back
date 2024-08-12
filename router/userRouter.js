@@ -104,11 +104,9 @@ router.post("/certification", authController.certification);
  *             type: object
  *             properties:
  *               authCode:
- *                 type: string
- *                 example: "123456"
+ *                 type: integer
  *               expectedCode:
- *                 type: string
- *                 example: "123456"
+ *                 type: integer
  *     responses:
  *       200:
  *         description: 성공
@@ -122,7 +120,7 @@ router.post("/verify", authController.verifyCertification);
  * /user/check:
  *   get:
  *     tags: [User]
- *     summary: 사용자 ID & 사용자 이름 중복 확인
+ *     summary: 사용자 ID & Name 중복 확인
  *     parameters:
  *       - in: query
  *         name: userId
@@ -157,6 +155,27 @@ router.get("/check", userController.doubleCheck);
  *         description: 성공
  */
 router.get("/searchId", userController.searchId);
+
+/**
+ * @swagger
+ * /user/point:
+ *   get:
+ *     summary: 포인트 내역 조회
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.get("/point", userController.searchPoint);
 
 /**
  * @swagger
@@ -206,10 +225,10 @@ router.get("/inquiry/search", userController.searchInquiry);
 
 /**
  * @swagger
- * /user/searchAnswer:
+ * /user/answer/serch:
  *   get:
  *     tags: [User]
- *     summary: 문의 답변 검색
+ *     summary: 문의 답변 whghl
  *     security:
  *       - ApiKeyAuth: []
  *     parameters:
@@ -222,7 +241,7 @@ router.get("/inquiry/search", userController.searchInquiry);
  *       200:
  *         description: 성공
  */
-router.get("/searchAnswer", token.verifyToken, userController.searchAnswer);
+router.get("/answer/search", token.verifyToken, userController.searchAnswer);
 
 /**
  * @swagger
@@ -230,7 +249,6 @@ router.get("/searchAnswer", token.verifyToken, userController.searchAnswer);
  *   post:
  *     tags: [User]
  *     summary: 프로필 생성
-
  *     security:
  *       - ApiKeyAuth: []
  *     requestBody:
@@ -291,14 +309,68 @@ router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"
 
 router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"), userController.updateProfile);
 
-// 토큰 검증 필요
+/**
+ * @swagger
+ * /user/achieveHub:
+ *   get:
+ *     summary: 업적 조회
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *               achieveId:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: 조회 성공
+ *       404:
+ *         description: UserName 혹은 achieveId 미존재
+ *       500:
+ *         description: 오류 발생
+ */
+router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
+
+/**
+ * @swagger
+ * /user/point/gain:
+ *   post:
+ *     summary: 포인트 추가
+ *     tags: [User]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *               points:
+ *                 type: number
+ *               description:
+ *                 type: string
+ *               calcul:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: 포인트 추가 성공
+ *       500:
+ *         description: 오류 발생
+ */
+router.post("/point/gain", token.verifyToken, userController.gainPoint);
 
 /**
  * @swagger
  * /user/{userId}:
  *   get:
  *     tags: [User]
- *     summary: 사용자 검색
+ *     summary: 사용자 정보 조회
  *     security:
  *       - ApiKeyAuth: []
  *     parameters:
