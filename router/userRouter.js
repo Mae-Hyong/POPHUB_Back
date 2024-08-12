@@ -1,19 +1,32 @@
-const express = require('express');
-const router = express.Router();
 const multerimg = require('../function/multer');
 const token = require('../function/jwt');
+
+const express = require('express');
+const router = express.Router();
+
 const { signController, authController, userController } = require('../controllers/userController');
 
 /**
  * @swagger
+ * components:
+ *   securitySchemes:
+ *     ApiKeyAuth:
+ *       type: apiKey
+ *       in: header
+ *       name: authorization
+ */
+
+// sign route
+/**
+ * @swagger
  * /user/signUp:
  *   post:
- *     summary: 회원가입
  *     tags: [User]
+ *     summary: 회원가입
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -23,11 +36,11 @@ const { signController, authController, userController } = require('../controlle
  *                 type: string
  *               userRole:
  *                 type: string
+ *                 enum: [General Member, President, Manager]
+ *                 description: "General Member: 일반 사용자, President: 판매자, Manager: 관리자"
  *     responses:
  *       201:
- *         description: 회원가입 성공
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.post("/signUp", signController.signUp);
 
@@ -35,12 +48,12 @@ router.post("/signUp", signController.signUp);
  * @swagger
  * /user/signIn:
  *   post:
- *     summary: 로그인
  *     tags: [User]
+ *     summary: 로그인
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -50,32 +63,30 @@ router.post("/signUp", signController.signUp);
  *                 type: string
  *     responses:
  *       200:
- *         description: 로그인 성공
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.post("/signIn", signController.signIn);
 
+// auth route
 /**
  * @swagger
  * /user/certification:
  *   post:
- *     summary: 인증 코드 메세지 전송
  *     tags: [User]
+ *     summary: SMS 전송
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
  *               phoneNumber:
- *                 type: integer
+ *                 type: string
+ *                 example: "01012345678"
  *     responses:
  *       200:
- *         description: 메세지 전공 성공
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.post("/certification", authController.certification);
 
@@ -83,33 +94,33 @@ router.post("/certification", authController.certification);
  * @swagger
  * /user/verify:
  *   post:
- *     summary: 인증 코드 비교
  *     tags: [User]
+ *     summary: SMS 인증
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
  *               authCode:
  *                 type: integer
- *              expectedCode:
+ *               expectedCode:
  *                 type: integer
  *     responses:
  *       200:
- *         description: 인증 성공
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.post("/verify", authController.verifyCertification);
+
+// user route
 
 /**
  * @swagger
  * /user/check:
  *   get:
- *     summary: 사용자 아이디 혹은 닉네임 체크
  *     tags: [User]
+ *     summary: 사용자 ID & Name 중복 확인
  *     parameters:
  *       - in: query
  *         name: userId
@@ -123,24 +134,25 @@ router.post("/verify", authController.verifyCertification);
  *         required: false
  *     responses:
  *       200:
- *         description: POSTMAN으로 확인 필요
- *       400:
- *         description: 사용자 userName 혹은 Id를 제공 필요
- *       500:
- *         description: 오류 발생
+ *         description: 성공
+ */
 router.get("/check", userController.doubleCheck);
 
 /**
  * @swagger
  * /user/searchId:
  *   get:
- *     summary: Search for a user ID
  *     tags: [User]
+ *     summary: 아이디 찾기
+ *     parameters:
+ *       - in: query
+ *         name: phoneNumber
+ *         schema:
+ *           type: string
+ *         required: true
  *     responses:
  *       200:
- *         description: User ID found
- *       400:
- *         description: User ID not found
+ *         description: 성공
  */
 router.get("/searchId", userController.searchId);
 
@@ -161,9 +173,7 @@ router.get("/searchId", userController.searchId);
  *                 type: string
  *     responses:
  *       200:
- *         description: 조회 성공
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.get("/point", userController.searchPoint);
 
@@ -171,12 +181,12 @@ router.get("/point", userController.searchPoint);
  * @swagger
  * /user/changePassword:
  *   post:
- *     summary: 비밀번호 변경
  *     tags: [User]
+ *     summary: 비밀번호 변경
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -186,11 +196,7 @@ router.get("/point", userController.searchPoint);
  *                 type: string
  *     responses:
  *       200:
- *         description: 변경 성공
- *       400:
- *         description: User ID 제공 필요
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.post("/changePassword", userController.changePassword);
 
@@ -198,48 +204,42 @@ router.post("/changePassword", userController.changePassword);
  * @swagger
  * /user/inquiry/search:
  *   get:
- *     summary: 문의 조회
  *     tags: [User]
+ *     summary: 문의 검색
  *     parameters:
  *       - in: query
  *         name: userName
- *         required: false
  *         schema:
  *           type: string
+ *         required: true
  *       - in: query
  *         name: inquiryId
- *         required: false
  *         schema:
- *           type: integer
+ *           type: string
+ *         required: true
  *     responses:
  *       200:
- *         description: 문의 조회 성공
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.get("/inquiry/search", userController.searchInquiry);
 
 /**
  * @swagger
- * /user/answer/search:
+ * /user/answer/serch:
  *   get:
- *     summary: 문의 답변 조회
  *     tags: [User]
+ *     summary: 문의 답변 whghl
+ *     security:
+ *       - ApiKeyAuth: []
  *     parameters:
  *       - in: query
  *         name: inquiryId
- *         required: true
  *         schema:
- *           type: number
+ *           type: string
+ *         required: true
  *     responses:
  *       200:
- *         description: 조회 성공
- *       400:
- *         description: 문의 ID 미존재
- *       404:
- *         description: 문의 미존재
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.get("/answer/search", token.verifyToken, userController.searchAnswer);
 
@@ -247,8 +247,10 @@ router.get("/answer/search", token.verifyToken, userController.searchAnswer);
  * @swagger
  * /user/profile/create:
  *   post:
- *     summary:프로필 생성
  *     tags: [User]
+ *     summary: 프로필 생성
+ *     security:
+ *       - ApiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -262,18 +264,19 @@ router.get("/answer/search", token.verifyToken, userController.searchAnswer);
  *                 type: string
  *               phoneNumber:
  *                 type: string
+ *                 example: "01012345678"
  *               Gender:
  *                 type: string
+ *                 enum: [M, F]
  *               Age:
  *                 type: integer
+ *                 example: 30
  *               file:
  *                 type: string
  *                 format: binary
  *     responses:
  *       201:
- *         description: 프로필 생성
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"), userController.createProfile);
 
@@ -281,8 +284,10 @@ router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"
  * @swagger
  * /user/profile/update:
  *   post:
- *     summary: Update an existing profile
  *     tags: [User]
+ *     summary: 프로필 수정
+ *     security:
+ *       - ApiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -294,15 +299,14 @@ router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"
  *                 type: string
  *               userName:
  *                 type: string
- *               file:
+ *               userImage:
  *                 type: string
  *                 format: binary
  *     responses:
  *       200:
- *         description: 프로필 업데이트 성공
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
+
 router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"), userController.updateProfile);
 
 /**
@@ -365,19 +369,19 @@ router.post("/point/gain", token.verifyToken, userController.gainPoint);
  * @swagger
  * /user/{userId}:
  *   get:
- *     summary: 사용자 정보 조회
  *     tags: [User]
+ *     summary: 사용자 정보 조회
+ *     security:
+ *       - ApiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
- *         required: true
  *         schema:
  *           type: string
+ *         required: true
  *     responses:
  *       200:
- *         description: 사용자 정보 조회 성공
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.get("/:userId", token.verifyToken, userController.searchUser);
 
@@ -385,8 +389,10 @@ router.get("/:userId", token.verifyToken, userController.searchUser);
  * @swagger
  * /user/inquiry/create:
  *   post:
- *     summary: 문의 생성
  *     tags: [User]
+ *     summary: 문의 생성
+ *     security:
+ *       - ApiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -397,7 +403,7 @@ router.get("/:userId", token.verifyToken, userController.searchUser);
  *               userName:
  *                 type: string
  *               categoryId:
- *                 type: number
+ *                 type: integer
  *               title:
  *                 type: string
  *               content:
@@ -407,9 +413,7 @@ router.get("/:userId", token.verifyToken, userController.searchUser);
  *                 format: binary
  *     responses:
  *       201:
- *         description: 문의 생성 성공
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.post("/inquiry/create", token.verifyToken, multerimg.upload.single("file"), userController.createInquiry);
 
@@ -417,12 +421,14 @@ router.post("/inquiry/create", token.verifyToken, multerimg.upload.single("file"
  * @swagger
  * /user/delete:
  *   post:
- *     summary: 유저 삭제
  *     tags: [User]
+ *     summary: 사용자 삭제
+ *     security:
+ *       - ApiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -432,9 +438,7 @@ router.post("/inquiry/create", token.verifyToken, multerimg.upload.single("file"
  *                 type: string
  *     responses:
  *       200:
- *         description: 유저 삭제 성공
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.post("/delete", token.verifyToken, userController.deleteUser);
 
