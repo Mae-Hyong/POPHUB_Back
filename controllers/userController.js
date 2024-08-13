@@ -342,7 +342,7 @@ const userController = {
 
     searchPoint: async (req, res) => {
         try {
-            const userName = req.body.userName;
+            const userName = req.query.userName;
             const searchResult = await userModel.searchPoint(userName);
             const result = await Promise.all(searchResult.map(async (searchResult) => {
                 return {
@@ -354,6 +354,7 @@ const userController = {
             }));
             return res.status(200).json(result);
         } catch (err) {
+            console.log(err);
             return res.status(500).send("point 조회 중 오류가 발생했습니다.");
         }
     }
