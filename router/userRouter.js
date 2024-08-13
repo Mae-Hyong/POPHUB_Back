@@ -165,7 +165,7 @@ router.get("/searchId", userController.searchId);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -228,7 +228,7 @@ router.get("/inquiry/search", userController.searchInquiry);
  * /user/answer/serch:
  *   get:
  *     tags: [User]
- *     summary: 문의 답변 whghl
+ *     summary: 문의 답변 조회
  *     security:
  *       - ApiKeyAuth: []
  *     parameters:
@@ -318,7 +318,7 @@ router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -328,11 +328,7 @@ router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"
  *                 type: number
  *     responses:
  *       200:
- *         description: 조회 성공
- *       404:
- *         description: UserName 혹은 achieveId 미존재
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
 
@@ -345,7 +341,7 @@ router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -359,9 +355,7 @@ router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
  *                 type: string
  *     responses:
  *       201:
- *         description: 포인트 추가 성공
- *       500:
- *         description: 오류 발생
+ *         description: 성공
  */
 router.post("/point/gain", token.verifyToken, userController.gainPoint);
 
