@@ -71,6 +71,33 @@ router.get("/inquiry/search", adminController.searchInquiry);
 
 
 router.post("/event/create", multerimg.upload.single("file"), adminController.createEvent);
+
+/**
+ * @swagger
+ * /admin/answer:
+ *   post:
+ *     tags: [Admin]
+ *     summary: 문의 답변 생성
+ *     security:
+ *       - ApiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               inquiryId:
+ *                 type: string
+ *               userName:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               
+ *     responses:
+ *       201:
+ *         description: 성공
+ */
 router.post("/answer", token.verifyToken, adminController.createAnswer);
 
 /**

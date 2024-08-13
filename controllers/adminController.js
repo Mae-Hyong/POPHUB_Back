@@ -252,7 +252,6 @@ const adminController = {
             const user_name = await adminModel.popupPendingCheck(storeId);
             return res.status(200).json(user_name);
         } catch (err) {
-            console.log(err);
             return res.status(500).send("오류 발생");
         }
     },

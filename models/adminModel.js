@@ -167,7 +167,7 @@ const adminModel = {
     },
 
     // 관리자 pending List 출력
-    popupPendingList: async (user_name) => {
+    popupPendingList: async () => {
         try {
             const pendingList = await new Promise((resolve, reject) => {
                 db.query(pending_query, (err, result) => {
