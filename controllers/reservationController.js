@@ -1,6 +1,6 @@
 const reservationModel = require("../models/reservationModel");
 const moment = require("moment");
-const { sendAlarm } = require("../utils/alarmService");
+const { sendAlarm } = require("../util/alarmService");
 const admin = require("firebase-admin");
 
 const reservationController = {

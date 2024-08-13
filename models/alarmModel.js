@@ -1,13 +1,16 @@
 const admin = require("firebase-admin");
-const db = require("../config/mysqlDatabase");
-const db = admin.firestore();
+const mysqlDb = require("../config/mysqlDatabase");
+const firestoreDb = admin.firestore();
 
 // ------- GET Query -------
 const userNameByStoreId_query =
     "SELECT user_name FROM popup_stores WHERE store_id = ?";
 
 const addAlarm = async (userName, type, alarmDetails) => {
-    const userRef = db.collection("users").doc(userName).collection(type);
+    const userRef = firestoreDb
+        .collection("users")
+        .doc(userName)
+        .collection(type);
 
     const existingAlarms = await userRef
         .where("time", "==", alarmDetails.time)
@@ -30,7 +33,7 @@ const addAlarm = async (userName, type, alarmDetails) => {
 
 const alarmModel = {
     tokenResetModel: async (userName, fcmToken) => {
-        await db
+        await firestoreDb
             .collection("users")
             .doc(userName)
             .set({ fcmToken: fcmToken }, { merge: true });
@@ -50,7 +53,7 @@ const alarmModel = {
         const expirationDate = new Date();
         expirationDate.setDate(expirationDate.getDate() + expiresIn); // 현재 날짜에 + 14일
 
-        await db.collection("users").doc(userName).set(
+        await firestoreDb.collection("users").doc(userName).set(
             {
                 fcmToken: fcmToken,
                 expirationDate: expirationDate,
@@ -60,7 +63,7 @@ const alarmModel = {
     },
 
     waitListAddModel: async (userName, storeId, date, desiredTime) => {
-        const waitlistRef = db.collection("waitlist");
+        const waitlistRef = firestoreDb.collection("waitlist");
         const waitlistDoc = await waitlistRef.add({
             userName,
             storeId,
@@ -72,17 +75,19 @@ const alarmModel = {
     },
 
     checkNotifyModel: async (storeId) => {
-        const waitlistSnapshot = await db
+        const waitlistSnapshot = await firestoreDb
             .collection("waitlist")
             .where("storeId", "==", storeId)
             .where("notified", "==", false)
             .get();
 
-        const batch = db.batch();
+        const batch = firestoreDb.batch();
 
         waitlistSnapshot.forEach(async (doc) => {
             const waitlistData = doc.data();
-            const userRef = db.collection("users").doc(waitlistData.userName);
+            const userRef = firestoreDb
+                .collection("users")
+                .doc(waitlistData.userName);
             const userDoc = await userRef.get();
 
             if (userDoc.exists) {
@@ -109,20 +114,27 @@ const alarmModel = {
 
         await batch.commit();
     },
+
     // store_id로 userName 조회 메서드 추가
     getUserNameByStoreId: async (storeId) => {
-        await new Promise((resolve, reject) => {
-            db.query(userNameByStoreId_query, storeId, (error, results) => {
-                if (error) {
-                    reject(error);
-                } else if (results.length === 0) {
-                    reject(
-                        new Error("해당 store_id에 대한 판매자를 찾을 수 없음.")
-                    );
-                } else {
-                    resolve(results[0].user_name);
+        return new Promise((resolve, reject) => {
+            mysqlDb.query(
+                userNameByStoreId_query,
+                storeId,
+                (error, results) => {
+                    if (error) {
+                        reject(error);
+                    } else if (results.length === 0) {
+                        reject(
+                            new Error(
+                                "해당 store_id에 대한 판매자를 찾을 수 없음."
+                            )
+                        );
+                    } else {
+                        resolve(results[0].user_name);
+                    }
                 }
-            });
+            );
         });
     },
 };
