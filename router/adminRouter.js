@@ -1,28 +1,24 @@
-const token = require("../function/jwt");
-const multerimg = require("../function/multer");
-const express = require("express");
+const token = require('../function/jwt');
+const multerimg = require('../function/multer');
+const express = require('express');
 const router = express.Router();
 
-const adminController = require("../controllers/adminController");
-
-/**
- * @swagger
- * tags:
- *   name: Admin
- *   description: Admin management and operations
- */
+const adminController = require('../controllers/adminController');
 
 /**
  * @swagger
  * /admin/category:
  *   get:
- *     summary: Get a list of categories
  *     tags: [Admin]
+ *     summary: 카테고리 조회
+ *     parameters:
+ *       - in: query
+ *         name: categoryId
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: List of categories retrieved successfully
- *       400:
- *         description: Error occurred while retrieving categories
+ *         description: 성공
  */
 router.get("/category", adminController.searchCategory);
 
@@ -30,13 +26,16 @@ router.get("/category", adminController.searchCategory);
  * @swagger
  * /admin/notice:
  *   get:
- *     summary: Get a list of notices
  *     tags: [Admin]
+ *     summary: 공지사항 조회
+ *     parameters:
+ *       - in: query
+ *         name: notice_id
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: List of notices retrieved successfully
- *       400:
- *         description: Error occurred while retrieving notices
+ *         description: 성공
  */
 router.get("/notice", adminController.searchNotice);
 
@@ -44,109 +43,61 @@ router.get("/notice", adminController.searchNotice);
  * @swagger
  * /admin/event:
  *   get:
- *     summary: Get a list of events
  *     tags: [Admin]
+ *     summary: 이벤트 조회
+ *     parameters:
+ *       - in: query
+ *         name: notice_id
+ *         schema:
+ *           type: string
+ *         required: false
  *     responses:
  *       200:
- *         description: List of events retrieved successfully
- *       400:
- *         description: Error occurred while retrieving events
+ *         description: 성공
  */
-router.get("/event", adminController.searchNotice);
+router.get("/event", adminController.searchEvent);
 
 /**
  * @swagger
  * /admin/inquiry/search:
  *   get:
- *     summary: Search inquiries
  *     tags: [Admin]
+ *     summary: 전체 문의사항 조회
  *     responses:
  *       200:
- *         description: Inquiries retrieved successfully
- *       400:
- *         description: Error occurred while retrieving inquiries
+ *         description: 성공
  */
 router.get("/inquiry/search", adminController.searchInquiry);
 
-/**
- * @swagger
- * /admin/event/create:
- *   post:
- *     summary: Create a new event
- *     tags: [Admin]
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             properties:
- *               file:
- *                 type: string
- *                 format: binary
- *     responses:
- *       200:
- *         description: Event created successfully
- *       400:
- *         description: Error occurred while creating the event
- */
-router.post(
-    "/event/create",
-    multerimg.upload.single("file"),
-    adminController.createEvent
-);
 
-/**
- * @swagger
- * /admin/answer:
- *   post:
- *     summary: Create an answer to an inquiry
- *     tags: [Admin]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               inquiryId:
- *                 type: string
- *               answer:
- *                 type: string
- *     responses:
- *       200:
- *         description: Answer created successfully
- *       400:
- *         description: Error occurred while creating the answer
- */
+router.post("/event/create", multerimg.upload.single("file"), adminController.createEvent);
 router.post("/answer", token.verifyToken, adminController.createAnswer);
 
 /**
  * @swagger
  * /admin/notice/create:
  *   post:
- *     summary: Create a new notice
  *     tags: [Admin]
+ *     summary: 공지사항 생성
  *     security:
- *       - bearerAuth: []
+ *       - ApiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
+ *               userName:
+ *                 type: string
  *               title:
  *                 type: string
  *               content:
  *                 type: string
+ *               
  *     responses:
- *       200:
- *         description: Notice created successfully
- *       400:
- *         description: Error occurred while creating the notice
+ *       201:
+ *         description: 성공
  */
 router.post("/notice/create", token.verifyToken, adminController.createNotice);
 
@@ -156,11 +107,13 @@ router.post("/notice/create", token.verifyToken, adminController.createNotice);
  *  get:
  *    tags: [Admin]
  *    summary: 팝업 pendingList 조회
+ *    security:
+ *       - ApiKeyAuth: []
  *    responses:
  *      200:
  *        description: 성공
  */
-router.get("/popupPendingList", adminController.popupPendingList); // pendingList 조회
+router.get('/popupPendingList', token.verifyToken, adminController.popupPendingList); // pendingList 조회
 
 /**
  * @swagger
@@ -168,29 +121,22 @@ router.get("/popupPendingList", adminController.popupPendingList); // pendingLis
  *   put:
  *     summary: 관리자 승인 pending -> check
  *     tags: [Admin]
+ *     security:
+ *       - ApiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
  *               storeId:
  *                 type: string
- *                 description: 변경할 스토어 ID
  *     responses:
  *       200:
  *         description: 성공
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 user_name:
- *                   type: string
- *                   description: 승인된 사용자 이름
  */
-router.put("/popupPendingCheck", adminController.popupPendingCheck); // 관리자 승인 pending -> check
+router.put('/popupPendingCheck', token.verifyToken, adminController.popupPendingCheck); // 관리자 승인 pending -> check
 
 /**
  * @swagger
@@ -198,35 +144,26 @@ router.put("/popupPendingCheck", adminController.popupPendingCheck); // 관리�
  *   post:
  *     summary: 관리자 승인 요청 거부 및 거부 사유 등록
  *     tags: [Admin]
+ *     security:
+ *       - ApiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
  *               storeId:
  *                 type: string
- *                 description: 거부할 스토어 ID
+ *                 required: true
  *               denialReason:
  *                 type: string
- *                 description: 거부 사유
- *             required:
- *               - storeId
- *               - denialReason
+ *                 required: true
  *     responses:
  *       201:
- *         description: 요청 거부 성공 및 사용자 이름 반환
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 user_name:
- *                   type: string
- *                   description: 거부된 요청의 사용자 이름
+ *         description: 성공
  */
-router.post("/popupPendingDeny", adminController.popupPendingDeny); // 관리자 승인 deny, 거부 사유 등록
+router.post('/popupPendingDeny', token.verifyToken, adminController.popupPendingDeny); // 관리자 승인 deny, 거부 사유 등록
 router.post(
     "/popupStore/notification",
     token.verifyToken,
