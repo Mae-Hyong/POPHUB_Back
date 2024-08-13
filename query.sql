@@ -237,6 +237,15 @@ CREATE TABLE wait_list (
     PRIMARY KEY (user_name, store_id)
 );
 
+-- QR코드 생성
+CREATE TABLE qrcodes (
+	qrcode_id INT AUTO_INCREMENT PRIMARY KEY,
+    store_id VARCHAR(50) NOT NULL,
+    qrcode_url TEXT NOT NULL,
+    create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
+);
+
 
 INSERT INTO category (category_id, category_name) VALUES
 (0, '기술 문의'),

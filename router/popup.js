@@ -663,6 +663,25 @@ router.delete('/review/delete/:reviewId', popupController.deleteReview); // 팝�
  *         description: 추천 데이터
  */
 router.get('/recommendation/:userName?', popupController.recommendation); // 추천 시스템
+
+/**
+ * @swagger
+ * /popup/qrcode/create:
+ *   get:
+ *      tags: [Popup]
+ *      summary: QR코드 생성
+ *      parameters:
+ *        - in: query
+ *          name: storeId
+ *          required: true
+ *          schema:
+ *            type: string
+ *      responses:
+ *        200:
+ *          description: 성공
+ */          
+router.get('/qrcode/create', popupController.createQrCode); // qr코드 생성
+
 module.exports = router;
 
 
