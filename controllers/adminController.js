@@ -208,52 +208,6 @@ const adminController = {
         }
     },
 
-    createEvent: async (req, res) => {
-        try {
-            let img = req.file ? req.file.location : null;
-            const body = req.body;
-            const eventData = {
-                title: body.title,
-                content: body.content,
-                img: img,
-                usesr_name: body.userName,
-            };
-
-            await adminModel.createEvent(eventData);
-            return res.status(201).send("공지사항 작성 완료");
-        } catch (err) {
-            return res
-                .status(500)
-                .send("공지사항 작성 중 오류가 발생했습니다.");
-        }
-    },
-
-    searchEvent: async (req, res) => {
-        try {
-            const eventId = req.query.eventId;
-            if (!eventId) {
-                const searchResult = await adminModel.searchNotice();
-                const results = await Promise.all(
-                    searchResult.map(async (searchResult) => {
-                        return {
-                            noticeId: searchResult.event_id,
-                            userName: searchResult.user_name,
-                            title: searchResult.title,
-                            content: searchResult.content,
-                            img: searchResult.img,
-                        };
-                    })
-                );
-                return res.status(200).json(results);
-            } else {
-                const result = await adminModel.selectNotice(eventId);
-                return res.status(200).json(result);
-            }
-        } catch (err) {
-            return res.status(500).send("이벤트 조회 중 오류가 발생했습니다.");
-        }
-    },
-
     searchAchive: async (req, res) => {
         try {
             const achieveId = req.query.achieveId;

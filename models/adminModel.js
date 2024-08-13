@@ -148,33 +148,6 @@ const adminModel = {
         });
     },
 
-    createEvent: (eventData) => {
-        return new Promise((resolve, reject) => {
-            db.query(create_event_query, eventData, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
-            });
-        });
-    },
-
-    searchEvent: () => {
-        return new Promise((resolve, reject) => {
-            db.query(search_event_query, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
-            });
-        });
-    },
-
-    selectEvent: (eventId) => {
-        return new Promise((resolve, reject) => {
-            db.query(select_event_query, eventId, (err, result) => {
-                if (err) reject(err);
-                else resolve(result[0]);
-            });
-        });
-    },
-
     searchAchive: () => {
         return new Promise((resolve, reject) => {
             db.query(search_achieve_query, (err, result) => {
