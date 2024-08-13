@@ -2,6 +2,7 @@ const productModel = require('../models/productModel');
 const { v4: uuidv4 } = require("uuid");
 
 const productController = {
+
     // 모든 굿즈 조회
     allProducts: async (req, res) => {
         try {
@@ -30,8 +31,8 @@ const productController = {
             const body = req.body;
             const storeId = req.params.storeId;
             const productData = {
-                productId,
-                storeId,
+                product_id: productId,
+                store_id: storeId,
                 product_name: body.productName,
                 product_price: body.productPrice,
                 product_description: body.productDescription,
@@ -39,15 +40,14 @@ const productController = {
             }
 
             const check = await productModel.createProduct(productData, body.userName);
-
             if (check === false) {
                 res.status(400).json({ error: '유저 닉네임이 일치하지 않습니다.' });
             } else {
                 let productImages = [];
                 if (req.files) {
                     await Promise.all(req.files.map(async (file) => {
-                        productImages.push(file.path);
-                        await productModel.uploadImage(productId, file.path);
+                        productImages.push(file.location);
+                        await productModel.uploadImage(productId, file.location);
                     }));
                 }
                 res.status(201).json('해당 상품이 등록되었습니다.');
@@ -76,14 +76,14 @@ const productController = {
             const productId = req.params.productId;
             const body = req.body;
             const updateData = {
-                productId,
+                product_id: productId,
                 product_name: body.productName,
                 product_price: body.productPrice,
                 product_description: body.productDescription,
                 remaining_quantity: body.remainingQuantity,
             }
             const check = await productModel.updateProduct(updateData, body.userName);
-
+            
             if (check === false) {
                 res.status(400).json({ error: '유저 닉네임이 일치하지 않습니다.' });
             } else {
@@ -91,8 +91,8 @@ const productController = {
                 let productImages = [];
                 if (req.files) {
                     await Promise.all(req.files.map(async (file) => {
-                        productImages.push(file.path);
-                        await productModel.uploadImage(productId, file.path);
+                        productImages.push(file.location);
+                        await productModel.uploadImage(productId, file.location);
                     }));
                 }
                 res.status(200).json('해당 상품이 수정되었습니다.');

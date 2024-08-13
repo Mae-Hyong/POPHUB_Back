@@ -20,7 +20,7 @@ const popupController = {
         try {
             const allPopups = await popupModel.allPopups();
 
-            
+
             const sortedPopups = allPopups.sort((a, b) => b.store_view_count - a.store_view_count);
 
             const popularPopups = sortedPopups.slice(0, 5);
@@ -67,7 +67,7 @@ const popupController = {
             const { type, storeName, categoryId } = req.query;
             let result;
 
-            if(type == 'storeName' && storeName) {
+            if (type == 'storeName' && storeName) {
                 result = await popupModel.searchStoreName(storeName);
             } else if (type == 'category' && categoryId) {
                 result = await popupModel.searchCategory(categoryId);
@@ -76,7 +76,7 @@ const popupController = {
             }
 
             res.status(200).json(result);
-        } catch(err) {
+        } catch (err) {
             res.status(500).send("팝업 검색 중 오류가 발생하였습니다.");
         }
     },
@@ -119,7 +119,7 @@ const popupController = {
             await popupModel.uploadSchedule(storeId, popupSchedule.schedule); // 팝업 스케줄 정보
 
             let userImages = [];
-            
+
             if (req.files) {
                 await Promise.all(req.files.map(async (file) => {
                     userImages.push(file.location);
@@ -205,11 +205,11 @@ const popupController = {
         try {
             const storeId = req.params.storeId;
             const check = await popupModel.viewDenialReason(storeId);
-            
+
             if (check.length === 0) {
                 return res.status(404).json({ message: "거부된 팝업 스토어가 존재하지 않습니다." });
             }
-            
+
             res.status(200).json(check);
         } catch (err) {
             res.status(500).send("팝업 거부 조회 중 오류가 발생하였습니다.");
@@ -239,28 +239,23 @@ const popupController = {
         }
     },
 
-    // 스토어별 리뷰
+    // 팝업별 & 아이디별 리뷰
     storeReview: async (req, res) => {
         try {
-            const storeId = req.params.storeId;
-            const review = await popupModel.storeReview(storeId);
-            res.status(200).json(review);
+            const { type, storeId, userName } = req.query;
+            let result;
+            if (type == 'store' && storeId) {
+                result = await popupModel.storeReview(storeId);
+            } else if (type == 'user' && userName) {
+                result = await popupModel.storeUserReview(userName);
+            } else {
+                return res.status(400).send("리뷰 조회 값이 없습니다.");
+            }
+            res.status(200).json(result);
         } catch (err) {
             res.status(500).send("스토어별 리뷰 조회 중 오류가 발생하였습니다.");
         }
     },
-
-    // 아이디별 리뷰
-    storeUserReview: async (req, res) => {
-        try {
-            const userName = req.params.userName;
-            const review = await popupModel.storeUserReview(userName);
-            res.status(200).json(review);
-        } catch (err) {
-            res.status(500).send("사용자별 리뷰 조회 중 오류가 발생하였습니다.");
-        }
-    },
-
 
     // 팝업 스토어 리뷰 상세 조회
     storeReviewDetail: async (req, res) => {
@@ -297,7 +292,7 @@ const popupController = {
                 await popupModel.createReview(reviewData);
                 return res.status(201).json('리뷰가 등록되었습니다.');
             }
-            
+
             res.status(400).json('리뷰 작성 권한이 없습니다.');
         } catch (err) {
             res.status(500).send("리뷰 생성 중 오류가 발생하였습니다.");
@@ -429,6 +424,7 @@ const popupController = {
             const storeId = req.params.storeId;
             const reservationId = uuidv4();
             const createdAt = moment().format('YYYY-MM-DD HH:mm:ss');
+
             let reservationData = {
                 reservation_id: reservationId,
                 store_id: storeId,
@@ -451,25 +447,34 @@ const popupController = {
         }
     },
 
-    // 예약 조회 - 유저
-    getReservationUser: async (req, res) => {
+    // 예약 조회 - 유저 & 판매자
+    getReservation: async (req, res) => {
         try {
-            const userName = req.params.userName;
-            const result = await popupModel.getReservationUser(userName);
+            const { type, userName, storeId } = req.query;
+            let result;
+            if (type == 'user' && userName) {
+                result = await popupModel.getReservationUser(userName);
+            } else if (type == 'president' && storeId) {
+                result = await popupModel.getReservationPresident(storeId);
+            } else {
+                return res.status(400).send("예약 조회 값이 없습니다.");
+            }
+
             res.status(200).json(result);
         } catch (err) {
             res.status(500).send("예약 조회 중 오류가 발생하였습니다.");
         }
     },
 
-    // 예약 조회 - 스토어 (팝업 등록자가 볼 것)
-    getReservationPresident: async (req, res) => {
+    // 예약 입장 성공
+    completedReservation: async (req, res) => {
         try {
-            const storeId = req.params.storeId;
-            const result = await popupModel.getReservationPresident(storeId);
-            res.status(200).json(result);
+            const reservationId = req.query.reservationId;
+            const result = await popupModel.completedReservation(reservationId);
+            res.status(200).json({ message: "입장이 성공적으로 완료되었습니다.", userName: result});
         } catch (err) {
-            res.status(500).send("예약 조회 오류가 발생하였습니다.");
+            console.log(err);
+            res.status(500).send("사전 예약 입장 수락 중 오류가 발생하였습니다.");
         }
     },
 
