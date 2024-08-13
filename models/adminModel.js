@@ -114,7 +114,7 @@ const adminModel = {
     },
     createEvent: (eventData) => {
         return new Promise((resolve, reject) => {
-            db.query("INSERT INTO events SET ?", eventData, (err, result) => {
+            db.query(create_event_query, eventData, (err, result) => {
                 if (err) reject(err);
                 else resolve(result);
             });

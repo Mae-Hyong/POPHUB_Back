@@ -143,7 +143,6 @@ const adminController = {
                 await sendAlarm(alarmData); // 알림 전송
                 await db.collection("Alarms").add(alarmData); // Firebase에 알림 저장
             }
-            await adminModel.createEvent(eventData);
             return res.status(201).send("공지사항 작성 완료");
         } catch (err) {
             return res
@@ -186,7 +185,7 @@ const adminController = {
         try {
             const eventId = req.query.eventId;
             if (!eventId) {
-                const searchResult = await adminModel.searchNotice();
+                const searchResult = await adminModel.searchEvent();
                 const results = await Promise.all(
                     searchResult.map(async (searchResult) => {
                         return {
@@ -200,7 +199,7 @@ const adminController = {
                 );
                 return res.status(200).json(results);
             } else {
-                const result = await adminModel.selectNotice(eventId);
+                const result = await adminModel.selectEvent(eventId);
                 return res.status(200).json(result);
             }
         } catch (err) {

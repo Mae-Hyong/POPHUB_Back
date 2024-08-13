@@ -222,7 +222,7 @@ router.get("/inquiry/search", userController.searchInquiry);
 
 /**
  * @swagger
- * /user/answer/serch:
+ * /user/answer/search:
  *   get:
  *     tags: [User]
  *     summary: 문의 답변 조회
