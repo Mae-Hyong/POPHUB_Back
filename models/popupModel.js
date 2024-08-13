@@ -8,7 +8,7 @@ const storeUserReview_query = 'SELECT * FROM store_review WHERE user_name = ?';
 const storeReviewDetail_query = 'SELECT * FROM store_review WHERE review_id = ?';
 const likePopupSelect_query = 'SELECT * FROM BookMark WHERE user_name = ? AND store_id = ?';
 const likePopupCheck_query = 'SELECT store_mark_number FROM popup_stores WHERE store_id = ?';
-const adminwait_query = 'SELECT * FROM popup_stores WHERE store_id = ?';
+const popupExists_query = 'SELECT * FROM popup_stores WHERE store_id = ?';
 const waitList_query = 'SELECT * FROM wait_list WHERE store_id = ?';
 const waitOrder_query = 'SELECT COUNT(*) AS waitOrder FROM wait_list WHERE store_id = ? AND wait_status = "waiting" AND wait_reservation_time <= (SELECT wait_reservation_time FROM wait_list WHERE store_id = ? AND user_name = ? AND wait_status = "waiting")';
 const waitReservation_query = 'SELECT store_wait_status FROM popup_stores WHERE store_id = ?';
@@ -37,6 +37,7 @@ const storeEndDate_query = 'SELECT store_end_date FROM popup_stores WHERE store_
 const getUserImage_query = 'SELECT user_image FROM user_info WHERE user_name = ?';
 const checkReview_query = 'SELECT COUNT(*) AS count FROM store_review WHERE store_id = ? AND user_name = ?';
 const checkReservation_query = 'SELECT COUNT (*) AS count FROM reservation WHERE store_id = ? AND user_name = ? AND reservation_status = "completed"';
+const qrCodeExistsQuery = 'SELECT * FROM qrcodes WHERE store_id = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -47,6 +48,7 @@ const createWaitReservation_query = 'INSERT INTO wait_list SET ?';
 const createImage_query = 'INSERT INTO images (store_id, image_url) VALUES (?, ?)';
 const reservation_query = 'INSERT INTO reservation SET ?';
 const storeCapacity_query = 'INSERT INTO store_capacity SET ?';
+const qrCodeInsert_query = 'INSERT INTO qrcodes SET ?';
 
 // ------- PUT Query -------
 const updatePopup_query = 'UPDATE popup_stores SET ? WHERE store_id = ?';
@@ -111,7 +113,7 @@ const popupModel = {
                 delete popup.image_urls;
                 return popup;
             }));
-    
+
             return schedule;
         } catch (err) {
             throw err;
@@ -341,7 +343,7 @@ const popupModel = {
 
     // 하나의 팝업 정보 조회
     getPopup: async (store_id, user_name) => {
-        
+
         // 조회수
         const updateViewCount = (store_id) => {
             return new Promise((resolve, reject) => {
@@ -594,7 +596,7 @@ const popupModel = {
                         resolve(user[0]?.user_image || null);
                     });
                 });
-    
+
                 return {
                     ...review,
                     user_image: userImage
@@ -628,7 +630,7 @@ const popupModel = {
                         resolve(user[0]?.user_image || null);
                     });
                 });
-    
+
                 return {
                     ...review,
                     user_image: userImage
@@ -658,7 +660,7 @@ const popupModel = {
     },
 
     // 리뷰 중복 체크
-    checkReview: async(store_id, user_name) => {
+    checkReview: async (store_id, user_name) => {
         try {
             const result = await new Promise((resolve, reject) => {
                 db.query(checkReview_query, [store_id, user_name], (err, result) => {
@@ -674,7 +676,7 @@ const popupModel = {
     },
 
     // 리뷰 권한 체크
-    checkReservation: async(store_id, user_name) => {
+    checkReservation: async (store_id, user_name) => {
         try {
             const result = await new Promise((resolve, reject) => {
                 db.query(checkReservation_query, [store_id, user_name], (err, result) => {
@@ -682,9 +684,9 @@ const popupModel = {
                     else resolve(result[0].count > 0);
                 });
             });
-            
+
             return result;
-        } catch(err) {
+        } catch (err) {
             throw err;
         }
     },
@@ -843,7 +845,7 @@ const popupModel = {
     popupStatus: async (store_id) => {
         try {
             const result = await new Promise((resolve, reject) => {
-                db.query(adminwait_query, store_id, (err, result) => {
+                db.query(popupExists_query, store_id, (err, result) => {
                     if (err) reject(err);
                     else resolve(result[0]);
 
@@ -908,17 +910,17 @@ const popupModel = {
             if (!results.length) {
                 return { message: "현재 예약 정보가 없습니다." };
             }
-            
+
             const date = await new Promise((resolve, reject) => {
                 db.query(storeEndDate_query, store_id, (err, result) => {
-                    if(err) reject(err);
+                    if (err) reject(err);
                     else resolve(result);
                 })
             });
 
             const day = await new Promise((resolve, reject) => {
                 db.query(storeSchedules_query, store_id, (err, result) => {
-                    if(err) reject(err);
+                    if (err) reject(err);
                     else resolve(result);
                 })
             })
@@ -935,7 +937,7 @@ const popupModel = {
                 return rest;
             });
 
-            return {common, status};
+            return { common, status };
 
         } catch (err) {
             throw err;
@@ -1061,7 +1063,7 @@ const popupModel = {
         try {
             await new Promise((resolve, reject) => {
                 db.query(completedReservation_query, ["completed", reservation_id], (err, result) => {
-                    if (err) reject (err);
+                    if (err) reject(err);
                     else resolve(result);
                 })
             })
@@ -1069,9 +1071,9 @@ const popupModel = {
             const userName = await new Promise((resolve, reject) => {
                 const getUserName_query = "SELECT user_name FROM reservation WHERE reservation_id = ?";
                 db.query(getUserName_query, reservation_id, (err, result) => {
-                    if(err) reject(err);
+                    if (err) reject(err);
                     else {
-                        if(result.length > 0) {
+                        if (result.length > 0) {
                             resolve(result[0].user_name);
                         } else {
                             resolve(null);
@@ -1143,10 +1145,10 @@ const popupModel = {
                     });
                 });
             };
-    
+
             // 첫 번째 카테고리 데이터
             const firstCategoryData = await getCategoryData(user_recommendation[0]);
-    
+
             // 첫 번째 카테고리 5개 이하일 경우,
             let results = firstCategoryData;
             if (results.length < 5 && user_recommendation.length > 1) {
@@ -1155,13 +1157,53 @@ const popupModel = {
                 const slice = Math.min(count, secondCategoryData.length);
                 results = results.concat(secondCategoryData.slice(0, slice));
             }
-    
+
             return results.length > 0 ? results : '해당 카테고리의 팝업이 존재하지 않습니다.';
         } catch (err) {
             throw err;
         }
     },
 
+
+    // QR 코드 체크
+    checkQrCode: async (store_id) => {
+        try {
+            // popup에 store_id 존재 여부 확인
+            const popupExists = await new Promise((resolve, reject) => {
+                db.query(popupExists_query, store_id, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                });
+            });
+
+            if (popupExists.length === 0) { return null; }
+
+            // qrcodes에 store_id 존재 여부 확인
+            const qrCodeExists = await new Promise((resolve, reject) => {
+                db.query(qrCodeExistsQuery, store_id, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                });
+            });
+            return qrCodeExists;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // QR 코드 생성
+    createQrCode: async (qrCodeData) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query(qrCodeInsert_query, qrCodeData, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                })
+            })
+        } catch (err) {
+            throw err;
+        }
+    },
 };
 
 module.exports = popupModel;

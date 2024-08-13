@@ -2,6 +2,7 @@ const popupModel = require('../models/popupModel');
 const moment = require('moment');
 const { v4: uuidv4 } = require("uuid");
 const { getRecommendation } = require('../function/recommendation');
+const qrCode = require('qrcode');
 
 const popupController = {
 
@@ -471,7 +472,7 @@ const popupController = {
         try {
             const reservationId = req.query.reservationId;
             const result = await popupModel.completedReservation(reservationId);
-            res.status(200).json({ message: "입장이 성공적으로 완료되었습니다.", userName: result});
+            res.status(200).json({ message: "입장이 성공적으로 완료되었습니다.", userName: result });
         } catch (err) {
             console.log(err);
             res.status(500).send("사전 예약 입장 수락 중 오류가 발생하였습니다.");
@@ -501,7 +502,32 @@ const popupController = {
         } catch (err) {
             res.status(500).send("추천 시스템 확인 오류가 발생하였습니다.");
         }
-    }
+    },
+
+    // QR코드 생성
+    createQrCode: async (req, res) => {
+        try {
+            const storeId = req.query.storeId;
+            const check = await popupModel.checkQrCode(storeId);
+            if (check === null) {
+                return res.status(404).json({ message: "해당 팝업의 ID가 존재하지 않습니다." });
+            } else if (check.length > 0) {
+                return res.status(200).json({ message: "이미 QR코드가 존재합니다.", QRcode: check[0].qrcode_url });
+            } else {
+                const QRCode = await qrCode.toDataURL(storeId);
+                const qrCodeDate = moment().format('YYYY-MM-DD HH:mm:ss');
+                const qrCodeData = {
+                    store_id: storeId,
+                    qrcode_url: QRCode,
+                    create_at: qrCodeDate
+                }
+                await popupModel.createQrCode(qrCodeData);
+                return res.status(200).json({ message: "QR코드가 생성되었습니다.", QRCode });
+            }
+        } catch (err) {
+            res.status(500).send("QR코드 생성 중 오류가 발생하였습니다.");
+        }
+    },
 };
 
 module.exports = { popupController }
