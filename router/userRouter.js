@@ -162,15 +162,12 @@ router.get("/searchId", userController.searchId);
  *   get:
  *     summary: 포인트 내역 조회
  *     tags: [User]
- *     requestBody:
- *       required: true
- *       content:
- *         application/x-www-form-urlencoded:
- *           schema:
- *             type: object
- *             properties:
- *               userName:
- *                 type: string
+ *     parameters:
+ *       - in: query
+ *         name: userName
+ *         schema:
+ *           type: string
+ *         required: true
  *     responses:
  *       200:
  *         description: 성공
@@ -313,8 +310,10 @@ router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"
  * @swagger
  * /user/achieveHub:
  *   get:
- *     summary: 업적 조회
  *     tags: [User]
+ *     summary: 업적 조회
+ *     security:
+ *       - ApiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -336,8 +335,10 @@ router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
  * @swagger
  * /user/point/gain:
  *   post:
- *     summary: 포인트 추가
  *     tags: [User]
+ *     summary: 포인트 추가
+ *     security:
+ *       - ApiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
