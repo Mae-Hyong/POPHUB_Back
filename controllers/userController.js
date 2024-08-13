@@ -281,11 +281,11 @@ const userController = {
             const result = await userModel.searchAnswer(inquiryId);
             if (!result) return res.status(404).send("Answer not found");
             return res.status(200).json({
-                answerId: result.answer_id,
-                inquiryId: result.inquiry_id,
-                userName: result.user_name,
-                content: result.content,
-                writeDate: result.write_date,
+                answerId: result[0].answer_id,
+                inquiryId: result[0].inquiry_id,
+                userName: result[0].user_name,
+                content: result[0].content,
+                writeDate: result[0].write_date,
             });
         } catch (err) {
             return res.status(500).send("문의 내역을 가져오는 중 오류가 발생했습니다.");
