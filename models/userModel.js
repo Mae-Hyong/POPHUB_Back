@@ -11,6 +11,7 @@ const inquiry_select_query = 'SELECT * FROM inquiry WHERE inquiry_id = ?';
 const answer_search_query = 'SELECT * FROM answer WHERE inquiry_id = ?';
 const search_category_query = 'SELECT category_name FROM category WHERE category_id = ?'
 const select_achieveHub_query = 'SELECT * FROM achieve_hub WHERE user_name = ? AND achieve_id = ?'
+const search_points_query = 'SELECT * FROM point_history WHERE user_name = ?'
 
 // ------- POST Query -------
 const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE user_id = ?';
