@@ -1,5 +1,6 @@
 const signModel = require("../models/signModel");
 const userModel = require("../models/userModel");
+const achieveModel = require("../models/achieveModel");
 
 const Token = require("../function/jwt");
 const sendMessage = require("../function/message");
@@ -154,6 +155,7 @@ const userController = {
             try {
                 let userImage = req.file ? req.file.location : null;
                 await userModel.createProfile(userId, userName, phoneNumber, Gender, Age, userImage);
+                await achieveModel.clearAchieve(userName, 2);
 
                 return res.status(201).send("Profile added successfully");
             } catch (error) {
@@ -296,7 +298,7 @@ const userController = {
         try {
             const { userName, achieveId } = req.body;
             if (userName && achieveId) {
-                await userModel.clearAchieve(userName, achieveId);
+                await achieveModel.clearAchieve(userName, achieveId);
                 return res.status(201).json({ Msg: "clear achieve" });
             } else return res.status(404).send("userName or achieveId not found");
         } catch (err) {
@@ -308,7 +310,7 @@ const userController = {
         try {
             const { userName, achieveId } = req.body;
             if (userName && achieveId) {
-                const searchResult = await userModel.searchAchiveHub(userName, achieveId);
+                const searchResult = await achieveModel.searchAchiveHub(userName, achieveId);
                 const results = await Promise.all(searchResult.map(async (searchResult) => {
                     return {
                         achiveId: searchResult.achive_id,
