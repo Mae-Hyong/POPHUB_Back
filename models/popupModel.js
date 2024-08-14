@@ -48,7 +48,7 @@ const createWaitReservation_query = 'INSERT INTO wait_list SET ?';
 const createImage_query = 'INSERT INTO images (store_id, image_url) VALUES (?, ?)';
 const reservation_query = 'INSERT INTO reservation SET ?';
 const storeCapacity_query = 'INSERT INTO store_capacity SET ?';
-const qrCodeInsert_query = 'INSERT INTO qrcodes SET ?';
+const insertQrCode_query = 'INSERT INTO qrcodes SET ?';
 
 // ------- PUT Query -------
 const updatePopup_query = 'UPDATE popup_stores SET ? WHERE store_id = ?';
@@ -69,6 +69,7 @@ const deleteReview_query = 'DELETE FROM store_review WHERE review_id = ?';
 const likePopupDelete_query = 'DELETE FROM BookMark WHERE user_name = ? AND store_id = ?';
 const waitDelete_query = 'DELETE FROM wait_list WHERE wait_id = ?';
 const deleteReservation_query = 'DELETE FROM reservation WHERE reservation_id = ?';
+const deleteQrCode_query = 'DELETE FROM qrcodes WHERE store_id = ?';
 
 const getWaitOrder = (store_id, user_name) => {
     return new Promise((resolve, reject) => {
@@ -1195,7 +1196,21 @@ const popupModel = {
     createQrCode: async (qrCodeData) => {
         try {
             await new Promise((resolve, reject) => {
-                db.query(qrCodeInsert_query, qrCodeData, (err, results) => {
+                db.query(insertQrCode_query, qrCodeData, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                })
+            })
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // QR 코드 삭제
+    deleteQrCode: async (store_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query(deleteQrCode_query, store_id, (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 })

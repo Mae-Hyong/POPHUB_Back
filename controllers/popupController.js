@@ -195,7 +195,6 @@ const popupController = {
             const storeId = req.params.storeId;
             await popupModel.deletePopup(storeId);
             res.status(200).json({ message: "해당 팝업스토어의 정보가 삭제되었습니다." });
-
         } catch (err) {
             res.status(500).send("팝업 삭제 중 오류가 발생하였습니다.");
         }
@@ -526,6 +525,18 @@ const popupController = {
             }
         } catch (err) {
             res.status(500).send("QR코드 생성 중 오류가 발생하였습니다.");
+        }
+    },
+
+    // QR 코드 삭제
+    deleteQrCode: async (req, res) => {
+        try {
+            const storeId = req.query.storeId;
+            await popupModel.deleteQrCode(storeId);
+            return res.status(200).json({ message: "QR코드가 삭제되었습니다." });
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("QR코드 삭제 중 오류가 발생하였습니다.");
         }
     },
 };

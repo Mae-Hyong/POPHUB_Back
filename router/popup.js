@@ -682,6 +682,24 @@ router.get('/recommendation/:userName?', popupController.recommendation); // 추
  */          
 router.get('/qrcode/create', popupController.createQrCode); // qr코드 생성
 
+/**
+ * @swagger
+ * /popup/qrcode/delete:
+ *   delete:
+ *      tags: [Popup]
+ *      summary: QR코드 삭제
+ *      parameters:
+ *        - in: query
+ *          name: storeId
+ *          required: true
+ *          schema:
+ *            type: string
+ *      responses:
+ *        200:
+ *          description: 성공
+ */
+router.delete('/qrcode/delete', popupController.deleteQrCode) // qr코드 삭제
+
 module.exports = router;
 
 
