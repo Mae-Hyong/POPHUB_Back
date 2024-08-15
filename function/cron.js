@@ -21,6 +21,16 @@ CREATE TABLE wait_list(
   )
 `;
 
+const join_date_count_query = `SELECT uj.user_id, ui.user_name 
+    FROM user_join_info uj 
+    INNER JOIN user_info ui ON uj.user_id = ui.user_id
+    WHERE DATEDIFF(NOW(), uj.join_date) >= 10
+      AND NOT EXISTS (
+          SELECT 1 FROM achieve_hub ah 
+          WHERE ah.user_name = ui.user_name 
+          AND ah.achieve_id = 9
+      );`;
+
 const updateStatus = (query) =>
     new Promise((resolve, reject) => {
         db.query(query, (err, result) => {
@@ -55,11 +65,21 @@ const resetWaitList = async () => {
     }
 };
 
+const joinDate = async () => {
+    new Promise((resolve, reject) => {
+        db.query(join_date_count_query, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        })
+    })
+};
+
 function scheduleDatabaseUpdate() {
     cron.schedule('0 0 * * *', async () => {
         await updatePopupStatus();
         await updateReservationStatus();
         await resetWaitList();
+        await joinDate();
     });
 }
 

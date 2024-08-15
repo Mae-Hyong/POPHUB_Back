@@ -237,6 +237,34 @@ CREATE TABLE wait_list (
     PRIMARY KEY (user_name, store_id)
 );
 
+CREATE TABLE achieve (
+	achieve_id int auto_increment primary key,
+    title varchar(50),
+    content varchar(150),
+    conditions text,
+    points int
+);
+
+CREATE TABLE achieve_hub (
+	user_name VARCHAR(50),
+    achieve_id int,
+    complete_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    primary key (user_name, achieve_id),
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
+    FOREIGN KEY (achieve_id) REFERENCES achieve(achieve_id) ON UPDATE CASCADE
+);
+
+CREATE TABLE point_history (
+    history_id int auto_increment primary key,
+    user_name varchar(50),
+    points int not null,
+    description text,
+    calcul ENUM("+", "-"),
+    transaction_at timestamp default current_timestamp,
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
+);
+
 
 INSERT INTO category (category_id, category_name) VALUES
 (0, '기술 문의'),

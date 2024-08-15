@@ -1,3 +1,4 @@
+const achieveModel = require('../models/achieveModel');
 const productModel = require('../models/productModel');
 const { v4: uuidv4 } = require("uuid");
 
@@ -119,6 +120,8 @@ const productController = {
         try {
             const productId = req.params.productId;
             const userName = req.body.userName;
+            const likeCount = await achieveModel.countBookMark(userName);
+            if(likeCount == 10) await achieveModel.clearAchieve(userName, 3);
             const like = await productModel.likeProduct(userName, productId);
             res.status(201).json(like);
         } catch (err) {

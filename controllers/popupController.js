@@ -1,4 +1,5 @@
 const popupModel = require('../models/popupModel');
+const achieveModel = require('../models/achieveModel')
 const moment = require('moment');
 const { v4: uuidv4 } = require("uuid");
 const { getRecommendation } = require('../function/recommendation');
@@ -221,6 +222,8 @@ const popupController = {
         try {
             const storeId = req.params.storeId;
             const userName = req.body.userName;
+            const likeCount = await achieveModel.countBookMark(userName);
+            if(likeCount == 10) await achieveModel.clearAchieve(userName, 3);
             const like = await popupModel.likePopup(userName, storeId);
             res.status(201).json(like);
         } catch (err) {
@@ -274,6 +277,8 @@ const popupController = {
             const body = req.body;
             const storeId = req.params.storeId;
             const reviewDate = moment().format('YYYY-MM-DD HH:mm:ss');
+            const reviewCount = await achieveModel.countReview(body.userName);
+            if(reviewCount > 0) await achieveModel.clearAchieve(body.userName, 1);
             const reviewData = {
                 user_name: body.userName,
                 store_id: storeId,
