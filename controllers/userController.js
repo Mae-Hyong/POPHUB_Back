@@ -31,6 +31,7 @@ const signController = {
 
             if (isPasswordValid) {
                 const token = Token.generateToken(userId);
+                await achieveModel.checkAndAddAchieve(userId);
                 return res.status(200).json({ user_id: userId, token });
             } else {
                 return res.status(401).send("Invalid password");

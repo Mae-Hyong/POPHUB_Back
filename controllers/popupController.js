@@ -277,8 +277,7 @@ const popupController = {
             const body = req.body;
             const storeId = req.params.storeId;
             const reviewDate = moment().format('YYYY-MM-DD HH:mm:ss');
-            const reviewCount = await achieveModel.countReview(body.userName);
-            if(reviewCount > 0) await achieveModel.clearAchieve(body.userName, 1);
+            await achieveModel.clearAchieve(body.userName, 1);
             const reviewData = {
                 user_name: body.userName,
                 store_id: storeId,
