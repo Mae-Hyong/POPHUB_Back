@@ -530,7 +530,7 @@ router.delete('/deleteReservation/:reservationId', popupController.deleteReserva
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -610,7 +610,7 @@ router.get('/review/storeReview/:reviewId', popupController.storeReviewDetail); 
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:

@@ -273,13 +273,11 @@ const popupController = {
         try {
             const body = req.body;
             const storeId = req.params.storeId;
-            const reviewDate = moment().format('YYYY-MM-DD HH:mm:ss');
             const reviewData = {
                 user_name: body.userName,
                 store_id: storeId,
                 review_rating: body.reviewRating,
                 review_content: body.reviewContent,
-                review_date: reviewDate,
             }
 
             // 예약 확인
@@ -304,12 +302,10 @@ const popupController = {
         try {
             const body = req.body;
             const reviewId = req.params.reviewId;
-            const reviewModifiedDate = moment().format('YYYY-MM-DD HH:mm:ss');
             const reviewData = {
                 user_name: body.userName,
                 review_rating: body.reviewRating,
                 review_content: body.reviewContent,
-                review_modified_date: reviewModifiedDate,
             }
             await popupModel.updateReview(reviewData, reviewId);
             res.status(200).json('수정이 완료되었습니다.');
@@ -423,8 +419,6 @@ const popupController = {
         try {
             const storeId = req.params.storeId;
             const reservationId = uuidv4();
-            const createdAt = moment().format('YYYY-MM-DD HH:mm:ss');
-
             let reservationData = {
                 reservation_id: reservationId,
                 store_id: storeId,
@@ -432,7 +426,6 @@ const popupController = {
                 reservation_date: req.body.reservationDate,
                 reservation_time: req.body.reservationTime,
                 capacity: req.body.capacity,
-                created_at: createdAt,
             };
 
             const result = await popupModel.reservation(reservationData);
@@ -514,11 +507,9 @@ const popupController = {
                 return res.status(200).json({ message: "이미 QR코드가 존재합니다.", QRcode: check[0].qrcode_url });
             } else {
                 const QRCode = await qrCode.toDataURL(storeId);
-                const qrCodeDate = moment().format('YYYY-MM-DD HH:mm:ss');
                 const qrCodeData = {
                     store_id: storeId,
                     qrcode_url: QRCode,
-                    create_at: qrCodeDate
                 }
                 await popupModel.createQrCode(qrCodeData);
                 return res.status(200).json({ message: "QR코드가 생성되었습니다.", QRCode });
