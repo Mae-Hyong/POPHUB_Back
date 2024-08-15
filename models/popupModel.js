@@ -38,6 +38,7 @@ const getUserImage_query = 'SELECT user_image FROM user_info WHERE user_name = ?
 const checkReview_query = 'SELECT COUNT(*) AS count FROM store_review WHERE store_id = ? AND user_name = ?';
 const checkReservation_query = 'SELECT COUNT (*) AS count FROM reservation WHERE store_id = ? AND user_name = ? AND reservation_status = "completed"';
 const qrCodeExistsQuery = 'SELECT * FROM qrcodes WHERE store_id = ?';
+const scanQrCode_query = 'SELECT * FROM qrcodes WHERE qrcode_url = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -1219,6 +1220,37 @@ const popupModel = {
             throw err;
         }
     },
+
+    // QR 코드 조회
+    showQrCode: async (store_id) => {
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query(qrCodeExistsQuery, store_id, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                })
+            })
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // QR 코드 스캔
+    scanQrCode: async (qrcode_url) => {
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query(scanQrCode_query, qrcode_url, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results[0].store_id);
+                })
+            })
+
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    }
 };
 
 module.exports = popupModel;
