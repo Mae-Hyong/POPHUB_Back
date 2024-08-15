@@ -530,7 +530,7 @@ router.delete('/deleteReservation/:reservationId', popupController.deleteReserva
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -610,7 +610,7 @@ router.get('/review/storeReview/:reviewId', popupController.storeReviewDetail); 
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -663,6 +663,79 @@ router.delete('/review/delete/:reviewId', popupController.deleteReview); // 팝�
  *         description: 추천 데이터
  */
 router.get('/recommendation/:userName?', popupController.recommendation); // 추천 시스템
+
+/**
+ * @swagger
+ * /popup/qrcode/create:
+ *   get:
+ *      tags: [Popup]
+ *      summary: QR코드 생성
+ *      parameters:
+ *        - in: query
+ *          name: storeId
+ *          required: true
+ *          schema:
+ *            type: string
+ *      responses:
+ *        200:
+ *          description: 성공
+ */          
+router.get('/qrcode/create', popupController.createQrCode); // qr코드 생성
+
+/**
+ * @swagger
+ * /popup/qrcode/delete:
+ *   delete:
+ *      tags: [Popup]
+ *      summary: QR코드 삭제
+ *      parameters:
+ *        - in: query
+ *          name: storeId
+ *          required: true
+ *          schema:
+ *            type: string
+ *      responses:
+ *        200:
+ *          description: 성공
+ */
+router.delete('/qrcode/delete', popupController.deleteQrCode) // qr코드 삭제
+
+/**
+ * @swagger
+ * /popup/qrcode/show:
+ *   get:
+ *      tags: [Popup]
+ *      summary: QR코드 이미지 조회
+ *      parameters:
+ *        - in: query
+ *          name: storeId
+ *          required: true
+ *          schema:
+ *            type: string
+ *      responses:
+ *        200:
+ *          description: 성공
+ */ 
+router.get('/qrcode/show', popupController.showQrCode) // qr코드 조회
+
+/**
+ * @swagger
+ * /popup/qrcode/scan:
+ *   get:
+ *      tags: [Popup]
+ *      summary: QR코드 스캔
+ *      parameters:
+ *        - in: query
+ *          name: qrCode
+ *          required: true
+ *          schema:
+ *            type: string
+ *      responses:
+ *        200:
+ *          description: 성공
+ */  
+router.get('/qrcode/scan', popupController.scanQrCode) // qr코드 스캔
+
 module.exports = router;
 
 

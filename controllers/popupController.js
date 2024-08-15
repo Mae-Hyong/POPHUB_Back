@@ -3,6 +3,7 @@ const achieveModel = require('../models/achieveModel')
 const moment = require('moment');
 const { v4: uuidv4 } = require("uuid");
 const { getRecommendation } = require('../function/recommendation');
+const qrCode = require('qrcode');
 
 const popupController = {
 
@@ -195,7 +196,6 @@ const popupController = {
             const storeId = req.params.storeId;
             await popupModel.deletePopup(storeId);
             res.status(200).json({ message: "해당 팝업스토어의 정보가 삭제되었습니다." });
-
         } catch (err) {
             res.status(500).send("팝업 삭제 중 오류가 발생하였습니다.");
         }
@@ -276,14 +276,12 @@ const popupController = {
         try {
             const body = req.body;
             const storeId = req.params.storeId;
-            const reviewDate = moment().format('YYYY-MM-DD HH:mm:ss');
             await achieveModel.clearAchieve(body.userName, 1);
             const reviewData = {
                 user_name: body.userName,
                 store_id: storeId,
                 review_rating: body.reviewRating,
                 review_content: body.reviewContent,
-                review_date: reviewDate,
             }
 
             // 예약 확인
@@ -308,12 +306,10 @@ const popupController = {
         try {
             const body = req.body;
             const reviewId = req.params.reviewId;
-            const reviewModifiedDate = moment().format('YYYY-MM-DD HH:mm:ss');
             const reviewData = {
                 user_name: body.userName,
                 review_rating: body.reviewRating,
                 review_content: body.reviewContent,
-                review_modified_date: reviewModifiedDate,
             }
             await popupModel.updateReview(reviewData, reviewId);
             res.status(200).json('수정이 완료되었습니다.');
@@ -427,8 +423,6 @@ const popupController = {
         try {
             const storeId = req.params.storeId;
             const reservationId = uuidv4();
-            const createdAt = moment().format('YYYY-MM-DD HH:mm:ss');
-
             let reservationData = {
                 reservation_id: reservationId,
                 store_id: storeId,
@@ -436,7 +430,6 @@ const popupController = {
                 reservation_date: req.body.reservationDate,
                 reservation_time: req.body.reservationTime,
                 capacity: req.body.capacity,
-                created_at: createdAt,
             };
 
             const result = await popupModel.reservation(reservationData);
@@ -475,7 +468,7 @@ const popupController = {
         try {
             const reservationId = req.query.reservationId;
             const result = await popupModel.completedReservation(reservationId);
-            res.status(200).json({ message: "입장이 성공적으로 완료되었습니다.", userName: result});
+            res.status(200).json({ message: "입장이 성공적으로 완료되었습니다.", userName: result });
         } catch (err) {
             console.log(err);
             res.status(500).send("사전 예약 입장 수락 중 오류가 발생하였습니다.");
@@ -505,7 +498,65 @@ const popupController = {
         } catch (err) {
             res.status(500).send("추천 시스템 확인 오류가 발생하였습니다.");
         }
-    }
+    },
+
+    // QR코드 생성
+    createQrCode: async (req, res) => {
+        try {
+            const storeId = req.query.storeId;
+            const check = await popupModel.checkQrCode(storeId);
+            if (check === null) {
+                return res.status(404).json({ message: "해당 팝업의 ID가 존재하지 않습니다." });
+            } else if (check.length > 0) {
+                return res.status(200).json({ message: "이미 QR코드가 존재합니다.", QRcode: check[0].qrcode_url });
+            } else {
+                const QRCode = await qrCode.toDataURL(storeId);
+                const qrCodeData = {
+                    store_id: storeId,
+                    qrcode_url: QRCode,
+                }
+                await popupModel.createQrCode(qrCodeData);
+                return res.status(200).json({ message: "QR코드가 생성되었습니다.", QRCode });
+            }
+        } catch (err) {
+            res.status(500).send("QR코드 생성 중 오류가 발생하였습니다.");
+        }
+    },
+
+    // QR 코드 삭제
+    deleteQrCode: async (req, res) => {
+        try {
+            const storeId = req.query.storeId;
+            await popupModel.deleteQrCode(storeId);
+            res.status(200).json({ message: "QR코드가 삭제되었습니다." });
+        } catch (err) {
+            res.status(500).send("QR코드 삭제 중 오류가 발생하였습니다.");
+        }
+    },
+
+    // QR 코드 조회
+    showQrCode: async (req, res) => {
+        try {
+            const storeId = req.query.storeId;
+            const result = await popupModel.showQrCode(storeId);
+            res.status(200).json({ qrcode_url: result[0].qrcode_url });
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("QR코드 조회 중 오류가 발생하였습니다.");
+        }
+    },
+
+    // QR 코드 스캔
+    scanQrCode: async (req,res) => {
+        try {
+            const qrCode = req.query.qrCode;
+            const storeId = await popupModel.scanQrCode(qrCode);
+            const result = await popupModel.getPopup(storeId); 
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(500).send("QR코드 스캔 중 오류가 발생하였습니다.");
+        }
+    }  
 };
 
 module.exports = { popupController }
