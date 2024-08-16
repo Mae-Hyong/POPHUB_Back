@@ -38,6 +38,7 @@ const getUserImage_query = 'SELECT user_image FROM user_info WHERE user_name = ?
 const checkReview_query = 'SELECT COUNT(*) AS count FROM store_review WHERE store_id = ? AND user_name = ?';
 const checkReservation_query = 'SELECT COUNT (*) AS count FROM reservation WHERE store_id = ? AND user_name = ? AND reservation_status = "completed"';
 const qrCodeExistsQuery = 'SELECT * FROM qrcodes WHERE store_id = ?';
+const scanQrCode_query = 'SELECT * FROM qrcodes WHERE qrcode_url = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -48,7 +49,7 @@ const createWaitReservation_query = 'INSERT INTO wait_list SET ?';
 const createImage_query = 'INSERT INTO images (store_id, image_url) VALUES (?, ?)';
 const reservation_query = 'INSERT INTO reservation SET ?';
 const storeCapacity_query = 'INSERT INTO store_capacity SET ?';
-const qrCodeInsert_query = 'INSERT INTO qrcodes SET ?';
+const insertQrCode_query = 'INSERT INTO qrcodes SET ?';
 
 // ------- PUT Query -------
 const updatePopup_query = 'UPDATE popup_stores SET ? WHERE store_id = ?';
@@ -69,6 +70,7 @@ const deleteReview_query = 'DELETE FROM store_review WHERE review_id = ?';
 const likePopupDelete_query = 'DELETE FROM BookMark WHERE user_name = ? AND store_id = ?';
 const waitDelete_query = 'DELETE FROM wait_list WHERE wait_id = ?';
 const deleteReservation_query = 'DELETE FROM reservation WHERE reservation_id = ?';
+const deleteQrCode_query = 'DELETE FROM qrcodes WHERE store_id = ?';
 
 const getWaitOrder = (store_id, user_name) => {
     return new Promise((resolve, reject) => {
@@ -1195,7 +1197,7 @@ const popupModel = {
     createQrCode: async (qrCodeData) => {
         try {
             await new Promise((resolve, reject) => {
-                db.query(qrCodeInsert_query, qrCodeData, (err, results) => {
+                db.query(insertQrCode_query, qrCodeData, (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 })
@@ -1204,6 +1206,51 @@ const popupModel = {
             throw err;
         }
     },
+
+    // QR 코드 삭제
+    deleteQrCode: async (store_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query(deleteQrCode_query, store_id, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                })
+            })
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // QR 코드 조회
+    showQrCode: async (store_id) => {
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query(qrCodeExistsQuery, store_id, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                })
+            })
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // QR 코드 스캔
+    scanQrCode: async (qrcode_url) => {
+        try {
+            const result = await new Promise((resolve, reject) => {
+                db.query(scanQrCode_query, qrcode_url, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results[0].store_id);
+                })
+            })
+
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    }
 };
 
 module.exports = popupModel;
