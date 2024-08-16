@@ -223,7 +223,7 @@ const popupController = {
             const storeId = req.params.storeId;
             const userName = req.body.userName;
             const likeCount = await achieveModel.countBookMark(userName);
-            if(likeCount == 10) await achieveModel.clearAchieve(userName, 3);
+            if (likeCount == 10) await achieveModel.clearAchieve(userName, 3);
             const like = await popupModel.likePopup(userName, storeId);
             res.status(201).json(like);
         } catch (err) {
@@ -468,6 +468,7 @@ const popupController = {
         try {
             const reservationId = req.query.reservationId;
             const result = await popupModel.completedReservation(reservationId);
+            await achieveModel.clearAchieve(result, 6);
             res.status(200).json({ message: "입장이 성공적으로 완료되었습니다.", userName: result });
         } catch (err) {
             console.log(err);
@@ -547,16 +548,16 @@ const popupController = {
     },
 
     // QR 코드 스캔
-    scanQrCode: async (req,res) => {
+    scanQrCode: async (req, res) => {
         try {
             const qrCode = req.query.qrCode;
             const storeId = await popupModel.scanQrCode(qrCode);
-            const result = await popupModel.getPopup(storeId); 
+            const result = await popupModel.getPopup(storeId);
             res.status(200).json(result);
         } catch (err) {
             res.status(500).send("QR코드 스캔 중 오류가 발생하였습니다.");
         }
-    }  
+    }
 };
 
 module.exports = { popupController }

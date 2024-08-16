@@ -1,4 +1,5 @@
 const payModel = require('../models/payModel');
+const achieveModel = require('../models/achieveModel');
 
 const axios = require('axios');
 const { v4 } = require('uuid');
@@ -41,6 +42,7 @@ const payController = {
             if (!req.body.productId) delete payRequestData.product_id;
 
             await payModel.payRequest(payRequestData);
+            await achieveModel.clearAchieve(userName, 9);
 
             const response = await $axios.post('/v1/payment/ready', {
                 cid: CID,
