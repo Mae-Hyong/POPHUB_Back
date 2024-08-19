@@ -59,7 +59,7 @@ function scheduleDatabaseUpdate() {
     cron.schedule('0 0 * * *', async () => {
         await updatePopupStatus();
         await updateReservationStatus();
-        await resetWaitList();
+        //await resetWaitList();
     });
 }
 
