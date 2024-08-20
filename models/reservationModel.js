@@ -2,8 +2,8 @@ const db = require("../config/mysqlDatabase");
 
 // ------- GET Query -------
 const search_userWait_query = "SELECT * FROM wait_list WHERE user_name = ?";
-const search_storeWait_query = "SELECT * FROM wait_list WHERE store_id = ?";
-const waitPosition_query = 'SELECT *, (SELECT COUNT(*) FROM wait_list AS wl WHERE wl.store_id = wait_list.store_id AND wl.status = "waiting" AND wl.created_at <= wait_list.created_at) AS position FROM wait_list WHERE user_name = ? AND store_id = ? AND status = "waiting" ORDER BY created_at ASC';
+const search_storeWait_query = "SELECT * FROM wait_list WHERE store_id = ? AND status = 'pending' ORDER BY created_at ASC";
+const waitPosition_query = 'SELECT *, (SELECT COUNT(*) FROM wait_list AS wl WHERE wl.store_id = wait_list.store_id AND wl.status = "pending" AND wl.created_at <= wait_list.created_at) AS position FROM wait_list WHERE user_name = ? AND store_id = ? AND status = "pending" ORDER BY created_at ASC';
 const get_reservationtime_query = 'SELECT * FROM wait_list WHERE created_at <= NOW() AND status = "pending"';
 const getReservationUser_query = 'SELECT * FROM reservation WHERE user_name = ? ORDER BY reservation_date ASC, reservation_time ASC';
 const reservationStatus_query = 'SELECT * FROM store_capacity WHERE store_id = ?';
@@ -269,11 +269,11 @@ const reservationModel = {
         });
     },
 
-    searchStoreWait: (storeId) => {
+    searchStoreWait: (store_id) => {
         return new Promise((resolve, reject) => {
-            db.query(search_storeWait_query, storeId, async (err, result) => {
+            db.query(search_storeWait_query, store_id, async (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             });
         });
     },
@@ -315,10 +315,7 @@ const reservationModel = {
 
     searchUserStoreWait: (userName, storeId) => {
         return new Promise((resolve, reject) => {
-            db.query(
-                waitPosition_query,
-                [userName, storeId],
-                (err, results) => {
+            db.query(waitPosition_query,[userName, storeId], (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 }

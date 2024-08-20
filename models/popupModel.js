@@ -29,8 +29,6 @@ const image_query = 'SELECT image_url FROM images WHERE store_id = ?';
 const getUserImage_query = 'SELECT user_image FROM user_info WHERE user_name = ?';
 const checkReview_query = 'SELECT COUNT(*) AS count FROM store_review WHERE store_id = ? AND user_name = ?';
 const checkReservation_query = 'SELECT COUNT (*) AS count FROM reservation WHERE store_id = ? AND user_name = ? AND reservation_status = "completed"';
-const qrCodeExistsQuery = 'SELECT * FROM qrcodes WHERE store_id = ?';
-const scanQrCode_query = 'SELECT * FROM qrcodes WHERE qrcode_url = ?';
 
 // ------- POST Query -------
 const createReview_query = 'INSERT INTO store_review SET ?';
@@ -39,7 +37,6 @@ const createSchedule_query = 'INSERT INTO store_schedules SET ?';
 const likePopupInsert_query = 'INSERT INTO BookMark (user_name, store_id) VALUES (?, ?)';
 const createWaitReservation_query = 'INSERT INTO wait_list SET ?';
 const createImage_query = 'INSERT INTO images (store_id, image_url) VALUES (?, ?)';
-const insertQrCode_query = 'INSERT INTO qrcodes SET ?';
 
 // ------- PUT Query -------
 const updatePopup_query = 'UPDATE popup_stores SET ? WHERE store_id = ?';
@@ -56,7 +53,6 @@ const deleteSchedule_query = 'DELETE FROM store_schedules WHERE store_id = ?';
 const deleteReview_query = 'DELETE FROM store_review WHERE review_id = ?';
 const likePopupDelete_query = 'DELETE FROM BookMark WHERE user_name = ? AND store_id = ?';
 const waitDelete_query = 'DELETE FROM wait_list WHERE wait_id = ?';
-const deleteQrCode_query = 'DELETE FROM qrcodes WHERE store_id = ?';
 
 const getWaitOrder = (store_id, user_name) => {
     return new Promise((resolve, reject) => {
@@ -928,92 +924,6 @@ const popupModel = {
             throw err;
         }
     },
-
-
-    // QR 코드 체크
-    checkQrCode: async (store_id) => {
-        try {
-            // popup에 store_id 존재 여부 확인
-            const popupExists = await new Promise((resolve, reject) => {
-                db.query(popupExists_query, store_id, (err, results) => {
-                    if (err) reject(err);
-                    resolve(results);
-                });
-            });
-
-            if (popupExists.length === 0) { return null; }
-
-            // qrcodes에 store_id 존재 여부 확인
-            const qrCodeExists = await new Promise((resolve, reject) => {
-                db.query(qrCodeExistsQuery, store_id, (err, results) => {
-                    if (err) reject(err);
-                    resolve(results);
-                });
-            });
-            return qrCodeExists;
-        } catch (err) {
-            throw err;
-        }
-    },
-
-    // QR 코드 생성
-    createQrCode: async (qrCodeData) => {
-        try {
-            await new Promise((resolve, reject) => {
-                db.query(insertQrCode_query, qrCodeData, (err, results) => {
-                    if (err) reject(err);
-                    resolve(results);
-                })
-            })
-        } catch (err) {
-            throw err;
-        }
-    },
-
-    // QR 코드 삭제
-    deleteQrCode: async (store_id) => {
-        try {
-            await new Promise((resolve, reject) => {
-                db.query(deleteQrCode_query, store_id, (err, results) => {
-                    if (err) reject(err);
-                    resolve(results);
-                })
-            })
-        } catch (err) {
-            throw err;
-        }
-    },
-
-    // QR 코드 조회
-    showQrCode: async (store_id) => {
-        try {
-            const result = await new Promise((resolve, reject) => {
-                db.query(qrCodeExistsQuery, store_id, (err, results) => {
-                    if (err) reject(err);
-                    resolve(results);
-                })
-            })
-            return result;
-        } catch (err) {
-            throw err;
-        }
-    },
-
-    // QR 코드 스캔
-    scanQrCode: async (qrcode_url) => {
-        try {
-            const result = await new Promise((resolve, reject) => {
-                db.query(scanQrCode_query, qrcode_url, (err, results) => {
-                    if (err) reject(err);
-                    resolve(results[0].store_id);
-                })
-            })
-
-            return result;
-        } catch (err) {
-            throw err;
-        }
-    }
 };
 
 module.exports = popupModel;

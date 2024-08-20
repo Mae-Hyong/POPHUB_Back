@@ -105,6 +105,7 @@ router.get('/advance/show', reservationController.getReservation); // 예약자 
  *        description: 성공
  */
 router.put('/advance/complete', reservationController.completedReservation); // 사전 예약 입장 수락
+
 /**
  * @swagger
  * /reservation/advance/delete/{reservationId}:
@@ -128,7 +129,7 @@ router.delete('/advance/delete/:reservationId', reservationController.deleteRese
  * /reservation/waiting/show:
  *  get:
  *      tags: [Waiting - 현장 대기]
- *      summary: 현장 대기 목록 조회
+ *      summary: 현장 대기 목록 조회 - 예약자
  *      parameters:
  *          - in: query
  *            name: userName
@@ -145,6 +146,54 @@ router.delete('/advance/delete/:reservationId', reservationController.deleteRese
  *              description: 성공
  */
 router.get('/waiting/show', reservationController.searchWaitList);
+
+/**
+ * @swagger
+ * /reservation/waiting/popup:
+ *  get:
+ *      tags: [Waiting - 현장 대기]
+ *      summary: 현장 대기 목록 조회 - 판매자
+ *      parameters:
+ *          - in: query
+ *            name: storeId
+ *            required: true
+ *            schema:
+ *              type: string
+ *      responses:
+ *          200:
+ *              description: 성공
+ */
+router.get('/waiting/popup', reservationController.searchWaitListPopup);
+
+/**
+ * @swagger
+ * /reservation/advance/show:
+ *  get:
+ *      tags: [Reservation - 사전 예약]
+ *      summary: "사전 예약 조회 (예약자 & 판매자)"
+ *      parameters:
+ *          - in: query
+ *            name: type
+ *            required: true
+ *            schema:
+ *              type: string
+ *              enum: [user, president]
+ *          - in: query
+ *            name: userName
+ *            required: false
+ *            schema:
+ *              type: string
+ *            description: "type: userName일 경우"
+ *          - in: query
+ *            name: storeId
+ *            required: false
+ *            schema:
+ *              type: string
+ *            description: "type: president일 경우"
+ *      responses:
+ *          200:
+ *              description: 성공
+ */
 
 /**
  * @swagger
@@ -184,9 +233,7 @@ router.post('/waiting', reservationController.createWaitList); // 대기 신청
  *                  schema:
  *                      type: object
  *                      properties:
- *                          userName:
- *                              type: string
- *                          storeId:
+ *                          reservationId:
  *                              type: string
  *      responses:
  *          201:

@@ -3,7 +3,6 @@ const achieveModel = require('../models/achieveModel');
 const moment = require('moment');
 const { v4: uuidv4 } = require("uuid");
 const { getRecommendation } = require('../function/recommendation');
-const qrCode = require('qrcode');
 
 const popupController = {
 
@@ -420,64 +419,6 @@ const popupController = {
             res.status(500).send("추천 시스템 확인 오류가 발생하였습니다.");
         }
     },
-
-    // QR코드 생성
-    createQrCode: async (req, res) => {
-        try {
-            const storeId = req.query.storeId;
-            const check = await popupModel.checkQrCode(storeId);
-            if (check === null) {
-                return res.status(404).json({ message: "해당 팝업의 ID가 존재하지 않습니다." });
-            } else if (check.length > 0) {
-                return res.status(200).json({ message: "이미 QR코드가 존재합니다.", QRcode: check[0].qrcode_url });
-            } else {
-                const QRCode = await qrCode.toDataURL(storeId);
-                const qrCodeData = {
-                    store_id: storeId,
-                    qrcode_url: QRCode,
-                }
-                await popupModel.createQrCode(qrCodeData);
-                return res.status(200).json({ message: "QR코드가 생성되었습니다.", QRCode });
-            }
-        } catch (err) {
-            res.status(500).send("QR코드 생성 중 오류가 발생하였습니다.");
-        }
-    },
-
-    // QR 코드 삭제
-    deleteQrCode: async (req, res) => {
-        try {
-            const storeId = req.query.storeId;
-            await popupModel.deleteQrCode(storeId);
-            res.status(200).json({ message: "QR코드가 삭제되었습니다." });
-        } catch (err) {
-            res.status(500).send("QR코드 삭제 중 오류가 발생하였습니다.");
-        }
-    },
-
-    // QR 코드 조회
-    showQrCode: async (req, res) => {
-        try {
-            const storeId = req.query.storeId;
-            const result = await popupModel.showQrCode(storeId);
-            res.status(200).json({ qrcode_url: result[0].qrcode_url });
-        } catch (err) {
-            console.log(err);
-            res.status(500).send("QR코드 조회 중 오류가 발생하였습니다.");
-        }
-    },
-
-    // QR 코드 스캔
-    scanQrCode: async (req, res) => {
-        try {
-            const qrCode = req.query.qrCode;
-            const storeId = await popupModel.scanQrCode(qrCode);
-            const result = await popupModel.getPopup(storeId);
-            res.status(200).json(result);
-        } catch (err) {
-            res.status(500).send("QR코드 스캔 중 오류가 발생하였습니다.");
-        }
-    }
 };
 
 module.exports = { popupController }
