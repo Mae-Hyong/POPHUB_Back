@@ -224,6 +224,7 @@ const userController = {
             let userImage = null;
             if (req.file) userImage = req.file ? req.file.location : '';
 
+            await achieveModel.clearAchieve(userName, 7);
             await userModel.createInquiry(userName, categoryId, title, content, userImage);
             res.status(201).send("Inquiry added successfully");
         } catch (err) {
