@@ -662,18 +662,32 @@ const popupModel = {
     // 리뷰 권한 체크
     checkReservation: async (store_id, user_name) => {
         try {
-            const result = await new Promise((resolve, reject) => {
+            const waitListCheck_query = 'SELECT COUNT(*) AS count FROM wait_list WHERE store_id = ? AND user_name = ? AND status = "completed"';
+            const reservationResult = await new Promise((resolve, reject) => {
                 db.query(checkReservation_query, [store_id, user_name], (err, result) => {
                     if (err) reject(err);
                     else resolve(result[0].count > 0);
                 });
             });
 
-            return result;
+            const waitListResult = await new Promise((resolve, reject) => {
+                db.query(waitListCheck_query, [store_id, user_name], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result[0].count > 0);
+                });
+            });
+
+            if (reservationResult || waitListResult) {
+                return { success: true };
+            } else {
+                return { success: false };
+            }
+
         } catch (err) {
             throw err;
         }
     },
+    
     createReview: async (reviewdata) => { // 리뷰 생성
         try {
             const result = await new Promise((resolve, reject) => {
