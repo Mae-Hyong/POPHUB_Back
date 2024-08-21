@@ -14,8 +14,9 @@ const maxCapacity_query = 'SELECT max_capacity FROM popup_stores WHERE store_id 
 const getStoreName_query = 'SELECT store_name FROM popup_stores WHERE store_id = ?';
 const getReservationPresident_query = 'SELECT * FROM reservation WHERE store_id = ? ORDER BY reservation_date ASC, reservation_time ASC';
 const getcapacityByReservationId_query = 'SELECT * FROM reservation WHERE reservation_id = ?';
-const getUserName_query = "SELECT user_name FROM reservation WHERE reservation_id = ?";
-
+const getUserName_query = 'SELECT user_name FROM reservation WHERE reservation_id = ?';
+const checkStatusForReservation_query = 'SELECT * FROM reservation WHERE user_name = ? AND store_id = ? AND reservation_status = "pending"';
+const checkStatusForWaitList_query = 'SELECT * FROM wait_list WHERE user_name = ? AND store_id = ? AND status = "pending"';
 // ------- POST Query -------
 const insert_wait_query = "INSERT INTO wait_list SET ?";
 const insert_stand_query = "INSERT INTO stand_store(user_name, store_id) VALUES (?, ?)";
@@ -76,6 +77,22 @@ const reservationModel = {
 
             return { common, status };
 
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 사전 예약 확인
+    checkStatusForReservation: async (user_name, store_id) => {
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query(checkStatusForReservation_query, [user_name, store_id], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                })
+            })
+            if (results.length > 0) { return { success: false }; } // 예약 O => 신청 X
+            else { return { success: true }; } // 예약 X => 신청 O
         } catch (err) {
             throw err;
         }
@@ -278,6 +295,21 @@ const reservationModel = {
         });
     },
 
+    checkStatusForWaitList: async (user_name, store_id) => {
+        try {
+            const results = await new Promise((resolve, reject) => {
+                db.query(checkStatusForWaitList_query, [user_name, store_id], (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                })
+            })
+            if (results.length > 0) { return { success: false }; } // 예약 O => 신청 X
+            else { return { success: true }; } // 예약 X => 신청 O
+        } catch (err) {
+            throw err;
+        }
+    },
+
     createWaitList: (insertData) => {
         return new Promise((resolve, reject) => {
             db.query(insert_wait_query, insertData, async (err, result) => {
@@ -315,10 +347,10 @@ const reservationModel = {
 
     searchUserStoreWait: (userName, storeId) => {
         return new Promise((resolve, reject) => {
-            db.query(waitPosition_query,[userName, storeId], (err, results) => {
-                    if (err) reject(err);
-                    resolve(results);
-                }
+            db.query(waitPosition_query, [userName, storeId], (err, results) => {
+                if (err) reject(err);
+                resolve(results);
+            }
             );
         });
     },

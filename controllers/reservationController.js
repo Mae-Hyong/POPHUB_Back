@@ -5,7 +5,7 @@ const admin = require("firebase-admin");
 const { v4: uuidv4 } = require("uuid");
 
 const reservationController = {
-    // 스토어별 예약 상태
+    // 스토어별 사전 예약 상태
     reservationStatus: async (req, res) => {
         try {
             const storeId = req.params.storeId;
@@ -16,7 +16,7 @@ const reservationController = {
         }
     },
 
-    // 예약
+    // 사전 예약
     reservation: async (req, res) => {
         try {
             const storeId = req.query.storeId;
@@ -30,6 +30,10 @@ const reservationController = {
                 capacity: req.body.capacity,
             };
 
+            const check = await reservationModel.checkStatusForReservation(req.body.userName, storeId);
+            if (!check.success){
+                return res.status(400).json({ message: '현재 해당 팝업 스토어 사전 예약이 되어 있습니다. 방문 이후 재예약이 가능합니다.' });
+            } 
             const result = await reservationModel.reservation(reservationData);
 
             if (result.success == true) {
@@ -38,11 +42,12 @@ const reservationController = {
                 res.status(400).json(`최대 인원을 초과하였습니다. 시간당 최대 인원:${result.max_capacity}`);
             }
         } catch (err) {
+            console.log(err);
             res.status(500).send("예약 중 오류가 발생하였습니다.");
         }
     },
 
-    // 예약 조회 - 유저 & 판매자
+    // 사전 예약 조회 - 유저 & 판매자
     getReservation: async (req, res) => {
         try {
             const { type, userName, storeId } = req.query;
@@ -61,7 +66,7 @@ const reservationController = {
         }
     },
 
-    // 예약 입장 성공
+    // 사전 예약 입장 성공
     completedReservation: async (req, res) => {
         try {
             const reservationId = req.query.reservationId;
@@ -73,7 +78,7 @@ const reservationController = {
         }
     },
 
-    // 예약 취소
+    // 사전 예약 취소
     deleteReservation: async (req, res) => {
         try {
             const reservationId = req.params.reservationId;
@@ -149,6 +154,7 @@ const reservationController = {
         }
     },
 
+    // 현장 대기
     createWaitList: async (req, res) => {
         try {
             const body = req.body;
@@ -161,6 +167,10 @@ const reservationController = {
                 // reservation_time: body.reservationTime,
                 // fcm_token: body.fcmToken,
             };
+            const check = await reservationModel.checkStatusForWaitList(body.userName, body.storeId);
+            if (!check.success){
+                return res.status(400).json({ message: '동일 팝업 스토어의 현장 대기 신청을 중복하여 할 수 없습니다.' });
+            } 
             await reservationModel.createWaitList(insertData);
             const waitList = await reservationModel.searchUserStoreWait(body.userName, body.storeId);
             res.status(201).send({
