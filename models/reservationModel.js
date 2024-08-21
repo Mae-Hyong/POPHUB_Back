@@ -24,7 +24,7 @@ const reservation_query = 'INSERT INTO reservation SET ?';
 const storeCapacity_query = 'INSERT INTO store_capacity SET ?';
 
 // ------- PUT Query -------
-const admission_wait_query = "UPDATE wait_list SET status = ? WHERE user_name = ? AND store_id = ?";
+const admission_wait_query = 'UPDATE wait_list SET status = "completed" WHERE reservation_id = ?';
 const updateCapacity_query = 'UPDATE store_capacity SET current_capacity = ? WHERE store_id = ? AND reservation_date = ? AND reservation_time = ?';
 const completedReservation_query = 'UPDATE reservation SET reservation_status = ? WHERE reservation_id = ?';
 const updateCapacityMinus_query = 'UPDATE store_capacity SET current_capacity = current_capacity - ? WHERE store_id = ? AND reservation_date = ? AND reservation_time = ?';
@@ -319,16 +319,12 @@ const reservationModel = {
         });
     },
 
-    admissionWaitList: (user_name, storeId) => {
+    admissionWaitList: (reservation_id) => {
         return new Promise((resolve, reject) => {
-            db.query(
-                admission_wait_query,
-                ["completed", user_name, storeId],
-                async (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result[0]);
-                }
-            );
+            db.query(admission_wait_query, reservation_id, async (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            });
         });
     },
 
