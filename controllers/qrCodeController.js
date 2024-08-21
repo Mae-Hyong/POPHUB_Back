@@ -68,15 +68,16 @@ const qrCodeController = {
     scanQrCodeForVisit: async (req, res) => {
         try {
             const type = req.query.type;
-            const storeId = req.body.storeId;
-            const reservationId = req.body.reservationId;
+            const qrCode = req.body.qrCode;
+            const userName = req.body.userName;
+            const storeId = await qrCodeModel.scanQrCodeForStore(qrCode);
             let result;
             if (type == 'reservation') {
-                result = await qrCodeModel.reservationForVisit(reservationId, storeId);
+                result = await qrCodeModel.reservationForVisit(storeId, userName);
             } else if (type == 'waiting') {
-                result = await qrCodeModel.waitingForVisit(reservationId, storeId);
+                result = await qrCodeModel.waitingForVisit(storeId, userName);
             } else {
-                return res.status(400).send(" 'reservaion' 또는 'waiting'을 사용하세요.");
+                return res.status(400).send("'reservaion' 또는 'waiting'을 사용하세요.");
             }
 
             if (result.success) {
@@ -86,7 +87,6 @@ const qrCodeController = {
             }
 
         } catch (err) {
-            console.log(err);
             res.status(500).send("QR코드 스캔 중 오류가 발생하였습니다.");
         }
     },
