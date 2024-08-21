@@ -4,13 +4,15 @@ const db = require('../config/mysqlDatabase');
 const popupExists_query = 'SELECT * FROM popup_stores WHERE store_id = ?';
 const qrCodeExistsQuery = 'SELECT * FROM qrcodes WHERE store_id = ?';
 const scanQrCode_query = 'SELECT * FROM qrcodes WHERE qrcode_url = ?';
-const reservationForVisit_query = 'UPDATE reservation SET reservation_status = "completed" WHERE reservation_id = ? AND store_id = ?';
-const waitingForVisit_query = 'UPDATE wait_list SET status = "completed" WHERE reservation_id = ? AND store_id = ?';
+const reservationCheck_query = 'SELECT * FROM reservation WHERE store_id = ? AND user_name = ? AND reservation_status = "pending"';
+const waitListCheck_query = 'SELECT * FROM wait_list WHERE store_id = ? AND user_name = ? AND status = "pending"';
 
 // ------- POST Query -------
 const insertQrCode_query = 'INSERT INTO qrcodes SET ?';
 
 // ------- PUT Query -------
+const reservationForVisit_query = 'UPDATE reservation SET reservation_status = "completed" WHERE reservation_id = ?';
+const waitingForVisit_query = 'UPDATE wait_list SET status = "completed" WHERE reservation_id = ?';
 
 // ------- DELETE Query -------
 const deleteQrCode_query = 'DELETE FROM qrcodes WHERE store_id = ?';
@@ -104,32 +106,51 @@ const qrCodeModel = {
     },
 
     // 사전 예약 방문 인증
-    reservationForVisit: async (reservation_id, store_id) => {
+    reservationForVisit: async (store_id, user_name) => {
         try {
-            await new Promise((resolve, reject) => {
-                db.query(reservationForVisit_query, [reservation_id, store_id], (err, results) => {
+            const results = await new Promise((resolve, reject) => {
+                db.query(reservationCheck_query, [store_id, user_name], (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 });
             });
-
-            return { success: true };
+            if (results.length > 0) {
+                await new Promise((resolve, reject) => {
+                    db.query(reservationForVisit_query, results[0].reservation_id, (err, results) => {
+                        if (err) reject(err);
+                        resolve(results);
+                    });
+                });
+    
+                return { success: true };
+            }
         } catch (err) {
             throw err;
         }
     },
 
     // 현장 대기 방문 인증
-    waitingForVisit: async (reservation_id, store_id) => {
+    waitingForVisit: async (store_id, user_name) => {
         try {
-            await new Promise((resolve, reject) => {
-                db.query(waitingForVisit_query, [reservation_id, store_id], (err, results) => {
+            
+            const results = await new Promise((resolve, reject) => {
+                db.query(waitListCheck_query, [store_id, user_name], (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 });
             });
-
-            return { success: true };
+            
+            if (results.length > 0) {
+                await new Promise((resolve, reject) => {
+                    db.query(waitingForVisit_query, results[0].reservation_id, (err, results) => {
+                        if (err) reject(err);
+                        resolve(results);
+                    });
+                });
+    
+                return { success: true };
+            }
+            
         } catch (err) {
             throw err;
         }
