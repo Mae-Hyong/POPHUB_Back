@@ -184,11 +184,11 @@ const reservationController = {
 
     admissionWaitList: async (req, res) => {
         try {
-            const { userName, storeId } = req.body;
-
-            await reservationModel.admissionWaitList(userName, storeId);
+            const { reservationId } = req.body;
+            await reservationModel.admissionWaitList(reservationId);
             res.status(201).json({ message: "입장이 수락되었습니다." });
         } catch (err) {
+            console.log(err);
             res.status(500).send("입장 수락 및 입장 데이터 입력 중 오류가 발생했습니다.");
         }
     },
