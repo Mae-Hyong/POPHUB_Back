@@ -26,7 +26,7 @@ const { signController, authController, userController } = require('../controlle
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -53,7 +53,7 @@ router.post("/signUp", signController.signUp);
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -77,7 +77,7 @@ router.post("/signIn", signController.signIn);
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -99,7 +99,7 @@ router.post("/certification", authController.certification);
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -183,7 +183,7 @@ router.get("/point", userController.searchPoint);
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -317,7 +317,7 @@ router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -342,7 +342,7 @@ router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
@@ -423,7 +423,7 @@ router.post("/inquiry/create", token.verifyToken, multerimg.upload.single("file"
  *     requestBody:
  *       required: true
  *       content:
- *         application/x-www-form-urlencoded:
+ *         application/json:
  *           schema:
  *             type: object
  *             properties:
