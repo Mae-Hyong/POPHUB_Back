@@ -229,12 +229,12 @@ CREATE TABLE stand_store (
 );
 
 CREATE TABLE wait_list (
+    reservation_id VARCHAR(50) PRIMARY KEY,
     user_name VARCHAR(50) NOT NULL,
     store_id VARCHAR(50) NOT NULL,
-    status ENUM('waiting', 'completed', 'cancelled') DEFAULT 'waiting',
+    status ENUM('pending', 'completed') DEFAULT 'pending',
     capacity INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_name, store_id)
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- QR코드 생성
