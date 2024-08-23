@@ -67,7 +67,6 @@ router.post("/signUp", signController.signUp);
  */
 router.post("/signIn", signController.signIn);
 
-// auth route
 /**
  * @swagger
  * /user/certification:
@@ -83,7 +82,6 @@ router.post("/signIn", signController.signIn);
  *             properties:
  *               phoneNumber:
  *                 type: string
- *                 example: "01012345678"
  *     responses:
  *       200:
  *         description: 성공
@@ -208,12 +206,12 @@ router.post("/changePassword", userController.changePassword);
  *         name: userName
  *         schema:
  *           type: string
- *         required: true
+ *         required: false
  *       - in: query
  *         name: inquiryId
  *         schema:
- *           type: string
- *         required: true
+ *           type: integer
+ *         required: false
  *     responses:
  *       200:
  *         description: 성공
@@ -232,7 +230,7 @@ router.get("/inquiry/search", userController.searchInquiry);
  *       - in: query
  *         name: inquiryId
  *         schema:
- *           type: string
+ *           type: integer
  *         required: true
  *     responses:
  *       200:
@@ -312,19 +310,12 @@ router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"
  *   get:
  *     tags: [User]
  *     summary: 업적 조회
- *     security:
- *       - ApiKeyAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               userName:
- *                 type: string
- *               achieveId:
- *                 type: number
+ *     parameters:
+ *       - in: query
+ *         name: userName
+ *         schema:
+ *           type: string
+ *         required: true
  *     responses:
  *       200:
  *         description: 성공
@@ -349,11 +340,11 @@ router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
  *               userName:
  *                 type: string
  *               points:
- *                 type: number
+ *                 type: integer
  *               description:
  *                 type: string
  *               calcul:
- *                 type: string
+ *                 type: ENUM['+', '-']
  *     responses:
  *       201:
  *         description: 성공

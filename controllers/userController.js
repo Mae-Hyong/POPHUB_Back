@@ -310,9 +310,9 @@ const userController = {
 
     searchAchiveHub: async (req, res) => {
         try {
-            const { userName, achieveId } = req.body;
+            const userName = req.query;
             if (userName && achieveId) {
-                const searchResult = await achieveModel.searchAchiveHub(userName, achieveId);
+                const searchResult = await achieveModel.searchAchiveHub(userName);
                 const results = await Promise.all(searchResult.map(async (searchResult) => {
                     return {
                         achiveId: searchResult.achive_id,

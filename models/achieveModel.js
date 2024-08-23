@@ -2,7 +2,7 @@ const db = require('../config/mysqlDatabase');
 
 const insert_achieveHub_query = "INSERT IGNORE INTO achieve_hub (user_name, achieve_id) VALUES (?, ?)";
 
-const select_achieveHub_query = 'SELECT * FROM achieve_hub WHERE user_name = ? AND achieve_id = ?';
+const select_achieveHub_query = 'SELECT * FROM achieve_hub WHERE user_name = ?';
 const count_mark_query = 'SELECT COUNT(*) AS markCount FROM BookMark WHERE user_name = ?';
 const joinDate_count_query = `
     SELECT uj.user_id, ui.user_name 
@@ -21,9 +21,9 @@ const achieveModel = {
         })
     },
 
-    searchAchiveHub: async (achieveId) => {
+    searchAchiveHub: async (userName) => {
         return new Promise((resolve, reject) => {
-            db.query(select_achieveHub_query, achieveId, (err, result) => {
+            db.query(select_achieveHub_query, userName, (err, result) => {
                 if (err) reject(err);
                 else resolve(result);
             })
