@@ -5,9 +5,17 @@ const achieveModel = require("../models/achieveModel");
 const Token = require("../function/jwt");
 const sendMessage = require("../function/message");
 const multerimg = require("../function/multer");
+// const kakao = require("../function/kakao");
 
 const bcrypt = require("bcrypt");
 const { v1 } = require("uuid");
+const querystring = require('querystring');
+const axios = require('axios');
+
+const kakao = {
+    clientID: '15720290ccf0f414e917a24f7db03f13', // 실제 카카오 REST API 키
+    redirectUri: 'http://localhost:3000/user/auth/kakao/callback',
+};
 
 const signController = {
     signUp: async (req, res) => {
@@ -20,6 +28,52 @@ const signController = {
             return res.status(201).send(`${userId}님 회원가입이 완료되었습니다.`);
         } catch (err) {
             return res.status(500).send("회원가입 중 오류가 발생했습니다."); // 클라이언트에게 오류 응답 보내기
+        }
+    },
+
+    kakaoOauth: async (req, res) => {
+        try {
+            console.log('kakaoAuthUrl')
+
+            const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${kakao.clientID}&redirect_uri=${kakao.redirectUri}`;
+            return res.redirect(kakaoAuthUrl);
+        } catch (err) {
+            console.error("카카오 인증 요청 오류:", err);
+            return res.status(500).send("카카오 인증 요청 중 오류가 발생했습니다.");
+        }
+    },
+
+    kakaoCallBack: async (req, res) => {
+        const { code } = req.query;
+
+        if (!code) {
+            return res.status(400).send('No code provided');
+        }
+
+        try {
+            // 액세스 토큰 요청
+            const tokenResponse = await axios.post('https://kauth.kakao.com/oauth/token', querystring.stringify({
+                grant_type: 'authorization_code',
+                client_id: kakao.clientID,
+                redirect_uri: kakao.redirectUri,
+                code: code,
+            }));
+
+            const accessToken = tokenResponse.data.access_token;
+
+            // 액세스 토큰을 이용해 사용자 정보 요청
+            const userResponse = await axios.get('https://kapi.kakao.com/v2/user/me', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            // 사용자 정보 처리 및 응답
+            const userInfo = userResponse.data;
+            return res.json(userInfo); // 사용자 정보를 JSON 형태로 반환
+        } catch (error) {
+            console.error('Error during Kakao login:', error.response ? error.response.data : error.message);
+            return res.status(500).send('Failed to login with Kakao');
         }
     },
 
