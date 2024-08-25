@@ -5,17 +5,13 @@ const achieveModel = require("../models/achieveModel");
 const Token = require("../function/jwt");
 const sendMessage = require("../function/message");
 const multerimg = require("../function/multer");
-// const kakao = require("../function/kakao");
 
 const bcrypt = require("bcrypt");
-const { v1 } = require("uuid");
+const { v1, v4 } = require("uuid");
 const querystring = require('querystring');
 const axios = require('axios');
-
-const kakao = {
-    clientID: '15720290ccf0f414e917a24f7db03f13', // 실제 카카오 REST API 키
-    redirectUri: 'http://localhost:3000/user/auth/kakao/callback',
-};
+const env = require('dotenv');
+env.config();
 
 const signController = {
     signUp: async (req, res) => {
@@ -35,7 +31,7 @@ const signController = {
         try {
             console.log('kakaoAuthUrl')
 
-            const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${kakao.clientID}&redirect_uri=${kakao.redirectUri}`;
+            const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${process.env.KAKAO_REST_API}&redirect_uri=${process.env.KAKAO_REDIRECT}`;
             return res.redirect(kakaoAuthUrl);
         } catch (err) {
             console.error("카카오 인증 요청 오류:", err);
@@ -54,8 +50,8 @@ const signController = {
             // 액세스 토큰 요청
             const tokenResponse = await axios.post('https://kauth.kakao.com/oauth/token', querystring.stringify({
                 grant_type: 'authorization_code',
-                client_id: kakao.clientID,
-                redirect_uri: kakao.redirectUri,
+                client_id: process.env.KAKAO_REST_API,
+                redirect_uri: process.env.KAKAO_REDIRECT,
                 code: code,
             }));
 
@@ -69,7 +65,10 @@ const signController = {
             });
 
             // 사용자 정보 처리 및 응답
+            const hashedPassword = await bcrypt.hash(v4(), 10);
             const userInfo = userResponse.data;
+            await signModel.signUp(userInfo.id, hashedPassword, 'General Member');
+            console.log(userInfo.id)
             return res.json(userInfo); // 사용자 정보를 JSON 형태로 반환
         } catch (error) {
             console.error('Error during Kakao login:', error.response ? error.response.data : error.message);
@@ -94,6 +93,36 @@ const signController = {
             return res.status(500).send("로그인 중 오류가 발생했습니다.");
         }
     },
+
+    kakaodelete: async(req, res) => {
+        try {
+            const { userId, phoneNumber } = req.body;
+            const userName = v1();
+            const unlinkRes = await axios.post(
+              'https://kapi.kakao.com/v1/user/unlink',  // KAKAO_UNLINK_URI 경로 설정
+              {
+                target_id_type: 'user_id',
+                target_id: userId, // 해당 사용자 id(카카오 회원번호)
+              },
+              {
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  Authorization: 'KakaoAK ' + process.env.KAKAO_KEY,  // 관리자 키를 사용해야 함
+                },
+              }
+            );
+
+            await userModel.deleteData(userId, phoneNumber);
+            await userModel.deleteChange(userName, true, userId);
+            await userModel.deleteUser(userId);
+
+            // 성공적으로 연결 해제 시 처리
+            res.json({ success: true, message: 'User unlinked successfully', data: unlinkRes.data });
+          } catch (error) {
+            console.error('Error during Kakao unlink:', error.response ? error.response.data : error.message);
+            res.status(500).json({ success: false, message: 'Failed to unlink user', error: error.message });
+          }
+    }
 };
 
 const authController = {

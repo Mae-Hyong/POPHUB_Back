@@ -8,21 +8,13 @@ const { signController, authController, userController } = require('../controlle
 
 /**
  * @swagger
- * /user/kakaoOauth:
- *   post:
- *     tags: [User]
- *     summary: 카카오 로그인 페이지로 리다이렉트
- *     description: 클라이언트를 카카오 로그인 페이지로 리다이렉트합니다.
- *     responses:
- *       302:
- *         description: 리다이렉트 성공
- *       500:
- *         description: 서버 오류
+ * components:
+ *   securitySchemes:
+ *     ApiKeyAuth:
+ *       type: apiKey
+ *       in: header
+ *       name: authorization
  */
-router.post("/kakaoOauth", signController.kakaoOauth);
-
-
-router.post("/auth/kakao/callback", signController.kakaoCallBack);
 
 /**
  * @swagger
@@ -51,7 +43,24 @@ router.post("/auth/kakao/callback", signController.kakaoCallBack);
  */
 router.post("/signUp", signController.signUp);
 
+/**
+ * @swagger
+ * /user/kakaoOauth:
+ *   post:
+ *     tags: [User]
+ *     summary: 카카오 로그인 페이지로 리다이렉트
+ *     description: 클라이언트를 카카오 로그인 페이지로 리다이렉트합니다.
+ *     responses:
+ *       302:
+ *         description: 리다이렉트 성공
+ *       500:
+ *         description: 서버 오류
+ */
+router.get("/kakaoOauth", signController.kakaoOauth);
 
+router.get("/auth/kakao/callback", signController.kakaoCallBack);
+
+router.delete("/kakao/delete", signController.kakaodelete)
 
 /**
  * @swagger
@@ -245,7 +254,8 @@ router.get("/inquiry/search", userController.searchInquiry);
  *       200:
  *         description: 성공
  */
-router.get("/answer/search", userController.searchAnswer);
+router.get("/answer/search", token.verifyToken, userController.searchAnswer);
+
 /**
  * @swagger
  * /user/profile/create:
@@ -281,7 +291,7 @@ router.get("/answer/search", userController.searchAnswer);
  *       201:
  *         description: 성공
  */
-router.post("/profile/create", multerimg.upload.single("file"), userController.createProfile);
+router.post("/profile/create", token.verifyToken, multerimg.upload.single("file"), userController.createProfile);
 
 /**
  * @swagger
@@ -310,7 +320,7 @@ router.post("/profile/create", multerimg.upload.single("file"), userController.c
  *         description: 성공
  */
 
-router.post("/profile/update", multerimg.upload.single("file"), userController.updateProfile);
+router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"), userController.updateProfile);
 
 /**
  * @swagger
@@ -328,7 +338,7 @@ router.post("/profile/update", multerimg.upload.single("file"), userController.u
  *       200:
  *         description: 성공
  */
-router.get("/achieveHub", userController.searchAchiveHub);
+router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
 
 /**
  * @swagger
@@ -357,7 +367,7 @@ router.get("/achieveHub", userController.searchAchiveHub);
  *       201:
  *         description: 성공
  */
-router.post("/point/gain", userController.gainPoint);
+router.post("/point/gain", token.verifyToken, userController.gainPoint);
 
 /**
  * @swagger
@@ -377,7 +387,7 @@ router.post("/point/gain", userController.gainPoint);
  *       200:
  *         description: 성공
  */
-router.get("/:userId", userController.searchUser);
+router.get("/:userId", token.verifyToken, userController.searchUser);
 
 /**
  * @swagger
@@ -409,7 +419,7 @@ router.get("/:userId", userController.searchUser);
  *       201:
  *         description: 성공
  */
-router.post("/inquiry/create", multerimg.upload.single("file"), userController.createInquiry);
+router.post("/inquiry/create", token.verifyToken, multerimg.upload.single("file"), userController.createInquiry);
 
 /**
  * @swagger
@@ -434,6 +444,6 @@ router.post("/inquiry/create", multerimg.upload.single("file"), userController.c
  *       200:
  *         description: 성공
  */
-router.post("/delete", userController.deleteUser);
+router.post("/delete", token.verifyToken, userController.deleteUser);
 
 module.exports = router;
