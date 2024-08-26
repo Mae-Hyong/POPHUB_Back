@@ -1,7 +1,7 @@
 const db = require('../config/mysqlDatabase');
 
 // ------- POST Query -------
-const sign_up_query = 'INSERT INTO user_join_info (user_id, user_password, user_role) VALUES (?, ?, ?)';
+const sign_up_query = 'INSERT IGNORE INTO user_join_info (user_id, user_password, user_role) VALUES (?, ?, ?)';
 const sign_in_query = 'SELECT * FROM user_join_info WHERE user_id = ?';
 
 const signModel = {
