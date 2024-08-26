@@ -31,22 +31,18 @@ const updateStatus = (query) =>
 
 async function updatePopupStatus() {
     try {
-        const openResult = await updateStatus(open_query);
-        console.log('Open stores updated: ', openResult);
-
-        const closeResult = await updateStatus(close_query);
-        console.log('Closed stores updated: ', closeResult);
+        await updateStatus(open_query);
+        await updateStatus(close_query);
     } catch (err) {
-        throw err;
+        res.status(500).send("오류가 발생하였습니다.");
     }
 }
 
 async function updateReservationStatus() {
     try {
-        const completedResult = await updateStatus(completed_query);
-        console.log('Update Reservation: ', completedResult);
+        await updateStatus(completed_query);
     } catch (err) {
-        throw err;
+        res.status(500).send("오류가 발생하였습니다.");
     }
 }
 
@@ -55,16 +51,15 @@ const resetWaitList = async () => {
         await updateStatus(delete_wait_list_query);
         await updateStatus(create_wait_list_query);
     } catch (err) {
-        throw err;
+        res.status(500).send("오류가 발생하였습니다.");
     }
 };
 
 function scheduleDatabaseUpdate() {
     cron.schedule('0 0 * * *', async () => {
-        console.log('Update status');
         await updatePopupStatus();
         await updateReservationStatus();
-        await resetWaitList();
+        //await resetWaitList();
     });
 }
 

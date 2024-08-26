@@ -1,11 +1,17 @@
 const signModel = require("../models/signModel");
 const userModel = require("../models/userModel");
+const achieveModel = require("../models/achieveModel");
 
 const Token = require("../function/jwt");
 const sendMessage = require("../function/message");
+const multerimg = require("../function/multer");
 
 const bcrypt = require("bcrypt");
-const { v1 } = require("uuid");
+const { v1, v4 } = require("uuid");
+const querystring = require('querystring');
+const axios = require('axios');
+const env = require('dotenv');
+env.config();
 
 const signController = {
     signUp: async (req, res) => {
@@ -21,6 +27,50 @@ const signController = {
         }
     },
 
+    kakaoOauth: async (req, res) => {
+        try {
+            const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${process.env.KAKAO_REST_API}&redirect_uri=${process.env.KAKAO_REDIRECT}`;
+            return res.redirect(kakaoAuthUrl);
+        } catch (err) {
+            return res.status(500).send("카카오 인증 요청 중 오류가 발생했습니다.");
+        }
+    },
+
+    kakaoCallBack: async (req, res) => {
+        const { code } = req.query;
+
+        if (!code) {
+            return res.status(400).send('No code provided');
+        }
+
+        try {
+            // 액세스 토큰 요청
+            const tokenResponse = await axios.post('https://kauth.kakao.com/oauth/token', querystring.stringify({
+                grant_type: 'authorization_code',
+                client_id: process.env.KAKAO_REST_API,
+                redirect_uri: process.env.KAKAO_REDIRECT,
+                code: code,
+            }));
+
+            const accessToken = tokenResponse.data.access_token;
+
+            // 액세스 토큰을 이용해 사용자 정보 요청
+            const userResponse = await axios.get('https://kapi.kakao.com/v2/user/me', {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+
+            // 사용자 정보 처리 및 응답
+            const hashedPassword = await bcrypt.hash(v4(), 10);
+            const userInfo = userResponse.data;
+            await signModel.signUp(userInfo.id, hashedPassword, 'General Member');
+            return res.json(userInfo); // 사용자 정보를 JSON 형태로 반환
+        } catch (error) {
+            return res.status(500).send('Failed to login with Kakao');
+        }
+    },
+
     signIn: async (req, res) => {
         try {
             const { userId, authPassword } = req.body;
@@ -29,6 +79,7 @@ const signController = {
 
             if (isPasswordValid) {
                 const token = Token.generateToken(userId);
+                await achieveModel.checkAndAddAchieve(userId);
                 return res.status(200).json({ user_id: userId, token });
             } else {
                 return res.status(401).send("Invalid password");
@@ -37,6 +88,35 @@ const signController = {
             return res.status(500).send("로그인 중 오류가 발생했습니다.");
         }
     },
+
+    kakaodelete: async (req, res) => {
+        try {
+            const { userId, phoneNumber } = req.body;
+            const userName = v1();
+            const unlinkRes = await axios.post(
+                'https://kapi.kakao.com/v1/user/unlink',  // KAKAO_UNLINK_URI 경로 설정
+                {
+                    target_id_type: 'user_id',
+                    target_id: userId, // 해당 사용자 id(카카오 회원번호)
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        Authorization: 'KakaoAK ' + process.env.KAKAO_KEY,  // 관리자 키를 사용해야 함
+                    },
+                }
+            );
+
+            await userModel.deleteData(userId, phoneNumber);
+            await userModel.deleteChange(userName, true, userId);
+            await userModel.deleteUser(userId);
+
+            // 성공적으로 연결 해제 시 처리
+            res.json({ success: true, message: 'User unlinked successfully', data: unlinkRes.data });
+        } catch (error) {
+            res.status(500).json({ success: false, message: 'Failed to unlink user', error: error.message });
+        }
+    }
 };
 
 const authController = {
@@ -73,12 +153,7 @@ const userController = {
             const userId = req.params.userId;
 
             // 아이디가 안담겨 왔을때
-            if (!userId) {
-                return res.status(400).json({
-                    resultCode: 400,
-                    resultMsg: "사용자 ID를 제공해야 합니다.",
-                });
-            }
+            if (!userId) return res.status(400).json({ resultMsg: "사용자 ID를 제공해야 합니다." });
 
             const result = await userModel.searchUser(userId);
             const role = await userModel.searchJoin(userId);
@@ -107,10 +182,7 @@ const userController = {
 
             // 아이디 혹은 유저 네임이 안담겨 왔을때
             if (!userId && !userName) {
-                return res.status(400).json({
-                    resultCode: 400,
-                    resultMsg: "사용자 userName 혹은 Id를 제공해야 합니다.",
-                });
+                return res.status(400).json({ resultMsg: "사용자 userName 혹은 Id를 제공해야 합니다." });
             }
 
             if (userId) {
@@ -129,16 +201,12 @@ const userController = {
 
     searchId: async (req, res) => {
         try {
-            const phoneNumber = req.params.phoneNumber;
-            if (!phoneNumber)
-                return res.send("사용자의 Phone Number을 제공해야 합니다.").status(400);
+            const phoneNumber = req.query.phoneNumber;
+            if (!phoneNumber) return res.send("사용자의 Phone Number을 제공해야 합니다.").status(400);
 
             const result = await userModel.searchId(phoneNumber);
 
-            if (result.length === 0) {
-                res.status(404).send("User not found");
-                return;
-            }
+            if (result.length === 0) return res.status(404).send("User not found");
             return res.status(200).json({ userId: result.user_id });
         } catch (err) {
             return res.status(500).send("ID 검색 중 오류가 발생했습니다.");
@@ -150,13 +218,11 @@ const userController = {
             const { userId, userPassword } = req.body;
             const hashedPassword = await bcrypt.hash(userPassword, 10);
 
-            if (!userId)
-                return res.send("사용자의 Id를 제공해야 합니다.").status(400);
+            if (!userId) return res.send("사용자의 Id를 제공해야 합니다.").status(400);
 
             await userModel.changePassword(userId, hashedPassword);
             return res.status(200).send("Password Change successfully");
         } catch (err) {
-            console.error(err);
             return res.status(500).send("비밀번호 변경 중 오류가 발생했습니다.");
         }
     },
@@ -165,25 +231,14 @@ const userController = {
         try {
             const { userId, userName, phoneNumber, Gender, Age } = req.body;
             try {
-                let userImage = null;
-                if (req.file) userImage = req.file.path;
-
-                await userModel.createProfile(
-                    userId,
-                    userName,
-                    phoneNumber,
-                    Gender,
-                    Age,
-                    userImage
-                );
+                let userImage = req.file ? req.file.location : null;
+                await userModel.createProfile(userId, userName, phoneNumber, Gender, Age, userImage);
+                await achieveModel.clearAchieve(userName, 2);
 
                 return res.status(201).send("Profile added successfully");
             } catch (error) {
-                console.error("Error uploading image to Cloudinary:", error);
                 return res.status(500).json({
-                    resultCode: 500,
-                    resultMsg:
-                        "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
+                    resultMsg: "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
                     error: error.message,
                 });
             }
@@ -196,27 +251,27 @@ const userController = {
         try {
             const { userId, userName } = req.body;
             try {
-                let userImage = null;
-                if (req.file) userImage = req.file.path;
+                let userImage = req.file ? req.file.location : null;
 
                 if (!userName) {
+                    const result = await userModel.searchUser(userId);
+                    await multerimg.deleted(result.user_image);
                     await userModel.updateImage(userId, userImage);
                     return res.status(200).send("Profile userImage successfully");
                 } else if (!userImage) {
                     await userModel.updateName(userId, userName);
                     return res.status(200).send("Profile userName successfully");
                 } else {
-                    await userModel.updateImage(userId, userImage);
+                    const result = await userModel.searchUser(userId);
+                    await multerimg.deleted(result.user_image);
                     await userModel.updateName(userId, userName);
+                    await userModel.updateImage(userId, userImage);
                 }
 
                 return res.status(200).send("Profile Modify successfully");
             } catch (error) {
-                console.error("Error uploading image to Cloudinary:", error);
                 return res.status(500).json({
-                    resultCode: 500,
-                    resultMsg:
-                        "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
+                    resultMsg: "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
                     error: error.message,
                 });
             }
@@ -243,17 +298,11 @@ const userController = {
     createInquiry: async (req, res) => {
         try {
             const { userName, categoryId, title, content } = req.body;
-            console.log(req.body);
             let userImage = null;
-            if (req.file) userImage = req.file.path;
+            if (req.file) userImage = req.file ? req.file.location : '';
 
-            await userModel.createInquiry(
-                userName,
-                categoryId,
-                title,
-                content,
-                userImage
-            );
+            await achieveModel.clearAchieve(userName, 7);
+            await userModel.createInquiry(userName, categoryId, title, content, userImage);
             res.status(201).send("Inquiry added successfully");
         } catch (err) {
             return res.status(500).send("문의 생성 중 오류가 발생했습니다.");
@@ -308,24 +357,88 @@ const userController = {
         try {
             const inquiryId = req.query.inquiryId;
             if (!inquiryId) {
-                return res.status(400).json({
-                    resultCode: 400,
-                    resultMsg: "문의 Id를 제공해야합니다.",
-                });
+                return res.status(400).json({ resultMsg: "문의 Id를 제공해야합니다." });
             }
             const result = await userModel.searchAnswer(inquiryId);
             if (!result) return res.status(404).send("Answer not found");
             return res.status(200).json({
-                answerId: result.answer_id,
-                inquiryId: result.inquiry_id,
-                userName: result.user_name,
-                content: result.content,
-                writeDate: result.write_date,
+                answerId: result[0].answer_id,
+                inquiryId: result[0].inquiry_id,
+                userName: result[0].user_name,
+                content: result[0].content,
+                writeDate: result[0].write_date,
             });
         } catch (err) {
             return res.status(500).send("문의 내역을 가져오는 중 오류가 발생했습니다.");
         }
     },
+
+    clearAchieve: async (req, res) => { // 추후 조건에 맞춰 쪼개질 예정
+        try {
+            const { userName, achieveId } = req.body;
+            if (userName && achieveId) {
+                await achieveModel.clearAchieve(userName, achieveId);
+                return res.status(201).json({ Msg: "clear achieve" });
+            } else return res.status(404).send("userName or achieveId not found");
+        } catch (err) {
+            return res.status(500).send("achieve Hub에 입력 중 오류가 발생했습니다.");
+        }
+    },
+
+    searchAchiveHub: async (req, res) => {
+        try {
+            const userName = req.query;
+            if (userName && achieveId) {
+                const searchResult = await achieveModel.searchAchiveHub(userName);
+                const results = await Promise.all(searchResult.map(async (searchResult) => {
+                    return {
+                        achiveId: searchResult.achive_id,
+                        userName: searchResult.user_name,
+                        completeAt: searchResult.complete_at
+                    };
+                }));
+                return res.status(200).json(results);
+            } else return res.status(404).send("userName or achieveId not found");
+
+        } catch (err) {
+            return res.status(500).send("이벤트 조회 중 오류가 발생했습니다.");
+        }
+    },
+
+    gainPoint: async (req, res) => {
+        try {
+            const body = req.body;
+            const insertData = {
+                user_name: body.userName,
+                points: body.points,
+                description: body.description,
+                calcul: body.calcul
+            };
+            await userModel.gainPoint(insertData);
+            return res.status(201).json({ Msg: "gainPoint" });
+        } catch (err) {
+            return res.status(500).send("point 입력 중 오류가 발생했습니다.");
+        }
+    },
+
+    searchPoint: async (req, res) => {
+        try {
+            const userName = req.query.userName;
+            const searchResult = await userModel.searchPoint(userName);
+            const result = await Promise.all(searchResult.map(async (searchResult) => {
+                return {
+                    userName: searchResult.user_name,
+                    point_score: searchResult.points,
+                    description: searchResult.description,
+                    calcul: searchResult.calcul
+                };
+            }));
+            return res.status(200).json(result);
+        } catch (err) {
+            return res.status(500).send("point 조회 중 오류가 발생했습니다.");
+        }
+    }
+
 };
 
 module.exports = {

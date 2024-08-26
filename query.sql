@@ -169,17 +169,6 @@ CREATE TABLE BookMark (
     FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
-CREATE TABLE wait_list ( -- 대기 상태
-	wait_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	store_id VARCHAR(50) NOT NULL,
-    user_name VARCHAR(50) NOT NULL,
-    wait_visitor_name VARCHAR(50) NOT NULL,
-    wait_visitor_number INT NOT NULL,
-    wait_reservation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    wait_status ENUM('waiting', 'queued', 'entered', 'skipped') DEFAULT 'queued', -- 대기 / 입장 대기 / 입장 완료 / 입장 X
-    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE
-);
 
 CREATE TABLE store_review (
     review_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -240,11 +229,49 @@ CREATE TABLE stand_store (
 );
 
 CREATE TABLE wait_list (
+    reservation_id VARCHAR(50) PRIMARY KEY,
     user_name VARCHAR(50) NOT NULL,
     store_id VARCHAR(50) NOT NULL,
-    status ENUM('waiting', 'completed', 'cancelled') NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_name, store_id)
+    status ENUM('pending', 'completed') DEFAULT 'pending',
+    capacity INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- QR코드 생성
+CREATE TABLE qrcodes (
+	qrcode_id INT AUTO_INCREMENT PRIMARY KEY,
+    store_id VARCHAR(50) NOT NULL,
+    qrcode_url TEXT NOT NULL,
+    create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
+);
+
+CREATE TABLE achieve (
+	achieve_id int auto_increment primary key,
+    title varchar(50),
+    content varchar(150),
+    conditions text,
+    points int
+);
+
+CREATE TABLE achieve_hub (
+	user_name VARCHAR(50),
+    achieve_id int,
+    complete_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    primary key (user_name, achieve_id),
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
+    FOREIGN KEY (achieve_id) REFERENCES achieve(achieve_id) ON UPDATE CASCADE
+);
+
+CREATE TABLE point_history (
+    history_id int auto_increment primary key,
+    user_name varchar(50),
+    points int not null,
+    description text,
+    calcul ENUM("+", "-"),
+    transaction_at timestamp default current_timestamp,
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
 
@@ -272,8 +299,20 @@ INSERT INTO category (category_id, category_name) VALUES
 (25, '패션/라이프스타일'),
 (26, '예술/공예'),
 (27, '애니메이션'),
-(28, '전시'),
-(29, '연예인/굿즈'),
-(30, '동물'),
-(31, '캐릭터'),
-(32, '캠페인');
+(28, '체험'),
+(29, '전시/문화')
+(30, '연예인/굿즈'),
+(31, '동물'),
+(32, '캐릭터'),
+(33, '캠페인');
+
+INSERT INTO achieve (title, content, conditions, points) VALUES
+('리뷰 스타터', '첫 리뷰 작성', '첫 리뷰를 작성한 사용자', 500),
+('어서와? POPHUB는 처음이지?', '첫 회원가입', '회원가입을 완료한 사용자', 1000),
+('탐색의 여정', '찜 10개', '10개 이상의 아이템을 찜한 사용자', 300),
+('응원의 손길', '첫 펀딩', '첫 펀딩에 참여한 사용자', 500),
+('첫걸음', '첫 상품 구매', '첫 상품을 구매한 사용자', 500),
+('탐험의 시작', '팝업스토어 하나 이상 예약 후 방문시', '팝업스토어를 하나 이상 예약하고 방문한 사용자', 300),
+('소중한 조언자', '첫 문의', '첫 문의를 작성한 사용자', 300),
+('waiting...', '3번 이상 예약 대기 중인 사용자', '3번 이상 예약 대기 상태인 사용자', 1000),
+('오랜 친구', '앱 가입 기간 1년 이상', '앱 가입 기간이 1년을 초과한 사용자', 1000);
