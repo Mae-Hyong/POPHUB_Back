@@ -29,12 +29,9 @@ const signController = {
 
     kakaoOauth: async (req, res) => {
         try {
-            console.log('kakaoAuthUrl')
-
             const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${process.env.KAKAO_REST_API}&redirect_uri=${process.env.KAKAO_REDIRECT}`;
             return res.redirect(kakaoAuthUrl);
         } catch (err) {
-            console.error("카카오 인증 요청 오류:", err);
             return res.status(500).send("카카오 인증 요청 중 오류가 발생했습니다.");
         }
     },
@@ -68,10 +65,8 @@ const signController = {
             const hashedPassword = await bcrypt.hash(v4(), 10);
             const userInfo = userResponse.data;
             await signModel.signUp(userInfo.id, hashedPassword, 'General Member');
-            console.log(userInfo.id)
             return res.json(userInfo); // 사용자 정보를 JSON 형태로 반환
         } catch (error) {
-            console.error('Error during Kakao login:', error.response ? error.response.data : error.message);
             return res.status(500).send('Failed to login with Kakao');
         }
     },
@@ -94,22 +89,22 @@ const signController = {
         }
     },
 
-    kakaodelete: async(req, res) => {
+    kakaodelete: async (req, res) => {
         try {
             const { userId, phoneNumber } = req.body;
             const userName = v1();
             const unlinkRes = await axios.post(
-              'https://kapi.kakao.com/v1/user/unlink',  // KAKAO_UNLINK_URI 경로 설정
-              {
-                target_id_type: 'user_id',
-                target_id: userId, // 해당 사용자 id(카카오 회원번호)
-              },
-              {
-                headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded',
-                  Authorization: 'KakaoAK ' + process.env.KAKAO_KEY,  // 관리자 키를 사용해야 함
+                'https://kapi.kakao.com/v1/user/unlink',  // KAKAO_UNLINK_URI 경로 설정
+                {
+                    target_id_type: 'user_id',
+                    target_id: userId, // 해당 사용자 id(카카오 회원번호)
                 },
-              }
+                {
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        Authorization: 'KakaoAK ' + process.env.KAKAO_KEY,  // 관리자 키를 사용해야 함
+                    },
+                }
             );
 
             await userModel.deleteData(userId, phoneNumber);
@@ -118,10 +113,9 @@ const signController = {
 
             // 성공적으로 연결 해제 시 처리
             res.json({ success: true, message: 'User unlinked successfully', data: unlinkRes.data });
-          } catch (error) {
-            console.error('Error during Kakao unlink:', error.response ? error.response.data : error.message);
+        } catch (error) {
             res.status(500).json({ success: false, message: 'Failed to unlink user', error: error.message });
-          }
+        }
     }
 };
 
@@ -441,7 +435,6 @@ const userController = {
             }));
             return res.status(200).json(result);
         } catch (err) {
-            console.log(err);
             return res.status(500).send("point 조회 중 오류가 발생했습니다.");
         }
     }
