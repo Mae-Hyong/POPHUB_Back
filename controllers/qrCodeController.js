@@ -81,6 +81,12 @@ const qrCodeController = {
             }
 
             if (result.success) {
+                const calendarData = {
+                    user_name: userName,
+                    store_id: storeId,
+                    reservation_date: result.reservation_date
+                }
+                await qrCodeModel.createCalendar(calendarData);
                 return res.status(200).json({ message: "방문 인증이 완료되었습니다." });
             } else {
                 return res.status(500).json({ message: "방문 인증 처리 중 오류가 발생하였습니다." });
@@ -90,6 +96,8 @@ const qrCodeController = {
             res.status(500).send("QR코드 스캔 중 오류가 발생하였습니다.");
         }
     },
+
+    
 }
 
 module.exports = { qrCodeController }

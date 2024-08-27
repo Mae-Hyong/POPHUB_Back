@@ -114,6 +114,7 @@ const qrCodeModel = {
                     resolve(results);
                 });
             });
+
             if (results.length > 0) {
                 await new Promise((resolve, reject) => {
                     db.query(reservationForVisit_query, results[0].reservation_id, (err, results) => {
@@ -121,8 +122,11 @@ const qrCodeModel = {
                         resolve(results);
                     });
                 });
-    
-                return { success: true };
+
+                const date = results[0].reservation_date.toISOString().split('T')[0];
+                return { success: true, reservation_date: date };
+            } else {
+                return { success: false };
             }
         } catch (err) {
             throw err;
@@ -132,7 +136,6 @@ const qrCodeModel = {
     // 현장 대기 방문 인증
     waitingForVisit: async (store_id, user_name) => {
         try {
-            
             const results = await new Promise((resolve, reject) => {
                 db.query(waitListCheck_query, [store_id, user_name], (err, results) => {
                     if (err) reject(err);
@@ -147,10 +150,28 @@ const qrCodeModel = {
                         resolve(results);
                     });
                 });
-    
-                return { success: true };
+
+                const date = results[0].created_at.toISOString().split('T')[0];
+                return { success: true, reservation_date: date };
+            } else {
+                return { success: false };
             }
             
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 캘린더 추가
+    createCalendar: async (calendarData) => {
+        try {
+            const query = 'INSERT INTO calendar SET ?';
+            await new Promise((resolve, reject) => {
+                db.query(query, calendarData, (err, result) => {
+                    if (err) reject(err);
+                    resolve(result);
+                })
+            })
         } catch (err) {
             throw err;
         }

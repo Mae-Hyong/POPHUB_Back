@@ -274,6 +274,14 @@ CREATE TABLE point_history (
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
+CREATE TABLE calendar (
+    calendar_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_name VARCHAR(50) NOT NULL,
+    store_id VARCHAR(50) NOT NULL,
+    reservation_date DATE NOT NULL,
+    FOREIGN KEY(user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
+    FOREIGN KEY(store_id) REFERENCES popup_stores(store_id)
+);
 
 INSERT INTO category (category_id, category_name) VALUES
 (0, '기술 문의'),
