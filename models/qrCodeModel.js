@@ -6,9 +6,13 @@ const qrCodeExistsQuery = 'SELECT * FROM qrcodes WHERE store_id = ?';
 const scanQrCode_query = 'SELECT * FROM qrcodes WHERE qrcode_url = ?';
 const reservationCheck_query = 'SELECT * FROM reservation WHERE store_id = ? AND user_name = ? AND reservation_status = "pending"';
 const waitListCheck_query = 'SELECT * FROM wait_list WHERE store_id = ? AND user_name = ? AND status = "pending"';
+const showCalendar_query = 'SELECT * FROM calendar WHERE user_name = ?';
+const showStore_query = 'SELECT store_name FROM popup_stores WHERE store_id = ?';
+const showImages_query = 'SELECT image_url FROM images WHERE store_id = ?';
 
 // ------- POST Query -------
 const insertQrCode_query = 'INSERT INTO qrcodes SET ?';
+const createCalendar_query = 'INSERT INTO calendar SET ?';
 
 // ------- PUT Query -------
 const reservationForVisit_query = 'UPDATE reservation SET reservation_status = "completed" WHERE reservation_id = ?';
@@ -165,13 +169,53 @@ const qrCodeModel = {
     // 캘린더 추가
     createCalendar: async (calendarData) => {
         try {
-            const query = 'INSERT INTO calendar SET ?';
             await new Promise((resolve, reject) => {
-                db.query(query, calendarData, (err, result) => {
+                db.query(createCalendar_query, calendarData, (err, result) => {
                     if (err) reject(err);
                     resolve(result);
                 })
             })
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 캘린더 조회
+    showCalendar: async (user_name) => {
+        try {
+            // calendar
+            const calendarResults = await new Promise((resolve, reject) => {
+                db.query(showCalendar_query, user_name, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                });
+            });
+    
+            const results = await Promise.all(calendarResults.map(async (entry) => {
+                // popup_stores
+                const storeResult = await new Promise((resolve, reject) => {
+                    db.query(showStore_query, entry.store_id, (err, storeResults) => {
+                        if (err) reject(err);
+                        resolve(storeResults[0].store_name);
+                    });
+                });
+    
+                // images
+                const imagesResult = await new Promise((resolve, reject) => {
+                    db.query(showImages_query, entry.store_id, (err, imagesResults) => {
+                        if (err) reject(err);
+                        resolve(imagesResults[0].image_url); // 여러 이미지 결과 반환
+                    });
+                });
+    
+                return {
+                    ...entry,
+                    store_name: storeResult,
+                    images: imagesResult
+                };
+            }));
+            return results;
+    
         } catch (err) {
             throw err;
         }

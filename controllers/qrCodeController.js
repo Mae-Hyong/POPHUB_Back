@@ -97,7 +97,21 @@ const qrCodeController = {
         }
     },
 
-    
+    // 캘린더 조회
+    showCalendar: async (req, res) => {
+        try {
+            const userName = req.query.userName;
+            const result = await qrCodeModel.showCalendar(userName);
+
+            if (result.length === 0) {
+                return res.status(200).json({ message: "방문인증된 팝업이 없습니다." });
+            }
+
+            return res.status(200).json(result);
+        } catch (err) {
+            res.status(500).send("캘린더 조회 중 오류가 발생하였습니다.");
+        }
+    }
 }
 
 module.exports = { qrCodeController }
