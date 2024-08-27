@@ -105,4 +105,22 @@ router.get('/scan/store', qrCodeController.scanQrCodeForStore); // qr코드 스�
  */
 router.put('/scan/visit', qrCodeController.scanQrCodeForVisit); // qr코드 스캔 - 방문 인증
 
+/**
+ * @swagger
+ * /qrcode/calendar/show:
+ *   get:
+ *      tags: [QRCode]
+ *      summary: 유저별 캘린더 조회
+ *      parameters:
+ *        - in: query
+ *          name: userName
+ *          required: true
+ *          schema:
+ *            type: string
+ *      responses:
+ *        200:
+ *          description: 성공
+ */
+router.get('/calendar/show', qrCodeController.showCalendar); // 유저별 캘린더 조회
+
 module.exports = router;
