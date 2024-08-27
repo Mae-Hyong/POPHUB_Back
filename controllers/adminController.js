@@ -1,5 +1,5 @@
 const adminModel = require("../models/adminModel");
-const { sendAlarm } = require("../util/alarmService");
+const { sendAlarm } = require("../function/alarmService");
 const admin = require("firebase-admin");
 const db = admin.firestore();
 const moment = require("moment");
