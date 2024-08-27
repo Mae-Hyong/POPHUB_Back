@@ -40,7 +40,7 @@ const reservationController = {
             if (result.success == true) {
                 res.status(201).json( `예약 등록이 완료되었습니다. 현재 인원:${result.update_capacity}, 최대 인원: ${result.max_capacity}` );
             } else {
-                res.status(400).json( `최대 인원을 초과하였습니다. 시간당 최대 인원:${result.max_capacity}`);
+                res.status(400).json( `최대 인원을 초과하였습니다. 시간당 최대 인원:${result.max_capacity}` );
             }
         } catch (err) {
             res.status(500).send("예약 중 오류가 발생하였습니다.");
@@ -76,9 +76,7 @@ const reservationController = {
             await achieveModel.clearAchieve(result, 6);
             res.status(200).json({ message: "입장이 성공적으로 완료되었습니다.", userName: result });
         } catch (err) {
-            res.status(500).send(
-                "사전 예약 입장 수락 중 오류가 발생하였습니다."
-            );
+            res.status(500).send("사전 예약 입장 수락 중 오류가 발생하였습니다.");
         }
     },
 
@@ -145,7 +143,6 @@ const reservationController = {
 
             res.status(200).json(result);
         } catch (err) {
-            console.log(err);
             res.status(500).send("현장 대기 조회 중 오류가 발생하였습니다.");
         }
     },
