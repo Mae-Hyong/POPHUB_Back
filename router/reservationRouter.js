@@ -47,7 +47,7 @@ router.get('/advance/status/:storeId', reservationController.reservationStatus);
  *               reservationTime:
  *                 type: string
  *                 format: time
- *                 example: '15:00'
+ *                 example: '11:00'
  *               capacity:
  *                 type: integer
  *                 example: 5
@@ -75,7 +75,7 @@ router.post('/advance', reservationController.reservation); // 사전 예약
  *            required: false
  *            schema:
  *              type: string
- *            description: "type: userName일 경우"
+ *            description: "type: user일 경우"
  *          - in: query
  *            name: storeId
  *            required: false
