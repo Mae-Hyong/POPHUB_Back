@@ -27,10 +27,10 @@ const signController = {
         }
     },
 
-    kakaoOauth: async (req, res) => {
+    oauthKakao: async (req, res) => {
         try {
             const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${process.env.KAKAO_REST_API}&redirect_uri=${process.env.KAKAO_REDIRECT}`;
-            return res.redirect(kakaoAuthUrl);
+            return res.status(302).redirect(kakaoAuthUrl);
         } catch (err) {
             return res.status(500).send("카카오 인증 요청 중 오류가 발생했습니다.");
         }
@@ -65,9 +65,61 @@ const signController = {
             const hashedPassword = await bcrypt.hash(v4(), 10);
             const userInfo = userResponse.data;
             await signModel.signUp(userInfo.id, hashedPassword, 'General Member');
-            return res.json(userInfo); // 사용자 정보를 JSON 형태로 반환
+            return res.status(201).json(userInfo); // 사용자 정보를 JSON 형태로 반환
         } catch (error) {
             return res.status(500).send('Failed to login with Kakao');
+        }
+    },
+
+    oauthNaver: async (req, res) => {
+        try {
+            const state = Math.random(10000, 99999).toString();
+            const naverAuthUrl = process.env.NAVER_AUTH + `&client_id=${process.env.NAVER_CLIENTID}&redirect_uri=${NAVER_SECERET}&state=${state}`
+            return res.status(302).redirect(naverAuthUrl);
+        } catch (err) {
+            return res.status(500).send("네이버 인증 요청 중 오류가 발생했습니다.");
+        }
+    },
+
+    naverCallback: async (req, res) => {
+        try {
+            const code = req.query.code;
+            const state = req.query.state;
+            if (!code) {
+                return res.status(400).send('Authorization code is missing');
+            }
+            const tokenResponse = await axios.get('https://nid.naver.com/oauth2.0/token', {
+                params: {
+                    grant_type: 'authorization_code',
+                    client_id: process.env.NAVER_CLIENTID,
+                    client_secret: process.env.NAVER_SECERET,
+                    code: code,
+                    state: state,
+                },
+            });
+
+            const access_token = tokenResponse.data.access_token;
+
+            if (!access_token) {
+                return res.status(401).send('Access token is missing or invalid');
+            }
+
+            const profileResponse = await axios.get('https://openapi.naver.com/v1/nid/me', {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                },
+            }).data;
+
+            // 사용자 정보 처리 및 응답
+            const hashedPassword = await bcrypt.hash(v4(), 10);
+            await signModel.signUp(profileResponse.response.id, hashedPassword, 'General Member');
+
+            return res.status(201).json({
+                token_info: tokenResponse.data,
+                profile_info: profileResponse,
+            });
+        } catch (error) {
+            res.status(500).send('Authentication failed');
         }
     },
 
