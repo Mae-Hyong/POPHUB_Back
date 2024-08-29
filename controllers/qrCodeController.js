@@ -20,7 +20,7 @@ const qrCodeController = {
                     qrcode_url: QRCode,
                 }
                 await qrCodeModel.createQrCode(qrCodeData);
-                return res.status(200).json({ message: "QR코드가 생성되었습니다.", QRCode });
+                return res.status(201).json({ message: "QR코드가 생성되었습니다.", QRCode });
             }
         } catch (err) {
             res.status(500).send("QR코드 생성 중 오류가 발생하였습니다.");

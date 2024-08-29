@@ -37,6 +37,7 @@ const productRouter = require("./router/product");
 const alarmRouter = require("./router/alarmRouter");
 const reservationRouter = require("./router/reservationRouter");
 const qrCodeRouter = require("./router/qrCodeRouter");
+const deliveryRouter = require("./router/deliveryRouter");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -65,6 +66,7 @@ app.use("/product", productRouter);
 app.use("/alarm", alarmRouter);
 app.use("/reservation", reservationRouter);
 app.use("/qrcode", qrCodeRouter);
+app.use("/delivery", deliveryRouter);
 
 cron.scheduleDatabaseUpdate();
 

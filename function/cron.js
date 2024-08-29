@@ -58,7 +58,7 @@ const resetWaitList = async () => {
 function scheduleDatabaseUpdate() {
     cron.schedule('0 0 * * *', async () => {
         await updatePopupStatus();
-        await updateReservationStatus();
+        //await updateReservationStatus();
         //await resetWaitList();
     });
 }
