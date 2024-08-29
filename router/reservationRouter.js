@@ -120,7 +120,7 @@ router.put('/advance/complete', reservationController.completedReservation); // 
  *              type: string
  *      responses:
  *          200:
- *              description: 성공
+ *            description: 성공
  */
 router.delete('/advance/delete/:reservationId', reservationController.deleteReservation) // 예약 취소
 

@@ -5,7 +5,7 @@ const { qrCodeController } = require('../controllers/qrCodeController');
 /**
  * @swagger
  * /qrcode/create:
- *   get:
+ *   post:
  *      tags: [QRCode]
  *      summary: QR코드 생성
  *      parameters:
@@ -15,10 +15,10 @@ const { qrCodeController } = require('../controllers/qrCodeController');
  *          schema:
  *            type: string
  *      responses:
- *        200:
+ *        201:
  *          description: 성공
  */          
-router.get('/create', qrCodeController.createQrCode); // qr코드 생성
+router.post('/create', qrCodeController.createQrCode); // qr코드 생성
 
 /**
  * @swagger
