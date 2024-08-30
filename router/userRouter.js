@@ -60,7 +60,7 @@ router.get("/oauth/kakao", signController.oauthKakao);
 
 router.get("/auth/kakao/callback", signController.kakaoCallBack);
 
-router.delete("/kakao/delete", signController.kakaodelete);
+router.delete("/kakao/delete", signController.kakaoDelete);
 
 /**
  * @swagger
@@ -78,6 +78,8 @@ router.delete("/kakao/delete", signController.kakaodelete);
 router.get("/oauth/naver", signController.oauthNaver);
 
 router.get("/auth/naver/callback", signController.kakaoCallBack);
+
+router.delete("/naver/delete", signController.naverDelete);
 /**
  * @swagger
  * /user/signIn:

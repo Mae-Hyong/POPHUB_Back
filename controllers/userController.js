@@ -141,7 +141,7 @@ const signController = {
         }
     },
 
-    kakaodelete: async (req, res) => {
+    kakaoDelete: async (req, res) => {
         try {
             const { userId, phoneNumber } = req.body;
             const userName = v1();
@@ -168,7 +168,57 @@ const signController = {
         } catch (error) {
             res.status(500).json({ success: false, message: 'Failed to unlink user', error: error.message });
         }
-    }
+    },
+
+    naverDelete: async (req, res) => {
+        try {
+            const code = req.query.code;
+            const state = req.query.state;
+            const userName = v1();
+            if (!code) {
+                return res.status(400).send('Authorization code is missing');
+            }
+            const tokenResponse = await axios.get('https://nid.naver.com/oauth2.0/token', {
+                params: {
+                    grant_type: 'authorization_code',
+                    client_id: process.env.NAVER_CLIENTID,
+                    client_secret: process.env.NAVER_SECERET,
+                    code: code,
+                    state: state,
+                },
+            });
+
+            const access_token = tokenResponse.data.access_token;
+
+            if (!access_token) {
+                return res.status(401).send('Access token is missing or invalid');
+            }
+
+            const profileResponse = await axios.get('https://openapi.naver.com/v1/nid/me', {
+                headers: {
+                    Authorization: `Bearer ${access_token}`,
+                },
+            }).data;
+
+            await axios.get('https://nid.naver.com/oauth2.0/token', {
+                params: {
+                    grant_type: 'delete',
+                    client_id: process.env.NAVER_CLIENTID,
+                    client_secret: process.env.NAVER_SECERET,
+                    access_token: access_token
+                },
+            });
+
+            await userModel.deleteData(profileResponse.response.id, phoneNumber);
+            await userModel.deleteChange(userName, true, profileResponse.response.id);
+            await userModel.deleteUser(profileResponse.response.id);
+
+            // 성공적으로 연결 해제 시 처리
+            res.json({ success: true, message: 'User unlinked successfully'});
+        } catch (error) {
+            res.status(500).send('Authentication failed');
+        }
+    },
 };
 
 const authController = {
