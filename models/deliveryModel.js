@@ -2,6 +2,8 @@ const db = require('../config/mysqlDatabase');
 
 // ------- GET Query -------
 const showAddress_query = 'SELECT * FROM user_address WHERE user_name = ?';
+const showUserAllDelivery_query = 'SELECT * FROM delivery WHERE user_name = ?';
+const showUserDelivery_query = 'SELECT * FROM delivery WHERE user_name = ? AND status = ?';
 
 // ------- POST Query -------
 const createAddress_query = 'INSERT INTO user_address SET ?';
@@ -115,7 +117,33 @@ const deliveryModel = {
         } catch (err) {
             throw err;
         }
-    }
+    },
+
+    // 배송 주문 조회 - 전체
+    statusDelivery: async (user_name, status) => {
+        try {
+            let result;
+            if (status == '전체') {
+                result = await new Promise((resolve, reject) => {
+                    db.query(showUserAllDelivery_query, user_name, (err, results) => {
+                        if (err) reject(err);
+                        resolve(results);
+                    });
+                });
+            } else {
+                result = await new Promise((resolve, reject) => {
+                    db.query(showUserDelivery_query, [user_name, status], (err, results) => {
+                        if (err) reject(err);
+                        resolve(results);
+                    });
+                });
+            }
+            return result;
+        } catch (err) {
+            throw err;
+        }
+    },
+
 }
 
 module.exports = deliveryModel;

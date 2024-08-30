@@ -121,7 +121,7 @@ router.post('/', deliveryController.createDelivery); // 배송 주문 생성
  * /delivery/cancel:
  *   put:
  *     tags: [Delivery]
- *     summary: 주문 취소
+ *     summary: 배송 주문 취소
  *     requestBody:
  *       required: true
  *       content:
@@ -142,5 +142,30 @@ router.post('/', deliveryController.createDelivery); // 배송 주문 생성
  *         description: 성공
  */
 router.put('/cancel', deliveryController.cancelDelivery) // 배송 주문 취소
+
+/**
+ * @swagger
+ * /delivery/show/user:
+ *   get:
+ *     tags: [Delivery]
+ *     summary: 배송 주문 조회 - 주문자
+ *     parameters:
+ *       - in: query
+ *         name: userName
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         required: true
+ *         description: 전체, 주문 완료, 주문 취소, 배송중, 배송 완료 순서
+ *         schema:
+ *           type: string
+ *           enum: [All, Order Completed, Order Canceled, Shipping, Delivered]
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.get('/show/user', deliveryController.showUserDelivery) // 배송 주문 조회 - 주문자
 
 module.exports = router;

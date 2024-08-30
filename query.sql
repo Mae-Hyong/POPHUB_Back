@@ -288,7 +288,7 @@ CREATE TABLE delivery (
     user_name VARCHAR(50) NOT NULL,
     product_id VARCHAR(50) NOT NULL,
     address INT NOT NULL,
-    status ENUM('주문 완료', '주문 취소', '배송중', '배송완료') NOT NULL DEFAULT '주문 완료',
+    status ENUM('주문 완료', '주문 취소', '배송중', '배송 완료') NOT NULL DEFAULT '주문 완료',
     payment_amount INT NOT NULL, -- 결제 금액
     quantity INT NOT NULL, -- 주문 수량
     order_date DATETIME DEFAULT now() NOT NULL, -- 주문일
