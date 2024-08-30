@@ -114,7 +114,27 @@ router.delete('/address/delete/:addressId', deliveryController.deleteAddress); /
  *       201:
  *         description: 성공
  */
+router.post('/', deliveryController.createDelivery); // 배송 주문 생성
 
-router.post('/', deliveryController.createDelivery); // 주문 생성
+/**
+ * @swagger
+ * /delivery/cancel:
+ *   put:
+ *     tags: [Delivery]
+ *     summary: 배송 주문 취소
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               deliveryId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.put('/cancel', deliveryController.cancelDelivery) // 배송 주문 취소
 
 module.exports = router;

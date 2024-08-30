@@ -68,9 +68,20 @@ const deliveryController = {
                 quantity: body.quantity
             }
             await deliveryModel.createDelivery(DeliveryData);
-            res.status(200).json({ message: "주문이 완료되었습니다." });
+            res.status(201).json({ message: "주문이 완료되었습니다." });
         } catch (err) {
             res.status(500).send("주문 생성 중 오류가 발생하였습니다.");
+        }
+    },
+
+    // 주문 취소
+    cancelDelivery: async (req, res) => {
+        try {
+            const deliveryId = req.body.deliveryId;
+            await deliveryModel.cancelDelivery(deliveryId);
+            res.status(200).json({ message: "주문이 취소되었습니다." });
+        } catch (err) {
+            res.status(500).send("주문 취소 중 오류가 발생하였습니다.");
         }
     }
 }
