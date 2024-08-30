@@ -6,8 +6,10 @@ const showAddress_query = 'SELECT * FROM user_address WHERE user_name = ?';
 // ------- POST Query -------
 const createAddress_query = 'INSERT INTO user_address SET ?';
 const createDelivery_query = 'INSERT INTO delivery SET ?';
+
 // ------- PUT Query -------
 const updateAddress_query = 'UPDATE user_address SET address = ? WHERE address_id = ?';
+const cancelDelivery_query = 'UPDATE delivery SET status = "주문 취소" WHERE delivery_id = ?';
 
 // ------- DELETE Query -------
 const deleteAddress_query = 'DELETE FROM user_address WHERE address_id = ?';
@@ -94,13 +96,26 @@ const deliveryModel = {
                 db.query(createDelivery_query, deliveryData, (err, results) => {
                     if (err) reject(err);
                     resolve(results);
-                })
-            })
+                });
+            });
         } catch (err) {
             throw err;
         }
     },
 
+    // 배송 주문 취소
+    cancelDelivery: async (delivery_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query(cancelDelivery_query, delivery_id, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                });
+            });
+        } catch (err) {
+            throw err;
+        }
+    }
 }
 
 module.exports = deliveryModel;
