@@ -5,7 +5,7 @@ const showAddress_query = 'SELECT * FROM user_address WHERE user_name = ?';
 
 // ------- POST Query -------
 const createAddress_query = 'INSERT INTO user_address SET ?';
-
+const createDelivery_query = 'INSERT INTO delivery SET ?';
 // ------- PUT Query -------
 const updateAddress_query = 'UPDATE user_address SET address = ? WHERE address_id = ?';
 
@@ -58,11 +58,25 @@ const deliveryModel = {
     },
 
     // 주소 삭제
-    deleteAddress: async(address_id) => {
+    deleteAddress: async (address_id) => {
         try {
             await new Promise((resolve, reject) => {
                 db.query(deleteAddress_query, [address_id], (err, results) => {
-                    if (err) reject (err);
+                    if (err) reject(err);
+                    resolve(results);
+                })
+            })
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 배송 주문 생성
+    createDelivery: async (deliveryData) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query(createDelivery_query, deliveryData, (err, results) => {
+                    if (err) reject(err);
                     resolve(results);
                 })
             })

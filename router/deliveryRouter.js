@@ -84,5 +84,37 @@ router.put('/address/update', deliveryController.updateAddress); // 주소 수�
  */
 router.delete('/address/delete/:addressId', deliveryController.deleteAddress); // 주소 삭제
 
+/**
+ * @swagger
+ * /delivery/:
+ *   post:
+ *     tags: [Delivery]
+ *     summary: 배송 주문
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *               addressId:
+ *                 type: string
+ *                 description: 선택한 주소 ID
+ *               productId:
+ *                 type: string
+ *               paymentAmount:
+ *                 type: integer
+ *                 description: 주문 금액
+ *               quantity:
+ *                 type: integer
+ *                 description: 주문 수량
+ *     responses:
+ *       201:
+ *         description: 성공
+ */
+
+router.post('/', deliveryController.createDelivery); // 주문 생성
 
 module.exports = router;
