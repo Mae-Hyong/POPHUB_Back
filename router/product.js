@@ -151,7 +151,7 @@ router.put('/update/:productId', multerimg.upload.array("files", 5), productCont
  *              type: string
  *      responses:
  *          200:
- *              description: 성공적으로 삭제됨
+ *              description: 성공
  */
 router.delete('/delete/:productId', productController.deleteProduct); // 상품 삭제
 

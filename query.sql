@@ -287,16 +287,15 @@ CREATE TABLE delivery (
     delivery_id VARCHAR(50) PRIMARY KEY NOT NULL,  
     user_name VARCHAR(50) NOT NULL,
     product_id VARCHAR(50) NOT NULL,
-    address_id INT NOT NULL,
-    status ENUM('주문 완료', '주문 취소' '배송중', '배송완료') NOT NULL DEFAULT '주문 완료',
+    address INT NOT NULL,
+    status ENUM('주문 완료', '주문 취소', '배송중', '배송완료') NOT NULL DEFAULT '주문 완료',
     payment_amount INT NOT NULL, -- 결제 금액
     quantity INT NOT NULL, -- 주문 수량
     order_date DATETIME DEFAULT now() NOT NULL, -- 주문일
     dstart_date DATETIME DEFAULT NULL,  -- 배송 시작(status == 배송중)
     dend_date DATETIME DEFAULT NULL,    -- 배송 완료(status == 배송완료)
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name),
-    FOREIGN KEY (product_id) REFERENCES products(product_id),
-    FOREIGN KEY (address_id) REFERENCES user_address(address_id)
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
 
 INSERT INTO category (category_id, category_name) VALUES

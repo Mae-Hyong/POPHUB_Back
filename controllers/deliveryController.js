@@ -58,11 +58,12 @@ const deliveryController = {
         try {
             const body = req.body;
             const deliveryId = uuidv4();
+            const address = await deliveryModel.getAddress(body.addressId);
             const DeliveryData = {
                 delivery_id: deliveryId,
                 user_name: body.userName,
                 product_id: body.productId,
-                address_id: body.addressId,
+                address,
                 payment_amount: body.paymentAmount,
                 quantity: body.quantity
             }
