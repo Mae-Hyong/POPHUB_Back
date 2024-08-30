@@ -102,6 +102,8 @@ router.delete('/address/delete/:addressId', deliveryController.deleteAddress); /
  *               addressId:
  *                 type: string
  *                 description: 선택한 주소 ID
+ *               storeId:
+ *                 type: string
  *               productId:
  *                 type: string
  *               paymentAmount:

@@ -61,6 +61,7 @@ const deliveryController = {
             const address = await deliveryModel.getAddress(body.addressId);
             const DeliveryData = {
                 delivery_id: deliveryId,
+                store_id: body.storeId,
                 user_name: body.userName,
                 product_id: body.productId,
                 address,
@@ -108,6 +109,8 @@ const deliveryController = {
             res.status(500).send("주문 조회 중 오류가 발생하였습니다.");
         }
     },
+
+
 }
 
 module.exports = { deliveryController }
