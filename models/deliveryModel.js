@@ -9,7 +9,7 @@ const createDelivery_query = 'INSERT INTO delivery SET ?';
 
 // ------- PUT Query -------
 const updateAddress_query = 'UPDATE user_address SET address = ? WHERE address_id = ?';
-const cancelDelivery_query = 'UPDATE delivery SET status = "주문 취소" WHERE delivery_id = ?';
+const cancelDelivery_query = 'UPDATE delivery SET status = "주문 취소", cancel_reason = ? WHERE delivery_id = ?';
 
 // ------- DELETE Query -------
 const deleteAddress_query = 'DELETE FROM user_address WHERE address_id = ?';
@@ -104,10 +104,10 @@ const deliveryModel = {
     },
 
     // 배송 주문 취소
-    cancelDelivery: async (delivery_id) => {
+    cancelDelivery: async (cancel_reason, delivery_id) => {
         try {
             await new Promise((resolve, reject) => {
-                db.query(cancelDelivery_query, delivery_id, (err, results) => {
+                db.query(cancelDelivery_query, [cancel_reason, delivery_id], (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 });

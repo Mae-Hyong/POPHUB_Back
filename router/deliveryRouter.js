@@ -121,7 +121,7 @@ router.post('/', deliveryController.createDelivery); // 배송 주문 생성
  * /delivery/cancel:
  *   put:
  *     tags: [Delivery]
- *     summary: 배송 주문 취소
+ *     summary: 주문 취소
  *     requestBody:
  *       required: true
  *       content:
@@ -131,6 +131,12 @@ router.post('/', deliveryController.createDelivery); // 배송 주문 생성
  *             properties:
  *               deliveryId:
  *                 type: string
+ *                 description: 배송 ID
+ *                 required: true
+ *               cancelReason:
+ *                 type: string
+ *                 enum: [고객 변심, 상품 문제, 배송 지연, 기타]
+ *                 required: true
  *     responses:
  *       200:
  *         description: 성공
