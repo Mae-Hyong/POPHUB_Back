@@ -21,8 +21,8 @@ const deliveryModel = {
                 db.query(showAddress_query, user_name, (err, results) => {
                     if (err) reject(err);
                     resolve(results);
-                })
-            })
+                });
+            });
             return result;
         } catch (err) {
             throw err;
@@ -36,8 +36,8 @@ const deliveryModel = {
                 db.query(createAddress_query, addressData, (err, results) => {
                     if (err) reject(err);
                     resolve(results);
-                })
-            })
+                });
+            });
         } catch (err) {
             throw err;
         }
@@ -50,8 +50,8 @@ const deliveryModel = {
                 db.query(updateAddress_query, [address, address_id], (err, results) => {
                     if (err) reject(err);
                     resolve(results);
-                })
-            })
+                });
+            });
         } catch (err) {
             throw err;
         }
@@ -64,8 +64,24 @@ const deliveryModel = {
                 db.query(deleteAddress_query, [address_id], (err, results) => {
                     if (err) reject(err);
                     resolve(results);
-                })
-            })
+                });
+            });
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 주소 찾기
+    getAddress: async (address_id) => {
+        try {
+            const getAddress_query = 'SELECT address FROM user_address WHERE address_id = ?';
+            const result = await new Promise((resolve, reject) => {
+                db.query(getAddress_query, [address_id], (err, results) => {
+                    if(err) reject(err);
+                    resolve(results[0].address);
+                });
+            });
+            return result;
         } catch (err) {
             throw err;
         }
@@ -83,7 +99,7 @@ const deliveryModel = {
         } catch (err) {
             throw err;
         }
-    }
+    },
 
 }
 
