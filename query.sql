@@ -294,6 +294,7 @@ CREATE TABLE delivery (
     order_date DATETIME DEFAULT now() NOT NULL, -- 주문일
     dstart_date DATETIME DEFAULT NULL,  -- 배송 시작(status == 배송중)
     dend_date DATETIME DEFAULT NULL,    -- 배송 완료(status == 배송완료)
+    cancel_reason ENUM('고객 변심', '상품 문제', '배송 지연', '기타') DEFAULT NULL, -- 주문 취소 사유
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );

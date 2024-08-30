@@ -77,13 +77,13 @@ const deliveryController = {
     // 주문 취소
     cancelDelivery: async (req, res) => {
         try {
-            const deliveryId = req.body.deliveryId;
-            await deliveryModel.cancelDelivery(deliveryId);
+            const { cancelReason, deliveryId } = req.body;
+            await deliveryModel.cancelDelivery(cancelReason, deliveryId);
             res.status(200).json({ message: "주문이 취소되었습니다." });
         } catch (err) {
             res.status(500).send("주문 취소 중 오류가 발생하였습니다.");
         }
-    }
+    },
 }
 
 module.exports = { deliveryController }
