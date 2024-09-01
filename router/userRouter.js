@@ -56,12 +56,30 @@ router.post("/signUp", signController.signUp);
  *       500:
  *         description: 서버 오류
  */
-router.get("/oauth/kakao", signController.kakaoOauth);
+router.get("/oauth/kakao", signController.oauthKakao);
 
 router.get("/auth/kakao/callback", signController.kakaoCallBack);
 
-router.delete("/kakao/delete", signController.kakaodelete)
+router.delete("/kakao/delete", signController.kakaoDelete);
 
+/**
+ * @swagger
+ * /user/oauth/naver:
+ *   get:
+ *     tags: [User]
+ *     summary: 네이버 로그인 페이지로 리다이렉트
+ *     description: 클라이언트를 네이버 로그인 페이지로 리다이렉트합니다.
+ *     responses:
+ *       302:
+ *         description: 리다이렉트 성공
+ *       500:
+ *         description: 서버 오류
+ */
+router.get("/oauth/naver", signController.oauthNaver);
+
+router.get("/auth/naver/callback", signController.kakaoCallBack);
+
+router.delete("/naver/delete", signController.naverDelete);
 /**
  * @swagger
  * /user/signIn:
