@@ -103,7 +103,7 @@ const deliveryController = {
             if (!result || (Array.isArray(result) && result.length === 0)) {
                 result = { message: "해당 내역이 존재하지 않습니다." };
             }
-    
+
             res.status(200).json(result);
         } catch (err) {
             res.status(500).send("주문 조회 중 오류가 발생하였습니다.");
@@ -124,9 +124,9 @@ const deliveryController = {
             };
             let result;
             const getStatus = getStatusMapping[status];
-            if(products) {
+            if (products) {
                 result = await deliveryModel.statusPresidentDelivery(storeId, getStatus);
-                
+
                 if (!result || (Array.isArray(result) && result.length === 0)) {
                     result = { message: "해당 내역이 존재하지 않습니다." };
                 }
@@ -136,6 +136,24 @@ const deliveryController = {
             }
         } catch (err) {
             res.status(500).send("주문 조회 중 오류가 발생하였습니다.");
+        }
+    },
+
+    // 배송 상태 변경
+    changeStatusDelivery: async (req, res) => {
+        try {
+            const { deliveryId, status } = req.body;
+            const getStatusMapping = {
+                'Order Completed': '주문 완료',
+                'Shipping': '배송중',
+                'Delivered': '배송 완료'
+            };
+            const getStatus = getStatusMapping[status];
+            await deliveryModel.changeStatusDelivery(getStatus, deliveryId);
+            res.status(200).json({ message: `배송 상태가 ${getStatus}(으)로 변경되었습니다.` });
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("배송 상태 변경 중 오류가 발생하였습니다.");
         }
     },
 

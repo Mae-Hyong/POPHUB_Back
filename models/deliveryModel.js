@@ -13,7 +13,7 @@ const createDelivery_query = 'INSERT INTO delivery SET ?';
 // ------- PUT Query -------
 const updateAddress_query = 'UPDATE user_address SET address = ? WHERE address_id = ?';
 const cancelDelivery_query = 'UPDATE delivery SET status = "주문 취소", cancel_reason = ? WHERE delivery_id = ?';
-
+const changeStatusDelivery_query = 'UPDATE delivery SET status = ? WHERE delivery_id = ?';
 // ------- DELETE Query -------
 const deleteAddress_query = 'DELETE FROM user_address WHERE address_id = ?';
 
@@ -172,7 +172,7 @@ const deliveryModel = {
                         resolve(results);
                     });
                 });
-        
+
                 return products;
             } else if (!storeExists) {
                 return { message: "일치하는 팝업 스토어가 없습니다." }; // store_id가 없을 때
@@ -208,7 +208,23 @@ const deliveryModel = {
         } catch (err) {
             throw err;
         }
-    }
+    },
+
+
+    // 배송 상태 변경
+    changeStatusDelivery: async (status, delivery_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query(changeStatusDelivery_query, [status, delivery_id], (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                });
+            });
+        } catch (err) {
+            console.log(err);
+            throw err;
+        }
+    },
 
 }
 
