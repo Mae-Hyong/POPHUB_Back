@@ -67,6 +67,7 @@ app.use("/product", productRouter);
 app.use("/alarm", alarmRouter);
 app.use("/reservation", reservationRouter);
 app.use("/qrcode", qrCodeRouter);
+app.use("/delivery", deliveryRouter);
 app.use("/funding", fundingRouter);
 
 cron.scheduleDatabaseUpdate();
