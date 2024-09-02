@@ -83,7 +83,7 @@ router.post("/event/create", multerimg.upload.single("file"), adminController.cr
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -111,7 +111,7 @@ router.post("/answer", token.verifyToken, adminController.createAnswer);
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -153,7 +153,7 @@ router.get('/popupPendingList', token.verifyToken, adminController.popupPendingL
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
@@ -176,7 +176,7 @@ router.put('/popupPendingCheck', token.verifyToken, adminController.popupPending
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
