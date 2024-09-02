@@ -37,12 +37,7 @@ const signController = {
     },
 
     kakaoCallBack: async (req, res) => {
-        const { code } = req.query;
-
-        if (!code) {
-            return res.status(400).send('No code provided');
-        }
-
+        const code = Math.random().toString();
         try {
             // 액세스 토큰 요청
             const tokenResponse = await axios.post('https://kauth.kakao.com/oauth/token', querystring.stringify({
@@ -143,8 +138,9 @@ const signController = {
 
     kakaoDelete: async (req, res) => {
         try {
-            const { userId, phoneNumber } = req.body;
+            const { userId } = req.body;
             const userName = v1();
+
             const unlinkRes = await axios.post(
                 'https://kapi.kakao.com/v1/user/unlink',  // KAKAO_UNLINK_URI 경로 설정
                 {
@@ -159,12 +155,12 @@ const signController = {
                 }
             );
 
-            await userModel.deleteData(userId, phoneNumber);
+            await userModel.deleteData(userId, userId);
             await userModel.deleteChange(userName, true, userId);
             await userModel.deleteUser(userId);
 
             // 성공적으로 연결 해제 시 처리
-            res.json({ success: true, message: 'User unlinked successfully', data: unlinkRes.data });
+            res.status(200).json({ success: true, message: 'User unlinked successfully', data: unlinkRes.data });
         } catch (error) {
             res.status(500).json({ success: false, message: 'Failed to unlink user', error: error.message });
         }
@@ -214,7 +210,7 @@ const signController = {
             await userModel.deleteUser(profileResponse.response.id);
 
             // 성공적으로 연결 해제 시 처리
-            res.json({ success: true, message: 'User unlinked successfully'});
+            res.json({ success: true, message: 'User unlinked successfully' });
         } catch (error) {
             res.status(500).send('Authentication failed');
         }

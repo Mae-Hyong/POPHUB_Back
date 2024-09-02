@@ -60,6 +60,27 @@ router.get("/oauth/kakao", signController.oauthKakao);
 
 router.get("/auth/kakao/callback", signController.kakaoCallBack);
 
+/**
+ * /user/kakao/delete
+ *   delete:
+ *     tags: [User]
+ *     summary: 카카오 연동 해제
+ *     description: 연동된 카카오 계정을 해제합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *     responses:
+ *       302:
+ *         description: 리다이렉트 성공
+ *       500:
+ *         description: 서버 오류
+ */
 router.delete("/kakao/delete", signController.kakaoDelete);
 
 /**
