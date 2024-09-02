@@ -1,4 +1,5 @@
 const db = require('../config/mysqlDatabase');
+const moment = require('moment');
 
 // ------- GET Query -------
 const showAddress_query = 'SELECT * FROM user_address WHERE user_name = ?';
@@ -6,6 +7,11 @@ const showUserAllDelivery_query = 'SELECT * FROM delivery WHERE user_name = ?';
 const showUserDelivery_query = 'SELECT * FROM delivery WHERE user_name = ? AND status = ?';
 const showPresidentAllDelivery_query = 'SELECT * FROM delivery WHERE store_id = ?';
 const showPresidentDelivery_query = 'SELECT * FROM delivery WHERE store_id = ? AND status = ?';
+const getAddress_query = 'SELECT address FROM user_address WHERE address_id = ?';
+const getStore_query = 'SELECT * FROM popup_stores WHERE user_name = ? AND store_id = ?';
+const productCheckQuery = 'SELECT * FROM products WHERE store_id = ?';
+const productQuery = 'SELECT * FROM delivery WHERE store_id = ?';
+
 // ------- POST Query -------
 const createAddress_query = 'INSERT INTO user_address SET ?';
 const createDelivery_query = 'INSERT INTO delivery SET ?';
@@ -13,7 +19,7 @@ const createDelivery_query = 'INSERT INTO delivery SET ?';
 // ------- PUT Query -------
 const updateAddress_query = 'UPDATE user_address SET address = ? WHERE address_id = ?';
 const cancelDelivery_query = 'UPDATE delivery SET status = "주문 취소", cancel_reason = ? WHERE delivery_id = ?';
-const changeStatusDelivery_query = 'UPDATE delivery SET status = ? WHERE delivery_id = ?';
+
 // ------- DELETE Query -------
 const deleteAddress_query = 'DELETE FROM user_address WHERE address_id = ?';
 
@@ -79,7 +85,6 @@ const deliveryModel = {
     // 주소 찾기
     getAddress: async (address_id) => {
         try {
-            const getAddress_query = 'SELECT address FROM user_address WHERE address_id = ?';
             const result = await new Promise((resolve, reject) => {
                 db.query(getAddress_query, [address_id], (err, results) => {
                     if (err) reject(err);
@@ -148,15 +153,13 @@ const deliveryModel = {
     // 스토어 & 상품 유무 확인
     getProducts: async (user_name, store_id) => {
         try {
-            const query = 'SELECT * FROM popup_stores WHERE user_name = ? AND store_id = ?';
             const storeExists = await new Promise((resolve, reject) => {
-                db.query(query, [user_name, store_id], (err, results) => {
+                db.query(getStore_query, [user_name, store_id], (err, results) => {
                     if (err) reject(err);
                     resolve(results.length > 0); //true or false
                 });
             });
 
-            const productCheckQuery = 'SELECT * FROM products WHERE store_id = ?';
             const productExists = await new Promise((resolve, reject) => {
                 db.query(productCheckQuery, [store_id], (err, results) => {
                     if (err) reject(err);
@@ -165,7 +168,6 @@ const deliveryModel = {
             });
 
             if (storeExists && productExists) {
-                const productQuery = 'SELECT * FROM delivery WHERE store_id = ?';
                 const products = await new Promise((resolve, reject) => {
                     db.query(productQuery, [store_id], (err, results) => {
                         if (err) reject(err);
@@ -214,14 +216,28 @@ const deliveryModel = {
     // 배송 상태 변경
     changeStatusDelivery: async (status, delivery_id) => {
         try {
+            const now = moment().format('YYYY-MM-DD');
+            let query = 'UPDATE delivery SET status = ?';
+            let queryParams = [status];
+
+            if (status === '배송중') {
+                query += ', dstart_date = ?';
+                queryParams.push(now);
+            } else if (status === '배송 완료') {
+                query += ', dend_date = ?';
+                queryParams.push(now);
+            }
+
+            query += ' WHERE delivery_id = ?';
+            queryParams.push(delivery_id);
+
             await new Promise((resolve, reject) => {
-                db.query(changeStatusDelivery_query, [status, delivery_id], (err, results) => {
+                db.query(query, queryParams, (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 });
             });
         } catch (err) {
-            console.log(err);
             throw err;
         }
     },
