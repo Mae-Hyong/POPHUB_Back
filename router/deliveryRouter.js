@@ -201,4 +201,32 @@ router.get('/show/user', deliveryController.showUserDelivery); // 배송 주문 
  *         description: 성공
  */
 router.get('/show/president', deliveryController.showPresidentDelivery); // 배송 주문 조회 - 판매자
+
+/**
+ * @swagger
+ * /delivery/changeStatus:
+ *   put:
+ *     tags: [Delivery]
+ *     summary: 배송 상태 변경 (취소 제외)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               deliveryId:
+ *                 type: string
+ *                 description: 배송 ID
+ *                 required: true
+ *               status:
+ *                 description: 주문 완료, 배송중, 배송 완료
+ *                 type: string
+ *                 enum: [Order Completed, Shipping, Delivered]
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.put('/changeStatus', deliveryController.changeStatusDelivery); // 배송 상태 변경
+
 module.exports = router;
