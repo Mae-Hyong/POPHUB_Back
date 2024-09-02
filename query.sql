@@ -299,6 +299,56 @@ CREATE TABLE delivery (
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
 
+create Table funding (
+   funding_id int auto_increment primary key,
+    user_name varchar(50),
+    title varchar(100),
+    content text,
+    amount int,
+    donation int,
+    status ENUM('pending', 'open', 'successful', 'fail') NOT NULL DEFAULT 'pending',
+    open_date datetime,
+    close_date datetime,
+    
+    foreign key (user_name) references user_info(user_name) on update cascade
+);
+
+create Table funding_img (
+   img_id int auto_increment primary key,
+   funding_id int,
+    item_id int,
+    image longtext,
+   
+    foreign key (funding_id) references funding(funding_id) on update cascade,
+    foreign key (item_id) references funding_item(item_id) on update cascade
+);
+
+create Table funding_item(
+   item_id int auto_increment primary key,
+    funding_id int,
+    user_name varchar(50),
+    item_name varchar(25),
+    content text,
+    count int,
+    amount int,
+    foreign key (user_name) references user_info(user_name) on update cascade,
+    foreign key (funding_id) references funding(funding_id) on update cascade
+);
+
+create table funding_list(
+   list_id int auto_increment primary key,
+   funding_id int,
+    item_id int,
+    partner_order_id VARCHAR(255),
+    user_name varchar(50),
+    count int,
+    
+    foreign key (funding_id) references funding(funding_id) on update cascade,
+    foreign key (item_id) references funding_item(item_id) on update cascade,
+    foreign key (user_name) references user_info(user_name) on update cascade,
+    FOREIGN KEY (partner_order_id) REFERENCES payment_details(partner_order_id)
+);
+
 INSERT INTO category (category_id, category_name) VALUES
 (0, '기술 문의'),
 (1, '상품 문의'),
