@@ -86,7 +86,7 @@ const deliveryController = {
         }
     },
 
-    // 배송 주문 조회
+    // 배송 주문 조회 - 주문자
     showUserDelivery: async (req, res) => {
         try {
             const { userName, status } = req.query;
@@ -99,7 +99,7 @@ const deliveryController = {
                 'Delivered': '배송 완료'
             };
             const getStatus = getStatusMapping[status];
-            result = await deliveryModel.statusDelivery(userName, getStatus);
+            result = await deliveryModel.statusUserDelivery(userName, getStatus);
             if (!result || (Array.isArray(result) && result.length === 0)) {
                 result = { message: "해당 내역이 존재하지 않습니다." };
             }
@@ -110,6 +110,34 @@ const deliveryController = {
         }
     },
 
+    // 배송 주문 조회 - 판매자
+    showPresidentDelivery: async (req, res) => {
+        try {
+            const { userName, storeId, status } = req.query;
+            const products = await deliveryModel.getProducts(userName, storeId);
+            const getStatusMapping = {
+                'All': '전체',
+                'Order Completed': '주문 완료',
+                'Order Canceled': '주문 취소',
+                'Shipping': '배송중',
+                'Delivered': '배송 완료'
+            };
+            let result;
+            const getStatus = getStatusMapping[status];
+            if(products) {
+                result = await deliveryModel.statusPresidentDelivery(storeId, getStatus);
+                
+                if (!result || (Array.isArray(result) && result.length === 0)) {
+                    result = { message: "해당 내역이 존재하지 않습니다." };
+                }
+                res.status(200).json(result);
+            } else {
+                res.status(400).send("일치하는 값이 없습니다.");
+            }
+        } catch (err) {
+            res.status(500).send("주문 조회 중 오류가 발생하였습니다.");
+        }
+    },
 
 }
 
