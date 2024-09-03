@@ -1,5 +1,8 @@
 const deliveryModel = require('../models/deliveryModel');
 const { v4: uuidv4 } = require("uuid");
+const axios = require('axios');
+const env = require('dotenv').config();
+
 
 const deliveryController = {
 
@@ -157,6 +160,34 @@ const deliveryController = {
         }
     },
 
-}
+
+    deliveryTracker: async (req, res) => {
+        try {
+            const { courier, trackingNumber } = req.query;
+    
+            const courierMap = {
+                'cjlogistics': 'kr.cjlogistics',
+                'logen': 'kr.logen',
+                'epost': 'kr.epost',
+                'hanjin': 'kr.hanjin',
+                'lotte': 'kr.lotte'
+            };
+            const carrierId = courierMap[courier];
+
+            const headers = {
+                'Authorization': `TRACKQL-API-KEY ${process.env.DELIVERY_CLIENT_ID}:${process.env.DELIVERY_CLIENT_SECRET}`,
+                'Content-Type': 'application/json'
+            };
+
+            const url = `https://apis.tracker.delivery/carriers/${carrierId}/tracks/${trackingNumber}`;
+            const response = await axios.get(url, { headers });
+    
+            res.status(200).json(response.data);
+
+        } catch (err) {
+            res.status(500).json({ message: "배송 API 조회 중 오류가 발생하였습니다." });
+        }
+    },
+};
 
 module.exports = { deliveryController }

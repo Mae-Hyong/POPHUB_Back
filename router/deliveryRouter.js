@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { deliveryController } = require('../controllers/deliveryController');
+const { deliveryController, trackPackage } = require('../controllers/deliveryController');
 
 /**
  * @swagger
@@ -229,4 +229,30 @@ router.get('/show/president', deliveryController.showPresidentDelivery); // 배�
  */
 router.put('/changeStatus', deliveryController.changeStatusDelivery); // 배송 상태 변경
 
+/**
+ * @swagger
+ * /delivery/tracker:
+ *   get:
+ *     tags: [Delivery]
+ *     summary: 운송장 조회
+ *     parameters:
+ *       - in: query
+ *         name: courier
+ *         required: true
+ *         description: "대한통운, 로젠택배, 우체국, 한진택배, 롯데택배 순"
+ *         schema:
+ *           type: string
+ *           enum: [cjlogistics, logen, epost, hanjin, lotte]
+ *           example: cjlogistics
+ *       - in: query
+ *         name: trackingNumber
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: "590087808733"
+ *     responses:
+ *       200:
+ *         description: 배송 상태 조회 성공
+ */
+router.get('/tracker', deliveryController.deliveryTracker); // 운송장 조회
 module.exports = router;
