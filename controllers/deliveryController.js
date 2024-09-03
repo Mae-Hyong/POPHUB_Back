@@ -60,14 +60,17 @@ const deliveryController = {
     createDelivery: async (req, res) => {
         try {
             const body = req.body;
+            const addressId = parseInt(body.addressId);
             const deliveryId = uuidv4();
-            const address = await deliveryModel.getAddress(body.addressId);
+            const address = await deliveryModel.getAddress(addressId);
             const DeliveryData = {
                 delivery_id: deliveryId,
-                store_id: body.storeId,
                 user_name: body.userName,
-                product_id: body.productId,
                 address,
+                store_id: body.storeId,
+                product_id: body.productId,
+                courier: body.courier,
+                tracking_number: body.trackingNumber,                
                 payment_amount: body.paymentAmount,
                 quantity: body.quantity
             }
@@ -155,7 +158,6 @@ const deliveryController = {
             await deliveryModel.changeStatusDelivery(getStatus, deliveryId);
             res.status(200).json({ message: `배송 상태가 ${getStatus}(으)로 변경되었습니다.` });
         } catch (err) {
-            console.log(err);
             res.status(500).send("배송 상태 변경 중 오류가 발생하였습니다.");
         }
     },

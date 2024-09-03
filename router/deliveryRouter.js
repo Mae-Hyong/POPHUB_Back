@@ -100,12 +100,19 @@ router.delete('/address/delete/:addressId', deliveryController.deleteAddress); /
  *               userName:
  *                 type: string
  *               addressId:
- *                 type: string
+ *                 type: integer
  *                 description: 선택한 주소 ID
  *               storeId:
  *                 type: string
  *               productId:
  *                 type: string
+ *               courier:
+ *                 type: strng
+ *                 enum: [cjlogistics, logen, epost, hanjin, lotte]
+ *                 description: 택배사
+ *               trackingNumber:
+ *                 type: string
+ *                 description: 운송장 번호
  *               paymentAmount:
  *                 type: integer
  *                 description: 주문 금액
@@ -249,7 +256,7 @@ router.put('/changeStatus', deliveryController.changeStatusDelivery); // 배송 
  *         required: true
  *         schema:
  *           type: string
- *           example: "590087808733"
+ *           example: 590087808733
  *     responses:
  *       200:
  *         description: 배송 상태 조회 성공
