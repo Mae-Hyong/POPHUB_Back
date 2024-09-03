@@ -302,7 +302,7 @@ CREATE TABLE delivery (
     courier VARCHAR(20) NOT NULL, -- 택배사
     tracking_number VARCHAR(30) NOT NULL, -- 운송장 번호
     order_date DATETIME DEFAULT now() NOT NULL, -- 주문일
-    status ENUM('주문 완료', '주문 취소') NOT NULL DEFAULT '주문 완료',
+    status ENUM('주문 완료', '주문 취소', '배송중', '배송 완료') NOT NULL DEFAULT '주문 완료',
     cancel_reason ENUM('고객 변심', '상품 문제', '배송 지연', '기타') DEFAULT NULL, -- 주문 취소 사유
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,

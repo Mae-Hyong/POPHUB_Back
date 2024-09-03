@@ -1,5 +1,7 @@
 const cron = require('node-cron');
 const db = require('../config/mysqlDatabase');
+const axios = require('axios');
+require('dotenv').config();
 const open_query =
     'UPDATE popup_stores SET store_status = "오픈" WHERE store_status = "오픈 예정" AND store_start_date <= DATE(NOW() + INTERVAL 9 HOUR)';
 const close_query =
@@ -21,9 +23,19 @@ CREATE TABLE wait_list(
   )
 `;
 
+const checkDelivery_query = 'SELECT tracking_number, courier FROM delivery WHERE status = "주문 완료" OR status = "배송 중"';
+const deliveryStatus_query = 'UPDATE delivery SET status = ? WHERE courier = ? AND tracking_number = ?';
 const updateStatus = (query) =>
     new Promise((resolve, reject) => {
         db.query(query, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+
+const updateParamsStatus = (query, params) =>
+    new Promise((resolve, reject) => {
+        db.query(query, params, (err, result) => {
             if (err) reject(err);
             else resolve(result);
         });
@@ -36,7 +48,7 @@ async function updatePopupStatus() {
     } catch (err) {
         res.status(500).send("오류가 발생하였습니다.");
     }
-}
+};
 
 async function updateReservationStatus() {
     try {
@@ -44,8 +56,51 @@ async function updateReservationStatus() {
     } catch (err) {
         res.status(500).send("오류가 발생하였습니다.");
     }
+};
+
+async function getDeliveryStatus(courier, trackingNumber) {
+    try {
+        const courierMap = {
+            'cjlogistics': 'kr.cjlogistics',
+            'logen': 'kr.logen',
+            'epost': 'kr.epost',
+            'hanjin': 'kr.hanjin',
+            'lotte': 'kr.lotte'
+        };
+        const carrierId = courierMap[courier];
+        const headers = {
+            'Authorization': `TRACKQL-API-KEY ${process.env.DELIVERY_CLIENT_ID}:${process.env.DELIVERY_CLIENT_SECRET}`,
+            'Content-Type': 'application/json'
+        };
+
+        const url = `https://apis.tracker.delivery/carriers/${carrierId}/tracks/${trackingNumber}`;
+        const response = await axios.get(url, { headers });
+
+        return response.data.state.text;
+    } catch (err) {
+        console.log("배송 상태 조회 중 오류가 발생하였습니다.");
+    }
 }
 
+async function updateDeliveryStatus() {
+    try {
+        const rows = await updateStatus(checkDelivery_query);
+        if (rows && rows.length > 0) {
+            for (const row of rows) {
+                const { tracking_number, courier } = row;
+                const status = await getDeliveryStatus(courier, tracking_number);
+                const newStatus = status && status.includes("완료") ? "배송 완료" : "배송 중";
+                await updateParamsStatus(deliveryStatus_query, [newStatus, courier, tracking_number]);
+
+            }
+            console.log("배송 상태 업데이트 완료");
+        } else {
+            console.log("배송 업데이트할 값이 없습니다.");
+        }
+    } catch (err) {
+        console.log("배송 상태 업데이트 중 오류가 발생하였습니다.");
+    }
+}
 const resetWaitList = async () => {
     try {
         await updateStatus(delete_wait_list_query);
@@ -58,9 +113,10 @@ const resetWaitList = async () => {
 function scheduleDatabaseUpdate() {
     cron.schedule('0 0 * * *', async () => {
         await updatePopupStatus();
+        await updateDeliveryStatus();
         //await updateReservationStatus();
         //await resetWaitList();
     });
-}
+};
 
 module.exports = { scheduleDatabaseUpdate };

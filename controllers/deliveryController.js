@@ -1,7 +1,7 @@
 const deliveryModel = require('../models/deliveryModel');
 const { v4: uuidv4 } = require("uuid");
 const axios = require('axios');
-const env = require('dotenv').config();
+require('dotenv').config();
 
 
 const deliveryController = {
@@ -60,9 +60,11 @@ const deliveryController = {
     createDelivery: async (req, res) => {
         try {
             const body = req.body;
-            const addressId = parseInt(body.addressId);
             const deliveryId = uuidv4();
-            const address = await deliveryModel.getAddress(addressId);
+            const address = await deliveryModel.getAddress(body.addressId, body.userName);
+            if(!address) {
+                return res.status(400).json({ message: "유효하지 않은 주소입니다. 다시 입력해주세요" });
+            }
             const DeliveryData = {
                 delivery_id: deliveryId,
                 user_name: body.userName,
@@ -74,8 +76,12 @@ const deliveryController = {
                 payment_amount: body.paymentAmount,
                 quantity: body.quantity
             }
-            await deliveryModel.createDelivery(DeliveryData);
-            res.status(201).json({ message: "주문이 완료되었습니다." });
+            const result = await deliveryModel.createDelivery(DeliveryData);
+            if(result) {
+                res.status(400).json({ message: result.message });
+            } else {
+                res.status(201).json({ message: "주문이 완료되었습니다." });
+            }
         } catch (err) {
             res.status(500).send("주문 생성 중 오류가 발생하였습니다.");
         }
@@ -183,7 +189,7 @@ const deliveryController = {
 
             const url = `https://apis.tracker.delivery/carriers/${carrierId}/tracks/${trackingNumber}`;
             const response = await axios.get(url, { headers });
-    
+            
             res.status(200).json(response.data);
 
         } catch (err) {

@@ -7,10 +7,11 @@ const showUserAllDelivery_query = 'SELECT * FROM delivery WHERE user_name = ?';
 const showUserDelivery_query = 'SELECT * FROM delivery WHERE user_name = ? AND status = ?';
 const showPresidentAllDelivery_query = 'SELECT * FROM delivery WHERE store_id = ?';
 const showPresidentDelivery_query = 'SELECT * FROM delivery WHERE store_id = ? AND status = ?';
-const getAddress_query = 'SELECT address FROM user_address WHERE address_id = ?';
+const getAddress_query = 'SELECT address FROM user_address WHERE address_id = ? AND user_name = ?';
 const getStore_query = 'SELECT * FROM popup_stores WHERE user_name = ? AND store_id = ?';
 const productCheckQuery = 'SELECT * FROM products WHERE store_id = ?';
 const productQuery = 'SELECT * FROM delivery WHERE store_id = ?';
+const checkDelivery_query = 'SELECT COUNT(*) AS count FROM delivery WHERE courier = ? AND tracking_number = ?';
 
 // ------- POST Query -------
 const createAddress_query = 'INSERT INTO user_address SET ?';
@@ -18,7 +19,7 @@ const createDelivery_query = 'INSERT INTO delivery SET ?';
 
 // ------- PUT Query -------
 const updateAddress_query = 'UPDATE user_address SET address = ? WHERE address_id = ?';
-const cancelDelivery_query = 'UPDATE delivery SET status = "주문 취소", cancel_reason = ? WHERE delivery_id = ?';
+const cancelDelivery_query = 'UPDATE delivery SET status = "주문 취소", courier = NULL, tracking_number = NULL, cancel_reason = ? WHERE delivery_id = ?';
 
 // ------- DELETE Query -------
 const deleteAddress_query = 'DELETE FROM user_address WHERE address_id = ?';
@@ -83,12 +84,16 @@ const deliveryModel = {
     },
 
     // 주소 찾기
-    getAddress: async (address_id) => {
+    getAddress: async (address_id, user_name) => {
         try {
             const result = await new Promise((resolve, reject) => {
-                db.query(getAddress_query, [address_id], (err, results) => {
+                db.query(getAddress_query, [address_id, user_name], (err, results) => {
                     if (err) reject(err);
-                    resolve(results[0].address);
+                    if (results.length === 0) {
+                        resolve(null);
+                    } else {
+                        resolve(results[0].address);
+                    }
                 });
             });
             return result;
@@ -100,12 +105,23 @@ const deliveryModel = {
     // 배송 주문 생성
     createDelivery: async (deliveryData) => {
         try {
-            await new Promise((resolve, reject) => {
-                db.query(createDelivery_query, deliveryData, (err, results) => {
+            const check = await new Promise((resolve, reject) => {
+                db.query(checkDelivery_query, [deliveryData.courier, deliveryData.tracking_number], (err, results) => {
                     if (err) reject(err);
-                    resolve(results);
+                    resolve(results[0].count);
                 });
             });
+
+            if( check > 0 ) {
+                return { message: "이미 존재하는 운송장입니다. 다시 입력해주세요." };
+            } else {
+                await new Promise((resolve, reject) => {
+                    db.query(createDelivery_query, deliveryData, (err, results) => {
+                        if (err) reject(err);
+                        resolve(results);
+                    });
+                });
+            }
         } catch (err) {
             throw err;
         }
