@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { deliveryController, trackPackage } = require('../controllers/deliveryController');
+const { deliveryController } = require('../controllers/deliveryController');
 
 /**
  * @swagger
@@ -157,7 +157,7 @@ router.put('/cancel', deliveryController.cancelDelivery); // 배송 주문 취�
  * /delivery/show/user:
  *   get:
  *     tags: [Delivery]
- *     summary: 배송 주문 조회 - 주문자
+ *     summary: 배송 주문 내역 - 주문자 (수정 필요)
  *     parameters:
  *       - in: query
  *         name: userName
@@ -167,10 +167,10 @@ router.put('/cancel', deliveryController.cancelDelivery); // 배송 주문 취�
  *       - in: query
  *         name: status
  *         required: false
- *         description: 전체, 주문 완료, 주문 취소, 배송중, 배송 완료 순서
+ *         description: 주문 취소, 주문 완료, 배송 완료
  *         schema:
  *           type: string
- *           enum: [All, Order Completed, Order Canceled, Shipping, Delivered]
+ *           enum: [Order Canceled, Order Completed, Delivered]
  *           example: "All"
  *     responses:
  *       200:
@@ -183,7 +183,7 @@ router.get('/show/user', deliveryController.showUserDelivery); // 배송 주문 
  * /delivery/show/president:
  *   get:
  *     tags: [Delivery]
- *     summary: 배송 주문 조회 - 판매자
+ *     summary: 배송 주문 조회 - 판매자 (수정 필요)
  *     parameters:
  *       - in: query
  *         name: userName
