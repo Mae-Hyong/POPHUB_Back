@@ -157,7 +157,7 @@ router.put('/cancel', deliveryController.cancelDelivery); // 배송 주문 취�
  * /delivery/show/user:
  *   get:
  *     tags: [Delivery]
- *     summary: 배송 주문 내역 - 주문자 (수정 필요)
+ *     summary: 배송 주문 내역 - 주문자
  *     parameters:
  *       - in: query
  *         name: userName
@@ -167,10 +167,10 @@ router.put('/cancel', deliveryController.cancelDelivery); // 배송 주문 취�
  *       - in: query
  *         name: status
  *         required: false
- *         description: 주문 취소, 주문 완료, 배송 완료
+ *         description: 전체, 주문 완료, 주문 취소, 배송중, 배송 완료 순
  *         schema:
  *           type: string
- *           enum: [Order Canceled, Order Completed, Delivered]
+ *           enum: [All, OrderCompleted, OrderCanceled, Shipping, Delivered]
  *           example: "All"
  *     responses:
  *       200:
@@ -183,7 +183,7 @@ router.get('/show/user', deliveryController.showUserDelivery); // 배송 주문 
  * /delivery/show/president:
  *   get:
  *     tags: [Delivery]
- *     summary: 배송 주문 조회 - 판매자 (수정 필요)
+ *     summary: 배송 주문 조회 - 판매자
  *     parameters:
  *       - in: query
  *         name: userName
@@ -201,7 +201,7 @@ router.get('/show/user', deliveryController.showUserDelivery); // 배송 주문 
  *         description: 전체, 주문 완료, 주문 취소, 배송중, 배송 완료
  *         schema:
  *           type: string
- *           enum: [All, Order Completed, Order Canceled, Shipping, Delivered]
+ *           enum: [All, OrderCompleted, OrderCanceled, Shipping, Delivered]
  *           example: "All"
  *     responses:
  *       200:
@@ -209,32 +209,32 @@ router.get('/show/user', deliveryController.showUserDelivery); // 배송 주문 
  */
 router.get('/show/president', deliveryController.showPresidentDelivery); // 배송 주문 조회 - 판매자
 
-/**
- * @swagger
- * /delivery/changeStatus:
- *   put:
- *     tags: [Delivery]
- *     summary: 배송 상태 변경 (취소 제외)
- *     requestBody:
- *       required: true
- *       content:
- *         application/x-www-form-urlencoded:
- *           schema:
- *             type: object
- *             properties:
- *               deliveryId:
- *                 type: string
- *                 description: 배송 ID
- *                 required: true
- *               status:
- *                 description: 주문 완료, 배송중, 배송 완료
- *                 type: string
- *                 enum: [Order Completed, Shipping, Delivered]
- *     responses:
- *       200:
- *         description: 성공
- */
-router.put('/changeStatus', deliveryController.changeStatusDelivery); // 배송 상태 변경
+// /**
+//  * @swagger
+//  * /delivery/changeStatus:
+//  *   put:
+//  *     tags: [Delivery]
+//  *     summary: 배송 상태 변경 (취소 제외)
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/x-www-form-urlencoded:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               deliveryId:
+//  *                 type: string
+//  *                 description: 배송 ID
+//  *                 required: true
+//  *               status:
+//  *                 description: 주문 완료, 배송중, 배송 완료
+//  *                 type: string
+//  *                 enum: [Order Completed, Shipping, Delivered]
+//  *     responses:
+//  *       200:
+//  *         description: 성공
+//  */
+// router.put('/changeStatus', deliveryController.changeStatusDelivery); // 배송 상태 변경
 
 /**
  * @swagger
