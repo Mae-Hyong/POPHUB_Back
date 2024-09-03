@@ -105,8 +105,8 @@ const deliveryController = {
             let result;
             const getStatusMapping = {
                 'All': '전체',
-                'Order Completed': '주문 완료',
-                'Order Canceled': '주문 취소',
+                'OrderCompleted': '주문 완료',
+                'OrderCanceled': '주문 취소',
                 'Shipping': '배송중',
                 'Delivered': '배송 완료'
             };
@@ -129,8 +129,8 @@ const deliveryController = {
             const products = await deliveryModel.getProducts(userName, storeId);
             const getStatusMapping = {
                 'All': '전체',
-                'Order Completed': '주문 완료',
-                'Order Canceled': '주문 취소',
+                'OrderCompleted': '주문 완료',
+                'OrderCanceled': '주문 취소',
                 'Shipping': '배송중',
                 'Delivered': '배송 완료'
             };
