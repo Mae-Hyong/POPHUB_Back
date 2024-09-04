@@ -3,6 +3,7 @@ const achieveModel = require('../models/achieveModel');
 
 const axios = require('axios');
 const { v4 } = require('uuid');
+const fundingModel = require('../models/fundingModel');
 
 const SERVER_URL = process.env.SERVER_URL;
 const MY_ADMIN_KEY = process.env.KAKAO_KEY;
@@ -29,6 +30,8 @@ const payController = {
                 order_id: orderId,
                 store_id: req.body.storeId || null,
                 product_id: req.body.productId || null,
+                funding_id: req.body.fundingId || null,
+                item_id: req.body.itemId || null,
                 partner_order_id: PARTNER_ORDER_ID,
                 user_name: userName,
                 item_name: itemName,
@@ -40,6 +43,12 @@ const payController = {
 
             if (!req.body.storeId) delete payRequestData.store_id;
             if (!req.body.productId) delete payRequestData.product_id;
+            if (!req.body.fundingId) delete payRequestData.fundingId;
+            if (!req.body.itemId) delete payRequestData.itemId;
+
+            if (req.body.fundingId) {
+                await fundingModel.createFundingList();
+            }
 
             await payModel.payRequest(payRequestData);
             await achieveModel.clearAchieve(userName, 9);
