@@ -195,6 +195,8 @@ CREATE TABLE reservation (
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
+
+
 CREATE TABLE store_capacity (
     store_id VARCHAR(50) NOT NULL,
     reservation_date DATE NOT NULL,
@@ -234,7 +236,9 @@ CREATE TABLE wait_list (
     store_id VARCHAR(50) NOT NULL,
     status ENUM('pending', 'completed') DEFAULT 'pending',
     capacity INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
 );
 
 -- QR코드 생성
@@ -282,6 +286,9 @@ CREATE TABLE calendar (
     FOREIGN KEY(user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
     FOREIGN KEY(store_id) REFERENCES popup_stores(store_id)
 );
+
+ALTER TABLE calendar
+ADD CONSTRAINT unique_reservation UNIQUE (user_name, store_id, reservation_date);
 
 CREATE TABLE user_address (
 	address_id INT AUTO_INCREMENT PRIMARY KEY,

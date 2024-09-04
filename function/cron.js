@@ -9,7 +9,7 @@ const close_query =
 const completed_query =
     'UPDATE reservation SET reservation_status = "completed" WHERE reservation_date < DATE(NOW() + INTERVAL 9 HOUR)';
 
-const delete_wait_list_query = 'DROP TABLE IF EXISTS wait_list';
+const delete_wait_list_query = 'DELETE FROM wait_list WHERE status = "pending"';
 const create_wait_list_query = `
 CREATE TABLE wait_list(
     user_name varchar(50) NOT NULL,
@@ -101,10 +101,10 @@ async function updateDeliveryStatus() {
         console.log("배송 상태 업데이트 중 오류가 발생하였습니다.");
     }
 }
-const resetWaitList = async () => {
+const updateWaitList = async () => {
     try {
         await updateStatus(delete_wait_list_query);
-        await updateStatus(create_wait_list_query);
+        //await updateStatus(create_wait_list_query);
     } catch (err) {
         res.status(500).send("오류가 발생하였습니다.");
     }
@@ -115,7 +115,7 @@ function scheduleDatabaseUpdate() {
         await updatePopupStatus();
         await updateDeliveryStatus();
         //await updateReservationStatus();
-        //await resetWaitList();
+        await updateWaitList();
     });
 };
 

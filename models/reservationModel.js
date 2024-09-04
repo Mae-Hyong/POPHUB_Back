@@ -14,9 +14,13 @@ const maxCapacity_query = 'SELECT max_capacity FROM popup_stores WHERE store_id 
 const getStoreName_query = 'SELECT store_name FROM popup_stores WHERE store_id = ?';
 const getReservationPresident_query = 'SELECT * FROM reservation WHERE store_id = ? ORDER BY reservation_date ASC, reservation_time ASC';
 const getcapacityByReservationId_query = 'SELECT * FROM reservation WHERE reservation_id = ?';
-const getUserName_query = 'SELECT user_name FROM reservation WHERE reservation_id = ?';
+const getUserName_query = 'SELECT * FROM reservation WHERE reservation_id = ?';
 const checkStatusForReservation_query = 'SELECT * FROM reservation WHERE user_name = ? AND store_id = ? AND reservation_status = "pending"';
 const checkStatusForWaitList_query = 'SELECT * FROM wait_list WHERE user_name = ? AND store_id = ? AND status = "pending"';
+const checkStatusReservation_query = 'SELECT reservation_status FROM reservation WHERE reservation_status = "pending" AND reservation_id = ?';
+const getUserWaitList_query = 'SELECT * FROM wait_list WHERE reservation_id =?';
+const checkStatusWaitList_query = 'SELECT * FROM wait_list WHERE status = "pending" AND reservation_id = ?';
+
 // ------- POST Query -------
 const insert_wait_query = "INSERT INTO wait_list SET ?";
 const insert_stand_query = "INSERT INTO stand_store(user_name, store_id) VALUES (?, ?)";
@@ -30,7 +34,7 @@ const completedReservation_query = 'UPDATE reservation SET reservation_status = 
 const updateCapacityMinus_query = 'UPDATE store_capacity SET current_capacity = current_capacity - ? WHERE store_id = ? AND reservation_date = ? AND reservation_time = ?';
 
 // ------- DELETE Query -------
-const delete_wait_query = "DELETE FROM wait_list WHERE user_name = ? AND store_id = ?";
+const delete_wait_query = 'DELETE FROM wait_list WHERE reservation_id = ?';
 const deleteReservation_query = 'DELETE FROM reservation WHERE reservation_id = ?';
 
 
@@ -217,6 +221,7 @@ const reservationModel = {
         }
     },
 
+    // 사전 예약 수락
     completedReservation: async (reservation_id) => {
         try {
             await new Promise((resolve, reject) => {
@@ -224,22 +229,22 @@ const reservationModel = {
                     if (err) reject(err);
                     else resolve(result);
                 })
-            })
+            });
 
-            const userName = await new Promise((resolve, reject) => {
+            const user = await new Promise((resolve, reject) => {
                 db.query(getUserName_query, reservation_id, (err, result) => {
                     if (err) reject(err);
                     else {
                         if (result.length > 0) {
-                            resolve(result[0].user_name);
+                            resolve(result);
                         } else {
                             resolve(null);
                         }
                     }
                 })
-            })
+            });
 
-            return userName;
+            return user;
 
         } catch (err) {
             throw err;
@@ -249,28 +254,40 @@ const reservationModel = {
     // 예약 취소
     deleteReservation: async (reservation_id) => {
         try {
-            const getCapacity = await new Promise((resolve, reject) => {
-                db.query(getcapacityByReservationId_query, reservation_id, (err, result) => {
+            const check = await new Promise((resolve, reject) => {
+                db.query(checkStatusReservation_query, reservation_id, (err, result) => {
                     if (err) reject(err);
-                    else resolve(result);
-                });
-            });
-
-            const { store_id, reservation_date, reservation_time, capacity } = getCapacity[0];
-
-            await new Promise((resolve, reject) => {
-                db.query(updateCapacityMinus_query, [capacity, store_id, reservation_date, reservation_time], (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result);
-                });
-            });
-
-            await new Promise((resolve, reject) => {
-                db.query(deleteReservation_query, reservation_id, (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result);
+                    else resolve(result.length);
                 })
             })
+
+            if (check === 0) { // 취소 불가
+                return check;
+            } else {
+                const getCapacity = await new Promise((resolve, reject) => {
+                    db.query(getcapacityByReservationId_query, reservation_id, (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    });
+                });
+
+                const { store_id, reservation_date, reservation_time, capacity } = getCapacity[0];
+
+                await new Promise((resolve, reject) => {
+                    db.query(updateCapacityMinus_query, [capacity, store_id, reservation_date, reservation_time], (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    });
+                });
+
+                await new Promise((resolve, reject) => {
+                    db.query(deleteReservation_query, reservation_id, (err, result) => {
+                        if (err) reject(err);
+                        else resolve(result);
+                    })
+                });
+            }
+
         } catch (err) {
             throw err;
         }
@@ -319,13 +336,33 @@ const reservationModel = {
         });
     },
 
-    admissionWaitList: (reservation_id) => {
-        return new Promise((resolve, reject) => {
-            db.query(admission_wait_query, reservation_id, async (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
+    admissionWaitList: async (reservation_id) => {
+        try {
+            await new Promise((resolve, reject) => {
+                db.query(admission_wait_query, reservation_id, async (err, result) => {
+                    if (err) reject(err);
+                    else resolve(result);
+                });
             });
-        });
+
+            const user = await new Promise((resolve, reject) => {
+                db.query(getUserWaitList_query, reservation_id, (err, result) => {
+                    if (err) reject(err);
+                    else {
+                        if (result.length > 0) {
+                            resolve(result);
+                        } else {
+                            resolve(null);
+                        }
+                    }
+                })
+            });
+
+            return user;
+        } catch (err) {
+
+        }
+
     },
 
     createStand: (insertData) => {
@@ -351,17 +388,28 @@ const reservationModel = {
         });
     },
 
-    cancelWaitList: (userName, storeId) => {
-        return new Promise((resolve, reject) => {
-            db.query(
-                delete_wait_query,
-                [userName, storeId],
-                async (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result[0]);
-                }
-            );
-        });
+    cancelWaitList: async (reservation_id) => {
+        try {
+            const check = await new Promise((resolve, reject) => {
+                db.query(checkStatusWaitList_query, reservation_id, (err, result) => {
+                    if (err) return reject(err);
+                    resolve(result.length);
+                });
+            });
+
+            if (check === 0) {
+                return check;
+            } else {
+                await new Promise((resolve, reject) => {
+                    db.query(delete_wait_query, reservation_id, (err, result) => {
+                        if (err) return reject(err);
+                        resolve(result);
+                    });
+                });
+            }
+        } catch (err) {
+            throw err;
+        }
     },
 
     getDueReservations: () => {
