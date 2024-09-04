@@ -249,12 +249,7 @@ router.put('/waiting/admission', reservationController.admissionWaitList);
  *      summary: 현장 대기 취소
  *      parameters:
  *          - in: query
- *            name: userName
- *            required: true
- *            schema:
- *              type: string
- *          - in: query
- *            name: storeId
+ *            name: reservationId
  *            required: true
  *            schema:
  *              type: string
