@@ -77,7 +77,7 @@ const qrCodeController = {
             } else if (type == 'waiting') {
                 result = await qrCodeModel.waitingForVisit(storeId, userName);
             } else {
-                return res.status(400).send("'reservaion' 또는 'waiting'을 사용하세요.");
+                return res.status(400).send("정확한 값을 입력해주세요.");
             }
 
             if (result.success) {
@@ -85,11 +85,17 @@ const qrCodeController = {
                     user_name: userName,
                     store_id: storeId,
                     reservation_date: result.reservation_date
+                };
+
+                try {
+                    await qrCodeModel.createCalendar(calendarData);
+                    return res.status(200).json({ message: "방문 인증이 완료되었습니다." });
+                } catch (err) {
+                    return res.status(500).json({ message: "처리된 방문인증입니다." });
                 }
-                await qrCodeModel.createCalendar(calendarData);
-                return res.status(200).json({ message: "방문 인증이 완료되었습니다." });
+                
             } else {
-                return res.status(500).json({ message: "방문 인증 처리 중 오류가 발생하였습니다." });
+                return res.status(500).json({ message: "방문 인증이 실패하였습니다." });
             }
 
         } catch (err) {
