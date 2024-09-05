@@ -100,12 +100,19 @@ router.delete('/address/delete/:addressId', deliveryController.deleteAddress); /
  *               userName:
  *                 type: string
  *               addressId:
- *                 type: string
+ *                 type: integer
  *                 description: 선택한 주소 ID
  *               storeId:
  *                 type: string
  *               productId:
  *                 type: string
+ *               courier:
+ *                 type: strng
+ *                 enum: [cjlogistics, logen, epost, hanjin, lotte]
+ *                 description: 택배사
+ *               trackingNumber:
+ *                 type: string
+ *                 description: 운송장 번호
  *               paymentAmount:
  *                 type: integer
  *                 description: 주문 금액
@@ -143,14 +150,14 @@ router.post('/', deliveryController.createDelivery); // 배송 주문 생성
  *       200:
  *         description: 성공
  */
-router.put('/cancel', deliveryController.cancelDelivery) // 배송 주문 취소
+router.put('/cancel', deliveryController.cancelDelivery); // 배송 주문 취소
 
 /**
  * @swagger
  * /delivery/show/user:
  *   get:
  *     tags: [Delivery]
- *     summary: 배송 주문 조회 - 주문자
+ *     summary: 배송 주문 내역 - 주문자
  *     parameters:
  *       - in: query
  *         name: userName
@@ -159,15 +166,100 @@ router.put('/cancel', deliveryController.cancelDelivery) // 배송 주문 취소
  *           type: string
  *       - in: query
  *         name: status
- *         required: true
- *         description: 전체, 주문 완료, 주문 취소, 배송중, 배송 완료 순서
+ *         required: false
+ *         description: 전체, 주문 완료, 주문 취소, 배송중, 배송 완료 순
  *         schema:
  *           type: string
- *           enum: [All, Order Completed, Order Canceled, Shipping, Delivered]
+ *           enum: [All, OrderCompleted, OrderCanceled, Shipping, Delivered]
+ *           example: "All"
  *     responses:
  *       200:
  *         description: 성공
  */
-router.get('/show/user', deliveryController.showUserDelivery) // 배송 주문 조회 - 주문자
+router.get('/show/user', deliveryController.showUserDelivery); // 배송 주문 조회 - 주문자
 
+/**
+ * @swagger
+ * /delivery/show/president:
+ *   get:
+ *     tags: [Delivery]
+ *     summary: 배송 주문 조회 - 판매자
+ *     parameters:
+ *       - in: query
+ *         name: userName
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: storeId
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: status
+ *         required: false
+ *         description: 전체, 주문 완료, 주문 취소, 배송중, 배송 완료
+ *         schema:
+ *           type: string
+ *           enum: [All, OrderCompleted, OrderCanceled, Shipping, Delivered]
+ *           example: "All"
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.get('/show/president', deliveryController.showPresidentDelivery); // 배송 주문 조회 - 판매자
+
+// /**
+//  * @swagger
+//  * /delivery/changeStatus:
+//  *   put:
+//  *     tags: [Delivery]
+//  *     summary: 배송 상태 변경 (취소 제외)
+//  *     requestBody:
+//  *       required: true
+//  *       content:
+//  *         application/x-www-form-urlencoded:
+//  *           schema:
+//  *             type: object
+//  *             properties:
+//  *               deliveryId:
+//  *                 type: string
+//  *                 description: 배송 ID
+//  *                 required: true
+//  *               status:
+//  *                 description: 주문 완료, 배송중, 배송 완료
+//  *                 type: string
+//  *                 enum: [Order Completed, Shipping, Delivered]
+//  *     responses:
+//  *       200:
+//  *         description: 성공
+//  */
+// router.put('/changeStatus', deliveryController.changeStatusDelivery); // 배송 상태 변경
+
+/**
+ * @swagger
+ * /delivery/tracker:
+ *   get:
+ *     tags: [Delivery]
+ *     summary: 운송장 조회
+ *     parameters:
+ *       - in: query
+ *         name: courier
+ *         required: true
+ *         description: "대한통운, 로젠택배, 우체국, 한진택배, 롯데택배 순"
+ *         schema:
+ *           type: string
+ *           enum: [cjlogistics, logen, epost, hanjin, lotte]
+ *           example: cjlogistics
+ *       - in: query
+ *         name: trackingNumber
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: 590087808733
+ *     responses:
+ *       200:
+ *         description: 배송 상태 조회 성공
+ */
+router.get('/tracker', deliveryController.deliveryTracker); // 운송장 조회
 module.exports = router;

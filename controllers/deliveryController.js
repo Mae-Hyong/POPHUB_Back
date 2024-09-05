@@ -1,5 +1,8 @@
 const deliveryModel = require('../models/deliveryModel');
 const { v4: uuidv4 } = require("uuid");
+const axios = require('axios');
+require('dotenv').config();
+
 
 const deliveryController = {
 
@@ -58,18 +61,27 @@ const deliveryController = {
         try {
             const body = req.body;
             const deliveryId = uuidv4();
-            const address = await deliveryModel.getAddress(body.addressId);
+            const address = await deliveryModel.getAddress(body.addressId, body.userName);
+            if(!address) {
+                return res.status(400).json({ message: "유효하지 않은 주소입니다. 다시 입력해주세요" });
+            }
             const DeliveryData = {
                 delivery_id: deliveryId,
-                store_id: body.storeId,
                 user_name: body.userName,
-                product_id: body.productId,
                 address,
+                store_id: body.storeId,
+                product_id: body.productId,
+                courier: body.courier,
+                tracking_number: body.trackingNumber,                
                 payment_amount: body.paymentAmount,
                 quantity: body.quantity
             }
-            await deliveryModel.createDelivery(DeliveryData);
-            res.status(201).json({ message: "주문이 완료되었습니다." });
+            const result = await deliveryModel.createDelivery(DeliveryData);
+            if(result) {
+                res.status(400).json({ message: result.message });
+            } else {
+                res.status(201).json({ message: "주문이 완료되었습니다." });
+            }
         } catch (err) {
             res.status(500).send("주문 생성 중 오류가 발생하였습니다.");
         }
@@ -86,31 +98,104 @@ const deliveryController = {
         }
     },
 
-    // 배송 주문 조회
+    // 배송 주문 조회 - 주문자
     showUserDelivery: async (req, res) => {
         try {
             const { userName, status } = req.query;
             let result;
             const getStatusMapping = {
                 'All': '전체',
-                'Order Completed': '주문 완료',
-                'Order Canceled': '주문 취소',
+                'OrderCompleted': '주문 완료',
+                'OrderCanceled': '주문 취소',
                 'Shipping': '배송중',
                 'Delivered': '배송 완료'
             };
             const getStatus = getStatusMapping[status];
-            result = await deliveryModel.statusDelivery(userName, getStatus);
+            result = await deliveryModel.statusUserDelivery(userName, getStatus);
             if (!result || (Array.isArray(result) && result.length === 0)) {
                 result = { message: "해당 내역이 존재하지 않습니다." };
             }
-    
+
             res.status(200).json(result);
         } catch (err) {
             res.status(500).send("주문 조회 중 오류가 발생하였습니다.");
         }
     },
 
+    // 배송 주문 조회 - 판매자
+    showPresidentDelivery: async (req, res) => {
+        try {
+            const { userName, storeId, status } = req.query;
+            const products = await deliveryModel.getProducts(userName, storeId);
+            const getStatusMapping = {
+                'All': '전체',
+                'OrderCompleted': '주문 완료',
+                'OrderCanceled': '주문 취소',
+                'Shipping': '배송중',
+                'Delivered': '배송 완료'
+            };
+            let result;
+            const getStatus = getStatusMapping[status];
+            if (products) {
+                result = await deliveryModel.statusPresidentDelivery(storeId, getStatus);
 
-}
+                if (!result || (Array.isArray(result) && result.length === 0)) {
+                    result = { message: "해당 내역이 존재하지 않습니다." };
+                }
+                res.status(200).json(result);
+            } else {
+                res.status(400).send("일치하는 값이 없습니다.");
+            }
+        } catch (err) {
+            res.status(500).send("주문 조회 중 오류가 발생하였습니다.");
+        }
+    },
+
+    // 배송 상태 변경
+    changeStatusDelivery: async (req, res) => {
+        try {
+            const { deliveryId, status } = req.body;
+            const getStatusMapping = {
+                'Order Completed': '주문 완료',
+                'Shipping': '배송중',
+                'Delivered': '배송 완료'
+            };
+            const getStatus = getStatusMapping[status];
+            await deliveryModel.changeStatusDelivery(getStatus, deliveryId);
+            res.status(200).json({ message: `배송 상태가 ${getStatus}(으)로 변경되었습니다.` });
+        } catch (err) {
+            res.status(500).send("배송 상태 변경 중 오류가 발생하였습니다.");
+        }
+    },
+
+
+    deliveryTracker: async (req, res) => {
+        try {
+            const { courier, trackingNumber } = req.query;
+    
+            const courierMap = {
+                'cjlogistics': 'kr.cjlogistics',
+                'logen': 'kr.logen',
+                'epost': 'kr.epost',
+                'hanjin': 'kr.hanjin',
+                'lotte': 'kr.lotte'
+            };
+            const carrierId = courierMap[courier];
+
+            const headers = {
+                'Authorization': `TRACKQL-API-KEY ${process.env.DELIVERY_CLIENT_ID}:${process.env.DELIVERY_CLIENT_SECRET}`,
+                'Content-Type': 'application/json'
+            };
+
+            const url = `https://apis.tracker.delivery/carriers/${carrierId}/tracks/${trackingNumber}`;
+            const response = await axios.get(url, { headers });
+            
+            res.status(200).json(response.data);
+
+        } catch (err) {
+            res.status(500).json({ message: "배송 API 조회 중 오류가 발생하였습니다." });
+        }
+    },
+};
 
 module.exports = { deliveryController }

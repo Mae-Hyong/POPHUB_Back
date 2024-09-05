@@ -1,4 +1,5 @@
 const reservationModel = require("../models/reservationModel");
+const qrCodeModel = require('../models/qrCodeModel');
 const achieveModel = require("../models/achieveModel");
 const { sendAlarm } = require("../function/alarmService");
 const admin = require("firebase-admin");
@@ -38,12 +39,12 @@ const reservationController = {
             const result = await reservationModel.reservation(reservationData);
 
             if (result.success == true) {
-                res.status(201).json( `예약 등록이 완료되었습니다. 현재 인원:${result.update_capacity}, 최대 인원: ${result.max_capacity}` );
+                res.status(201).json(`사전 예약 등록이 완료되었습니다. 현재 인원:${result.update_capacity}, 최대 인원: ${result.max_capacity}`);
             } else {
-                res.status(400).json( `최대 인원을 초과하였습니다. 시간당 최대 인원:${result.max_capacity}` );
+                res.status(400).json(`최대 인원을 초과하였습니다. 시간당 최대 인원:${result.max_capacity}`);
             }
         } catch (err) {
-            res.status(500).send("예약 중 오류가 발생하였습니다.");
+            res.status(500).send("사전 예약 중 오류가 발생하였습니다.");
         }
     },
 
@@ -70,13 +71,27 @@ const reservationController = {
     completedReservation: async (req, res) => {
         try {
             const reservationId = req.query.reservationId;
-            const result = await reservationModel.completedReservation(
-                reservationId
-            );
-            await achieveModel.clearAchieve(result, 6);
-            res.status(200).json({ message: "입장이 성공적으로 완료되었습니다.", userName: result });
+            const result = await reservationModel.completedReservation(reservationId);
+
+
+            if (result && result.length > 0) {
+                const calendarData = {
+                    user_name: result[0].user_name,
+                    store_id: result[0].store_id,
+                    reservation_date: result[0].reservation_date
+                };
+
+                try {
+                    await qrCodeModel.createCalendar(calendarData);
+                    await achieveModel.clearAchieve(result, 6);
+                } catch (err) {
+                    return res.status(500).json({ message: "처리된 방문인증입니다." });
+                }
+            }
+
+            res.status(201).json({ message: "입장이 성공적으로 완료되었습니다.", userName: result[0].user_name });
         } catch (err) {
-            res.status(500).send("사전 예약 입장 수락 중 오류가 발생하였습니다.");
+            res.status(500).json({ message: "사전 예약 입장 수락 중 오류가 발생하였습니다." });
         }
     },
 
@@ -84,10 +99,15 @@ const reservationController = {
     deleteReservation: async (req, res) => {
         try {
             const reservationId = req.params.reservationId;
-            await reservationModel.deleteReservation(reservationId);
-            res.status(200).json("예약이 취소되었습니다.");
+            const check = await reservationModel.deleteReservation(reservationId);
+            if(check === 0) {
+                return res.status(404).json({ message: "입장된 예약은 취소가 불가능합니다." });
+            } else {
+                res.status(200).json({ message: "사전 예약이 정상적으로 취소되었습니다."});
+            }
+            
         } catch (err) {
-            res.status(500).send("예약 삭제 오류가 발생하였습니다.");
+            res.status(500).send("사전 예약 취소 중 오류가 발생하였습니다.");
         }
     },
 
@@ -178,7 +198,21 @@ const reservationController = {
     admissionWaitList: async (req, res) => {
         try {
             const { reservationId } = req.body;
-            await reservationModel.admissionWaitList(reservationId);
+            const result = await reservationModel.admissionWaitList(reservationId);
+            if (result && result.length > 0) {
+                const calendarData = {
+                    user_name: result[0].user_name,
+                    store_id: result[0].store_id,
+                    reservation_date: result[0].created_at
+                };
+
+                try {
+                    await qrCodeModel.createCalendar(calendarData);
+                } catch (err) {
+                    return res.status(500).json({ message: "처리된 방문인증입니다." });
+                }
+            }
+
             res.status(201).json({ message: "입장이 수락되었습니다." });
         } catch (err) {
             res.status(500).send("입장 수락 및 입장 데이터 입력 중 오류가 발생했습니다.");
@@ -187,9 +221,13 @@ const reservationController = {
 
     cancelWaitList: async (req, res) => {
         try {
-            const { userName, storeId } = req.query;
-            await reservationModel.cancelWaitList(userName, storeId);
-            res.status(200).send({ message: "현장 대기 예약이 취소되었습니다." });
+            const { reservationId } = req.query;
+            const check = await reservationModel.cancelWaitList(reservationId);
+            if (check === 0) {
+                return res.status(404).json({ message: "입장된 예약은 취소가 불가능합니다." });
+            } else {
+                res.status(200).send({ message: "현장 대기 예약이 취소되었습니다." });
+            }
         } catch (err) {
             res.status(500).send("현장 대기 예약을 취소하는 중 오류가 발생했습니다.");
         }
