@@ -25,6 +25,8 @@ const payController = {
             const orderId = v4();
             const PARTNER_ORDER_ID = v4();
             const PARTNER_USER_ID = v4();
+            const fundingId = req.body.fundingId || null;
+            const itemId = req.body.itemId || null;
 
             const payRequestData = {
                 order_id: orderId,
@@ -43,11 +45,11 @@ const payController = {
 
             if (!req.body.storeId) delete payRequestData.store_id;
             if (!req.body.productId) delete payRequestData.product_id;
-            if (!req.body.fundingId) delete payRequestData.fundingId;
-            if (!req.body.itemId) delete payRequestData.itemId;
+            if (!fundingId) delete payRequestData.fundingId;
+            if (!itemId) delete payRequestData.itemId;
 
-            if (req.body.fundingId) {
-                await fundingModel.createFundingList();
+            if (fundingId) {
+                await fundingModel.createFundingList(fundingId, itemId, PARTNER_ORDER_ID, userName, quantity);
             }
 
             await payModel.payRequest(payRequestData);

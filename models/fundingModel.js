@@ -9,6 +9,7 @@ const insert_funding_query = "INSERT INTO funding SET ?"
 const insert_fundingImg_query = "INSERT INTO funding_img SET ?"
 const insert_item_query = "INSERT INTO funding_item SET ?"
 const insert_itemImg_query = "INSERT INTO funding_img SET ?"
+const create_fundingList_query = "INSERT INTO funding_list (funding_id, item_id, partner_order_id, user_name, count) VALUES (?, ?, ?, ?, ?)"
 
 const fundingModel = {
     createFunding: (fundingData) => {
@@ -77,6 +78,15 @@ const fundingModel = {
     fundingByUser: (userName) => {
         return new Promise ((resolve, reject) => {
             db.query(userNameByFunding_query, userName, (err, result) =>{
+                if (err) reject(err);
+                else resolve(result[0]);
+            })
+        })
+    },
+
+    createFundingList: (fundingId, itemId, PARTNER_ORDER_ID, userName, quantity) => {
+        return new Promise ((resolve, reject) => {
+            db.query(create_fundingList_query, [fundingId, itemId, PARTNER_ORDER_ID, userName, quantity], (err, result) =>{
                 if (err) reject(err);
                 else resolve(result[0]);
             })
