@@ -4,6 +4,8 @@ const search_funding_query = "SELECT * FROM funding"
 const imagesByFundingId_query = "SELECT * FROM funding_img WHERE funding_id = ?"
 const search_fundingId_query = "SELECT * FROM funding WHERE funding_id = ?"
 const userNameByFunding_query = "SELECT * FROM funding WHERE user_name = ?"
+const search_fundingItem_query = "SELECT * FROM funding_item WHERE funding_id = ?"
+const select_fundingItem_query = "SELECT * FROM funding_item WHERE item_id = ?"
 
 const insert_funding_query = "INSERT INTO funding SET ?"
 const insert_fundingImg_query = "INSERT INTO funding_img SET ?"
@@ -89,6 +91,15 @@ const fundingModel = {
             db.query(create_fundingList_query, [fundingId, itemId, PARTNER_ORDER_ID, userName, quantity], (err, result) =>{
                 if (err) reject(err);
                 else resolve(result[0]);
+            })
+        })
+    },
+
+    searchItem: (fundingId) => {
+        return new Promise ((resolve, reject) => {
+            db.query(search_fundingItem_query, fundingId, (err, result) =>{
+                if(err) reject(err);
+                else resolve(result);
             })
         })
     },

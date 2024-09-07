@@ -120,6 +120,49 @@ const fundingController = {
 
     searchItem: async(req, res) => {
         try {
+            const { fundingId, itemId } = req.query;
+            if(!fundingId) {
+                const result = await fundingModel.searchItem(itemId);
+                const resultList = await new Promise.all(
+                    result.map(async (result) => {
+                        const images = await fundingModel.imagesByitemId(itemId);
+                        return {
+                            fundingId: result.funding_id,
+                            userName: result.userName,
+                            title: result.title,
+                            content: result.content,
+                            amount: result.amount,
+                            donation: result.donation,
+                            status: result.status,
+                            openDate: result.openDate,
+                            closeDate: result.closeDate,
+                            images: images.map(image => image.image_url)
+                        };
+                    })
+                )
+                return res.status(200).json(resultList);
+            } else if (!itemId) {
+                const result = await fundingModel.searchFunding(fundingId);
+                const resultList = await new Promise.all(
+                    result.map(async (result) => {
+                        const images = await fundingModel.imagesByFundingId(fundingId);
+                        return {
+                            fundingId: result.funding_id,
+                            userName: result.userName,
+                            title: result.title,
+                            content: result.content,
+                            amount: result.amount,
+                            donation: result.donation,
+                            status: result.status,
+                            openDate: result.openDate,
+                            closeDate: result.closeDate,
+                            images: images.map(image => image.image_url)
+                        };
+                    })
+                )
+                return res.status(200).json(resultList);
+            }
+
             
         } catch (err) {
             
