@@ -122,24 +122,18 @@ const fundingController = {
         try {
             const { fundingId, itemId } = req.query;
             if(!fundingId) {
-                const result = await fundingModel.searchItem(itemId);
-                const resultList = await new Promise.all(
-                    result.map(async (result) => {
-                        const images = await fundingModel.imagesByitemId(itemId);
-                        return {
+                const result = await fundingModel.selectItem(itemId);
+                const images = await fundingModel.imagesByitemId(itemId);
+                const resultList = {
+                            itemId: result.item_id,
                             fundingId: result.funding_id,
-                            userName: result.userName,
-                            title: result.title,
+                            userName: result.user_name,
+                            itemName: result.item_name,
                             content: result.content,
+                            count: result.count,
                             amount: result.amount,
-                            donation: result.donation,
-                            status: result.status,
-                            openDate: result.openDate,
-                            closeDate: result.closeDate,
                             images: images.map(image => image.image_url)
                         };
-                    })
-                )
                 return res.status(200).json(resultList);
             } else if (!itemId) {
                 const result = await fundingModel.searchFunding(fundingId);
@@ -147,25 +141,21 @@ const fundingController = {
                     result.map(async (result) => {
                         const images = await fundingModel.imagesByFundingId(fundingId);
                         return {
+                            itemId: result.item_id,
                             fundingId: result.funding_id,
-                            userName: result.userName,
-                            title: result.title,
+                            userName: result.user_name,
+                            itemName: result.item_name,
                             content: result.content,
+                            count: result.count,
                             amount: result.amount,
-                            donation: result.donation,
-                            status: result.status,
-                            openDate: result.openDate,
-                            closeDate: result.closeDate,
                             images: images.map(image => image.image_url)
                         };
                     })
                 )
                 return res.status(200).json(resultList);
-            }
-
-            
+            }            
         } catch (err) {
-            
+            return res.status(500).send("아이템 조회 중 오류 발생")
         }
     },
 
