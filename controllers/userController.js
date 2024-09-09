@@ -76,9 +76,18 @@ const signController = {
         }
     },
 
+    clearNaver: async (req, res) => {
+        try {
+            const state = Math.floor(Math.random() * 1000000).toString();
+            const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${process.env.NAVER_CLIENTID}&redirect_uri=${process.env.CLEAR_REDIRECT}&state=${state}`
+            return res.status(302).redirect(naverAuthUrl);
+        } catch (err) {
+            return res.status(500).send("네이버 인증 요청 중 오류가 발생했습니다.");
+        }
+    },
+
     naverCallback: async (req, res) => {
         try {
-            console.log("HI")
             const code = req.query.code;
             const state = req.query.state;
             if (!code) {
@@ -95,7 +104,6 @@ const signController = {
             });
 
             const access_token = tokenResponse.data.access_token;
-            console.log(access_token)
             if (!access_token) {
                 return res.status(401).send('Access token is missing or invalid');
             }
@@ -170,6 +178,7 @@ const signController = {
 
     naverDelete: async (req, res) => {
         try {
+            console.log("test")
             const code = req.query.code;
             const state = req.query.state;
             const userName = v1();
@@ -180,7 +189,7 @@ const signController = {
                 params: {
                     grant_type: 'authorization_code',
                     client_id: process.env.NAVER_CLIENTID,
-                    client_secret: process.env.NAVER_SECERET,
+                    client_secret: process.env.NAVER_SECRET,
                     code: code,
                     state: state,
                 },
@@ -196,24 +205,25 @@ const signController = {
                 headers: {
                     Authorization: `Bearer ${access_token}`,
                 },
-            }).data;
+            });
 
             await axios.get('https://nid.naver.com/oauth2.0/token', {
                 params: {
                     grant_type: 'delete',
                     client_id: process.env.NAVER_CLIENTID,
-                    client_secret: process.env.NAVER_SECERET,
+                    client_secret: process.env.NAVER_SECRET,
                     access_token: access_token
                 },
             });
 
-            await userModel.deleteData(profileResponse.response.id, phoneNumber);
-            await userModel.deleteChange(userName, true, profileResponse.response.id);
-            await userModel.deleteUser(profileResponse.response.id);
+            await userModel.deleteData(profileResponse.data.response.id, profileResponse.data.response.id);
+            await userModel.deleteChange(userName, true, profileResponse.data.response.id);
+            await userModel.deleteUser(profileResponse.data.response.id);
 
             // 성공적으로 연결 해제 시 처리
             res.json({ success: true, message: 'User unlinked successfully' });
-        } catch (error) {
+        } catch (err) {
+            console.error(err)
             res.status(500).send('Authentication failed');
         }
     },

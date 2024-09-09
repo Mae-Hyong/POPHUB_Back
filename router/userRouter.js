@@ -81,7 +81,7 @@ router.get("/auth/kakao/callback", signController.kakaoCallBack);
  *       500:
  *         description: 서버 오류
  */
-router.delete("/kakao/delete", signController.kakaoDelete);
+router.get("/kakao/delete", signController.kakaoDelete);
 
 /**
  * @swagger
@@ -100,7 +100,9 @@ router.get("/oauth/naver", signController.oauthNaver);
 
 router.get("/auth/naver/callback", signController.naverCallback);
 
-router.delete("/naver/delete", signController.naverDelete);
+router.get("/naver/clear", signController.clearNaver);
+
+router.get("/naver/delete", signController.naverDelete);
 /**
  * @swagger
  * /user/signIn:
