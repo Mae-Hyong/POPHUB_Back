@@ -10,6 +10,7 @@ const bcrypt = require("bcrypt");
 const { v1, v4 } = require("uuid");
 const querystring = require('querystring');
 const axios = require('axios');
+const { response } = require("express");
 require('dotenv').config();
 
 const signController = {
@@ -68,9 +69,7 @@ const signController = {
     oauthNaver: async (req, res) => {
         try {
             const state = Math.floor(Math.random() * 1000000).toString();
-            console.log(state)
-            const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${process.env.NAVER_CLIENTID}&redirect_uri=${process.env.NAVER_SECRET}&state=${state}`
-            console.log(naverAuthUrl)
+            const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${process.env.NAVER_CLIENTID}&redirect_uri=${process.env.NAVER_REDIRECT}&state=${state}`
             return res.status(302).redirect(naverAuthUrl);
         } catch (err) {
             return res.status(500).send("네이버 인증 요청 중 오류가 발생했습니다.");
@@ -96,7 +95,7 @@ const signController = {
             });
 
             const access_token = tokenResponse.data.access_token;
-
+            console.log(access_token)
             if (!access_token) {
                 return res.status(401).send('Access token is missing or invalid');
             }
@@ -109,13 +108,14 @@ const signController = {
 
             // 사용자 정보 처리 및 응답
             const hashedPassword = await bcrypt.hash(v4(), 10);
-            await signModel.signUp(profileResponse.response.id, hashedPassword, 'General Member');
+            await signModel.signUp(profileResponse.data.response.id, hashedPassword, 'General Member');
 
             return res.status(201).json({
                 token_info: tokenResponse.data,
-                profile_info: profileResponse,
+                profile_info: profileResponse.data,
             });
-        } catch (error) {
+        } catch (err) {
+            console.error(err)
             res.status(500).send('Authentication failed');
         }
     },
