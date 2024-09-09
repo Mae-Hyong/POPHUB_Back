@@ -98,7 +98,7 @@ router.delete("/kakao/delete", signController.kakaoDelete);
  */
 router.get("/oauth/naver", signController.oauthNaver);
 
-router.get("/auth/naver/callback", signController.kakaoCallBack);
+router.get("/auth/naver/callback", signController.naverCallback);
 
 router.delete("/naver/delete", signController.naverDelete);
 /**

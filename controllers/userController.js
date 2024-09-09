@@ -10,8 +10,7 @@ const bcrypt = require("bcrypt");
 const { v1, v4 } = require("uuid");
 const querystring = require('querystring');
 const axios = require('axios');
-const env = require('dotenv');
-env.config();
+require('dotenv').config();
 
 const signController = {
     signUp: async (req, res) => {
@@ -60,7 +59,7 @@ const signController = {
             const hashedPassword = await bcrypt.hash(v4(), 10);
             const userInfo = userResponse.data;
             await signModel.signUp(userInfo.id, hashedPassword, 'General Member');
-            return res.status(201).json(userInfo); // 사용자 정보를 JSON 형태로 반환
+            return res.status(201).json(userInfo, accessToken); // 사용자 정보를 JSON 형태로 반환
         } catch (error) {
             return res.status(500).send('Failed to login with Kakao');
         }
@@ -68,8 +67,10 @@ const signController = {
 
     oauthNaver: async (req, res) => {
         try {
-            const state = Math.random(10000, 99999).toString();
-            const naverAuthUrl = process.env.NAVER_AUTH + `&client_id=${process.env.NAVER_CLIENTID}&redirect_uri=${NAVER_SECERET}&state=${state}`
+            const state = Math.floor(Math.random() * 1000000).toString();
+            console.log(state)
+            const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${process.env.NAVER_CLIENTID}&redirect_uri=${process.env.NAVER_SECRET}&state=${state}`
+            console.log(naverAuthUrl)
             return res.status(302).redirect(naverAuthUrl);
         } catch (err) {
             return res.status(500).send("네이버 인증 요청 중 오류가 발생했습니다.");
@@ -78,6 +79,7 @@ const signController = {
 
     naverCallback: async (req, res) => {
         try {
+            console.log("HI")
             const code = req.query.code;
             const state = req.query.state;
             if (!code) {
@@ -87,7 +89,7 @@ const signController = {
                 params: {
                     grant_type: 'authorization_code',
                     client_id: process.env.NAVER_CLIENTID,
-                    client_secret: process.env.NAVER_SECERET,
+                    client_secret: process.env.NAVER_SECRET,
                     code: code,
                     state: state,
                 },
@@ -103,7 +105,7 @@ const signController = {
                 headers: {
                     Authorization: `Bearer ${access_token}`,
                 },
-            }).data;
+            });
 
             // 사용자 정보 처리 및 응답
             const hashedPassword = await bcrypt.hash(v4(), 10);

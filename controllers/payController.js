@@ -49,7 +49,7 @@ const payController = {
             if (!itemId) delete payRequestData.itemId;
 
             if (fundingId) {
-                await fundingModel.createFundingList(fundingId, itemId, PARTNER_ORDER_ID, userName, quantity);
+                await fundingModel.createFundingList(payRequestData);
             } else {
                 await achieveModel.clearAchieve(userName, 9);
             }

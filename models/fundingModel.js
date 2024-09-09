@@ -12,12 +12,12 @@ const insert_funding_query = "INSERT INTO funding SET ?"
 const insert_fundingImg_query = "INSERT INTO funding_img SET ?"
 const insert_item_query = "INSERT INTO funding_item SET ?"
 const insert_itemImg_query = "INSERT INTO funding_img SET ?"
-const create_fundingList_query = "INSERT INTO funding_list (funding_id, item_id, partner_order_id, user_name, count) VALUES (?, ?, ?, ?, ?)"
+const create_fundingList_query = "INSERT INTO funding_list SET ?"
 
 const fundingModel = {
     createFunding: (fundingData) => {
-        return new Promise ((resolve, reject) => {
-            db.query(insert_funding_query, fundingData, (err, result) =>{
+        return new Promise((resolve, reject) => {
+            db.query(insert_funding_query, fundingData, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })
@@ -25,8 +25,8 @@ const fundingModel = {
     },
 
     fundingImg: (img) => {
-        return new Promise ((resolve, reject) => {
-            db.query(insert_fundingImg_query, img, (err, result) =>{
+        return new Promise((resolve, reject) => {
+            db.query(insert_fundingImg_query, img, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })
@@ -34,8 +34,8 @@ const fundingModel = {
     },
 
     createItem: (itemData) => {
-        return new Promise ((resolve, reject) => {
-            db.query(insert_item_query, itemData, (err, result) =>{
+        return new Promise((resolve, reject) => {
+            db.query(insert_item_query, itemData, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })
@@ -43,8 +43,8 @@ const fundingModel = {
     },
 
     itemImg: (img) => {
-        return new Promise ((resolve, reject) => {
-            db.query(insert_itemImg_query, img, (err, result) =>{
+        return new Promise((resolve, reject) => {
+            db.query(insert_itemImg_query, img, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })
@@ -52,8 +52,8 @@ const fundingModel = {
     },
 
     searchFunding: () => {
-        return new Promise ((resolve, reject) => {
-            db.query(search_funding_query, (err, result) =>{
+        return new Promise((resolve, reject) => {
+            db.query(search_funding_query, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })
@@ -61,8 +61,8 @@ const fundingModel = {
     },
 
     imagesByFundingId: (fundingId) => {
-        return new Promise ((resolve, reject) => {
-            db.query(imagesByFundingId_query, fundingId, (err, result) =>{
+        return new Promise((resolve, reject) => {
+            db.query(imagesByFundingId_query, fundingId, (err, result) => {
                 if (err) reject(err);
                 else resolve(result);
             })
@@ -70,8 +70,8 @@ const fundingModel = {
     },
 
     imagesByitemId: (itemId) => {
-        return new Promise ((resolve, reject) => {
-            db.query(imagesByitemId_query, itemId, (err, result) =>{
+        return new Promise((resolve, reject) => {
+            db.query(imagesByitemId_query, itemId, (err, result) => {
                 if (err) reject(err);
                 else resolve(result);
             })
@@ -79,26 +79,26 @@ const fundingModel = {
     },
 
     fundingById: (fundingId) => {
-        return new Promise ((resolve, reject) => {
-            db.query(search_fundingId_query, fundingId, (err, result) =>{
-                if (err) reject(err);
-                else resolve(result);
-            })
-        })
-    },
-
-    fundingByUser: (userName) => {
-        return new Promise ((resolve, reject) => {
-            db.query(userNameByFunding_query, userName, (err, result) =>{
+        return new Promise((resolve, reject) => {
+            db.query(search_fundingId_query, fundingId, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })
         })
     },
 
-    createFundingList: (fundingId, itemId, PARTNER_ORDER_ID, userName, quantity) => {
-        return new Promise ((resolve, reject) => {
-            db.query(create_fundingList_query, [fundingId, itemId, PARTNER_ORDER_ID, userName, quantity], (err, result) =>{
+    fundingByUser: (userName) => {
+        return new Promise((resolve, reject) => {
+            db.query(userNameByFunding_query, userName, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
+            })
+        })
+    },
+
+    createFundingList: (payRequestData) => {
+        return new Promise((resolve, reject) => {
+            db.query(create_fundingList_query, payRequestData, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })
@@ -106,27 +106,27 @@ const fundingModel = {
     },
 
     searchItemByFunding: (fundingId) => {
-        return new Promise ((resolve, reject) => {
-            db.query(search_fundingItem_query, fundingId, (err, result) =>{
-                if(err) reject(err);
+        return new Promise((resolve, reject) => {
+            db.query(search_fundingItem_query, fundingId, (err, result) => {
+                if (err) reject(err);
                 else resolve(result);
             })
         })
     },
 
     searchItem: (itemId) => {
-        return new Promise ((resolve, reject) => {
-            db.query(search_fundingItem_query, itemId, (err, result) =>{
-                if(err) reject(err);
+        return new Promise((resolve, reject) => {
+            db.query(search_fundingItem_query, itemId, (err, result) => {
+                if (err) reject(err);
                 else resolve(result);
             })
         })
     },
 
     selectItem: (itemId) => {
-        return new Promise ((resolve, reject) => {
-            db.query(select_fundingItem_query, itemId, (err, result) =>{
-                if(err) reject(err);
+        return new Promise((resolve, reject) => {
+            db.query(select_fundingItem_query, itemId, (err, result) => {
+                if (err) reject(err);
                 else resolve(result[0]);
             })
         })

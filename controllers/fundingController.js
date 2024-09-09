@@ -1,7 +1,7 @@
 const fundingModel = require('../models/fundingModel');
 
 const fundingController = {
-    createFunding: async(req, res) => {
+    createFunding: async (req, res) => {
         try {
             const body = req.body;
             let image = req.file ? req.file.location : null;
@@ -17,7 +17,7 @@ const fundingController = {
 
             await fundingModel.createFunding(fundingData);
 
-            if(image){
+            if (image) {
                 const fundingImg = {
                     funding_id: fundingId,
                     image: image,
@@ -25,14 +25,14 @@ const fundingController = {
 
                 await fundingModel.fundingImg(fundingImg);
             }
-            
+
             return res.status(201).send('Funding Data Added');
         } catch (err) {
             return res.status(500).send('Funding 데이터를 입력 도중 오류가 발생했습니다.');
         }
     },
 
-    createItem: async(req, res) => {
+    createItem: async (req, res) => {
         try {
             const body = req.body;
             let image = req.file ? req.file.location : null;
@@ -47,7 +47,7 @@ const fundingController = {
 
             await fundingModel.createItem(itemData);
 
-            if(image){
+            if (image) {
                 const fundingImg = {
                     funding_id: fundingId,
                     image: image,
@@ -55,7 +55,7 @@ const fundingController = {
 
                 await fundingModel.itemImg(fundingImg);
             }
-            
+
             return res.status(201).send('Item Data Added');
         } catch (err) {
             return res.status(500).send('Item 데이터를 입력 도중 오류가 발생했습니다.');
@@ -74,18 +74,18 @@ const fundingController = {
     //         };
 
     //         await fundingModel.createList(listData);
-            
+
     //         return res.status(201).send('Item Data Added')
     //     } catch (err) {
-            
+
     //     }
     // },
 
-    searchFunding: async(req, res) => {
+    searchFunding: async (req, res) => {
         try {
             const fundingId = req.query;
             const userName = req.query;
-            if (!fundingId && !userName){
+            if (!fundingId && !userName) {
                 const result = await fundingModel.searchFunding();
                 const fundingList = await Promise.all(
                     result.map(async (result) => {
@@ -95,8 +95,9 @@ const fundingController = {
                             userName: result.userName,
                             title: result.title,
                             content: result.content,
-                            amount: result.amount,
-                            donation: result.donation,
+                            amount: result.amount, // 목표금액
+                            donation: result.donation, // 후원 금액
+                            progress: result.donation / result.amount * 100,
                             status: result.status,
                             openDate: result.openDate,
                             closeDate: result.closeDate,
@@ -105,10 +106,10 @@ const fundingController = {
                     })
                 );
                 return res.status(200).send(fundingList);
-            } else if(fundingId) {
+            } else if (fundingId) {
                 const funding = await fundingModel.fundingById(fundingId);
                 const images = await fundingModel.imagesByFundingId(fundingId);
-                return res.status(200).json({funding, images: images.map(image => image.image_url)})
+                return res.status(200).json({ funding, images: images.map(image => image.image_url) })
             } else {
                 const funding = await fundingModel.fundingByUser(userName)
                 return res.status(200).send(funding)
@@ -118,22 +119,22 @@ const fundingController = {
         }
     },
 
-    searchItem: async(req, res) => {
+    searchItem: async (req, res) => {
         try {
             const { fundingId, itemId } = req.query;
-            if(!fundingId) {
+            if (!fundingId) {
                 const result = await fundingModel.selectItem(itemId);
                 const images = await fundingModel.imagesByitemId(itemId);
                 const resultList = {
-                            itemId: result.item_id,
-                            fundingId: result.funding_id,
-                            userName: result.user_name,
-                            itemName: result.item_name,
-                            content: result.content,
-                            count: result.count,
-                            amount: result.amount,
-                            images: images.map(image => image.image_url)
-                        };
+                    itemId: result.item_id,
+                    fundingId: result.funding_id,
+                    userName: result.user_name,
+                    itemName: result.item_name,
+                    content: result.content,
+                    count: result.count,
+                    amount: result.amount,
+                    images: images.map(image => image.image_url)
+                };
                 return res.status(200).json(resultList);
             } else if (!itemId) {
                 const result = await fundingModel.searchFunding(fundingId);
@@ -153,41 +154,33 @@ const fundingController = {
                     })
                 )
                 return res.status(200).json(resultList);
-            }            
+            }
         } catch (err) {
             return res.status(500).send("아이템 조회 중 오류 발생")
         }
     },
 
-    searchlist: async(req, res) => {
+    searchlist: async (req, res) => {
         try {
-            
+
         } catch (err) {
-            
+
         }
     },
 
-    updateFunding: async(req, res) => {
+    updateFunding: async (req, res) => {
         try {
-            
+
         } catch (err) {
-            
+
         }
     },
 
-    updateItem: async(req, res) => {
+    updateItem: async (req, res) => {
         try {
-            
-        } catch (err) {
-            
-        }
-    },
 
-    updatelist: async(req, res) => {
-        try {
-            
         } catch (err) {
-            
+
         }
     },
 }
