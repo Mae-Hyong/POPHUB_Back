@@ -1,11 +1,15 @@
 const fundingModel = require('../models/fundingModel');
+const { v1 } = require("uuid")
 
 const fundingController = {
     createFunding: async (req, res) => {
         try {
             const body = req.body;
-            let image = req.file ? req.file.location : null;
+            const images = req.files ? req.files.map(file => file.location) : []; // 파일이 여러 개일 경우 배열로 처리
+            const fundingId = v1()
+            // Funding 데이터를 객체로 생성
             const fundingData = {
+                funding_id: fundingId,
                 user_name: body.userName,
                 title: body.title,
                 content: body.content,
@@ -14,20 +18,22 @@ const fundingController = {
                 open_date: body.openDate,
                 close_date: body.closeDate
             };
-
+    
+            // 데이터베이스에 펀딩 정보 저장
             await fundingModel.createFunding(fundingData);
 
-            if (image) {
-                const fundingImg = {
-                    funding_id: fundingId,
-                    image: image,
+            if (req.files && req.files.length > 0) {
+                if (req.files) {
+                    await Promise.all(req.files.map(async (file) => {
+                        images.push(file.location);
+                        await fundingModel.fundingImg(fundingId, file.location);
+                    }));
                 }
-
-                await fundingModel.fundingImg(fundingImg);
             }
 
             return res.status(201).send('Funding Data Added');
         } catch (err) {
+            console.error(err)
             return res.status(500).send('Funding 데이터를 입력 도중 오류가 발생했습니다.');
         }
     },

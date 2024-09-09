@@ -9,10 +9,12 @@ const search_fundingItem_query = "SELECT * FROM funding_item WHERE funding_id = 
 const select_fundingItem_query = "SELECT * FROM funding_item WHERE item_id = ?"
 
 const insert_funding_query = "INSERT INTO funding SET ?"
-const insert_fundingImg_query = "INSERT INTO funding_img SET ?"
+const insert_fundingImg_query = "INSERT INTO funding_img (funding_id, image) VALUES (?, ?)";
 const insert_item_query = "INSERT INTO funding_item SET ?"
 const insert_itemImg_query = "INSERT INTO funding_img SET ?"
 const create_fundingList_query = "INSERT INTO funding_list SET ?"
+
+const update_donation_query = "UPDATE funding SET donation = donation + ? WHERE funding_id = ?;"
 
 const fundingModel = {
     createFunding: (fundingData) => {
@@ -24,13 +26,13 @@ const fundingModel = {
         })
     },
 
-    fundingImg: (img) => {
+    fundingImg: (fundingId, image) => {
         return new Promise((resolve, reject) => {
-            db.query(insert_fundingImg_query, img, (err, result) => {
+            db.query(insert_fundingImg_query, [fundingId, image], (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
-            })
-        })
+                else resolve(result);
+            });
+        });
     },
 
     createItem: (itemData) => {
@@ -126,6 +128,15 @@ const fundingModel = {
     selectItem: (itemId) => {
         return new Promise((resolve, reject) => {
             db.query(select_fundingItem_query, itemId, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
+            })
+        })
+    },
+
+    updatedonation: (totalAmount, fundingId) => {
+        return new Promise((resolve, reject) => {
+            db.query(update_donation_query, [ totalAmount, fundingId ], (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })

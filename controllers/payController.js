@@ -50,6 +50,7 @@ const payController = {
 
             if (fundingId) {
                 await fundingModel.createFundingList(payRequestData);
+                await fundingModel.updatedonation(totalAmount, fundingId);
             } else {
                 await achieveModel.clearAchieve(userName, 9);
             }

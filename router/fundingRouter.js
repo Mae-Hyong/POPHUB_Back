@@ -2,6 +2,8 @@ const express = require('express');
 const fundingController = require('../controllers/fundingController');
 const router = express.Router();
 
+const multerimg = require('../function/multer');
+
 /**
  * @swagger
  * /funding/create:
@@ -40,6 +42,7 @@ const router = express.Router();
  *       500:
  *         description: Funding 데이터를 입력 도중 오류가 발생했습니다.
  */
+router.post("/create", multerimg.upload.array('images', 10), fundingController.createFunding);
 
 /**
  * @swagger
