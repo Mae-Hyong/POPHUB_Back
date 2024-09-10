@@ -115,13 +115,13 @@ const fundingController = {
                 return res.status(200).send(fundingList);
             } else if (fundingId) {
                 const funding = await fundingModel.fundingById(fundingId);
-
                 const images = await fundingModel.imagesByFundingId(fundingId);
-                return res.status(200).json({ funding, images: images.map(image => image.image) })
+                return res.status(200).json({ funding, progress: result.donation / result.amount * 100, images: images.map(image => image.image) })
             } else {
-                const images = await fundingModel.imagesByFundingId(fundingId);
                 const funding = await fundingModel.fundingByUser(userName)
-                return res.status(200).json({ funding, images: images.map(imge => imge.image) })
+                fundingId = funding.funding_id;
+                const images = await fundingModel.imagesByFundingId(fundingId);
+                return res.status(200).json({ funding, progress: result.donation / result.amount * 100, images: images.map(imge => imge.image) })
             }
         } catch (err) {
             return res.status(500).send("펀딩 조회 중 오류 발생")
