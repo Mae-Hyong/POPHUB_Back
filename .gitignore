@@ -1,3 +1,4 @@
 node_modules
-config/PopHub_key.json
+PopHub_key.json
+google-services.json
 .env

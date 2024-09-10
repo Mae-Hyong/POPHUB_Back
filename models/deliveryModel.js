@@ -20,6 +20,7 @@ const createDelivery_query = 'INSERT INTO delivery SET ?';
 // ------- PUT Query -------
 const updateAddress_query = 'UPDATE user_address SET address = ? WHERE address_id = ?';
 const cancelDelivery_query = 'UPDATE delivery SET status = "주문 취소", courier = NULL, tracking_number = NULL, cancel_reason = ? WHERE delivery_id = ?';
+const createTrackingNumber_query = 'UPDATE delivery SET courier = ?, tracking_number = ? WHERE delivery_id = ?';
 
 // ------- DELETE Query -------
 const deleteAddress_query = 'DELETE FROM user_address WHERE address_id = ?';
@@ -105,22 +106,38 @@ const deliveryModel = {
     // 배송 주문 생성
     createDelivery: async (deliveryData) => {
         try {
+            await new Promise((resolve, reject) => {
+                db.query(createDelivery_query, deliveryData, (err, results) => {
+                    if (err) reject(err);
+                    resolve(results);
+                });
+            });
+        } catch (err) {
+            throw err;
+        }
+    },
+
+    // 운송장 번호 부여
+    createTrackingNumber: async (delivery_id, courier, tracking_number) => {
+        try {
             const check = await new Promise((resolve, reject) => {
-                db.query(checkDelivery_query, [deliveryData.courier, deliveryData.tracking_number], (err, results) => {
+                db.query(checkDelivery_query, [courier, tracking_number], (err, results) => {
                     if (err) reject(err);
                     resolve(results[0].count);
                 });
             });
-
-            if( check > 0 ) {
-                return { message: "이미 존재하는 운송장입니다. 다시 입력해주세요." };
+            
+            if (check > 0) {
+                return { message: "이미 존재하는 운송장입니다. 다시 입력해주세요.", success: false };
             } else {
                 await new Promise((resolve, reject) => {
-                    db.query(createDelivery_query, deliveryData, (err, results) => {
+                    db.query(createTrackingNumber_query, [courier, tracking_number, delivery_id], (err, results) => {
                         if (err) reject(err);
-                        resolve(results);
+                        resolve();
                     });
                 });
+
+                return { success: true };
             }
         } catch (err) {
             throw err;
@@ -172,7 +189,7 @@ const deliveryModel = {
             const storeExists = await new Promise((resolve, reject) => {
                 db.query(getStore_query, [user_name, store_id], (err, results) => {
                     if (err) reject(err);
-                    resolve(results.length > 0); //true or false
+                    resolve(results.length > 0);
                 });
             });
 
