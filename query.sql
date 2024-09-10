@@ -306,8 +306,8 @@ CREATE TABLE delivery (
     product_id VARCHAR(50) NOT NULL,
     payment_amount INT NOT NULL, -- 결제 금액
     quantity INT NOT NULL, -- 주문 수량
-    courier VARCHAR(20) NOT NULL, -- 택배사
-    tracking_number VARCHAR(30) NOT NULL, -- 운송장 번호
+    courier VARCHAR(20) DEFAULT NULL, -- 택배사
+    tracking_number VARCHAR(30) DEFAULT NULL, -- 운송장 번호
     order_date DATETIME DEFAULT now() NOT NULL, -- 주문일
     status ENUM('주문 완료', '주문 취소', '배송중', '배송 완료') NOT NULL DEFAULT '주문 완료',
     cancel_reason ENUM('고객 변심', '상품 문제', '배송 지연', '기타') DEFAULT NULL, -- 주문 취소 사유

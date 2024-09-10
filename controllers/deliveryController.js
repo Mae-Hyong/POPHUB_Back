@@ -70,20 +70,32 @@ const deliveryController = {
                 user_name: body.userName,
                 address,
                 store_id: body.storeId,
-                product_id: body.productId,
-                courier: body.courier,
-                tracking_number: body.trackingNumber,                
+                product_id: body.productId,          
                 payment_amount: body.paymentAmount,
                 quantity: body.quantity
             }
-            const result = await deliveryModel.createDelivery(DeliveryData);
-            if(result) {
-                res.status(400).json({ message: result.message });
-            } else {
-                res.status(201).json({ message: "주문이 완료되었습니다." });
-            }
+            await deliveryModel.createDelivery(DeliveryData);
+            res.status(201).json({ message: "주문이 완료되었습니다." });
+
         } catch (err) {
             res.status(500).send("주문 생성 중 오류가 발생하였습니다.");
+        }
+    },
+    
+    // 운송장 번호 생성
+    createTrackingNumber: async (req, res) => {
+        try {
+            const { deliveryId, courier, trackingNumber } = req.body;
+            const result = await deliveryModel.createTrackingNumber(deliveryId, courier, trackingNumber);
+            if(result.success === false) {
+                res.status(400).json({ message: result.message });
+            } else {
+                res.status(201).json({ message: "운송장 번호가 등록되었습니다." });
+            }
+
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("운송장 번호 생성 중 오류가 발생하였습니다.");
         }
     },
 
@@ -135,8 +147,9 @@ const deliveryController = {
                 'Delivered': '배송 완료'
             };
             let result;
+            
             const getStatus = getStatusMapping[status];
-            if (products) {
+            if (Array.isArray(products) && products.length > 0) {
                 result = await deliveryModel.statusPresidentDelivery(storeId, getStatus);
 
                 if (!result || (Array.isArray(result) && result.length === 0)) {
@@ -144,7 +157,7 @@ const deliveryController = {
                 }
                 res.status(200).json(result);
             } else {
-                res.status(400).send("일치하는 값이 없습니다.");
+                res.status(400).json({ message: products.message });
             }
         } catch (err) {
             res.status(500).send("주문 조회 중 오류가 발생하였습니다.");
