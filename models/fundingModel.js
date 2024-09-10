@@ -57,7 +57,7 @@ const fundingModel = {
         return new Promise((resolve, reject) => {
             db.query(search_funding_query, (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             })
         })
     },
@@ -136,7 +136,7 @@ const fundingModel = {
 
     updatedonation: (totalAmount, fundingId) => {
         return new Promise((resolve, reject) => {
-            db.query(update_donation_query, [ totalAmount, fundingId ], (err, result) => {
+            db.query(update_donation_query, [totalAmount, fundingId], (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })

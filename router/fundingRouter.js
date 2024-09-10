@@ -134,5 +134,6 @@ router.post("/create", multerimg.upload.array('images', 10), fundingController.c
  *       500:
  *         description: 펀딩 조회 중 오류 발생
  */
+router.get("/search", fundingController.searchFunding);
 
 module.exports = router;
