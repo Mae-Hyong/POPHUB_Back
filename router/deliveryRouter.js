@@ -106,13 +106,6 @@ router.delete('/address/delete/:addressId', deliveryController.deleteAddress); /
  *                 type: string
  *               productId:
  *                 type: string
- *               courier:
- *                 type: strng
- *                 enum: [cjlogistics, logen, epost, hanjin, lotte]
- *                 description: 택배사
- *               trackingNumber:
- *                 type: string
- *                 description: 운송장 번호
  *               paymentAmount:
  *                 type: integer
  *                 description: 주문 금액
@@ -120,10 +113,39 @@ router.delete('/address/delete/:addressId', deliveryController.deleteAddress); /
  *                 type: integer
  *                 description: 주문 수량
  *     responses:
- *       201:
+ *       200:
  *         description: 성공
  */
 router.post('/', deliveryController.createDelivery); // 배송 주문 생성
+
+/**
+ * @swagger
+ * /delivery/createTrackingNumber:
+ *   put:
+ *     tags: [Delivery]
+ *     summary: 운송장 번호 생성
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               deliveryId:
+ *                 type: string
+ *               courier:
+ *                 schema:
+ *                 type: string
+ *                 enum: [cjlogistics, logen, epost, hanjin, lotte]
+ *                 example: cjlogistics
+ *                 description: "대한통운, 로젠택배, 우체국, 한진택배, 롯데택배 순"
+ *               trackingNumber:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: 성공
+ */
+router.put('/createTrackingNumber', deliveryController.createTrackingNumber); // 운송장 번호 생성
 
 /**
  * @swagger
