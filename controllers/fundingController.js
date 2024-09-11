@@ -18,7 +18,7 @@ const fundingController = {
                 open_date: body.openDate,
                 close_date: body.closeDate
             };
-    
+
             // 데이터베이스에 펀딩 정보 저장
             await fundingModel.createFunding(fundingData);
 
@@ -89,12 +89,13 @@ const fundingController = {
 
     searchFunding: async (req, res) => {
         try {
-            const fundingId = req.query;
-            const userName = req.query;
+            let fundingId = req.query.fundingId;
+            const userName = req.query.userName;
             if (!fundingId && !userName) {
                 const result = await fundingModel.searchFunding();
                 const fundingList = await Promise.all(
                     result.map(async (result) => {
+                        fundingId = result.funding_id;
                         const images = await fundingModel.imagesByFundingId(fundingId);
                         return {
                             fundingId: result.funding_id,
@@ -107,7 +108,7 @@ const fundingController = {
                             status: result.status,
                             openDate: result.openDate,
                             closeDate: result.closeDate,
-                            images: images.map(image => image.image_url)
+                            images: images.map(image => image.image)
                         };
                     })
                 );
@@ -115,13 +116,15 @@ const fundingController = {
             } else if (fundingId) {
                 const funding = await fundingModel.fundingById(fundingId);
                 const images = await fundingModel.imagesByFundingId(fundingId);
-                return res.status(200).json({ funding, images: images.map(image => image.image_url) })
+                return res.status(200).json({ funding, progress: result.donation / result.amount * 100, images: images.map(image => image.image) })
             } else {
                 const funding = await fundingModel.fundingByUser(userName)
-                return res.status(200).send(funding)
+                fundingId = funding.funding_id;
+                const images = await fundingModel.imagesByFundingId(fundingId);
+                return res.status(200).json({ funding, progress: result.donation / result.amount * 100, images: images.map(imge => imge.image) })
             }
         } catch (err) {
-            res.status(500).send("펀딩 조회 중 오류 발생")
+            return res.status(500).send("펀딩 조회 중 오류 발생")
         }
     },
 
