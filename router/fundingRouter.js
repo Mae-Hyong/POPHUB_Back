@@ -78,6 +78,7 @@ router.post("/create", multerimg.upload.array('images', 10), fundingController.c
  *       500:
  *         description: Item 데이터를 입력 도중 오류가 발생했습니다.
  */
+router.post("/item/create", fundingController.createItem);
 
 /**
  * @swagger
@@ -134,5 +135,6 @@ router.post("/create", multerimg.upload.array('images', 10), fundingController.c
  *       500:
  *         description: 펀딩 조회 중 오류 발생
  */
+router.get("/search", fundingController.searchFunding);
 
 module.exports = router;
