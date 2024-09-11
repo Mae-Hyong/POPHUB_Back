@@ -41,8 +41,10 @@ const fundingController = {
     createItem: async (req, res) => {
         try {
             const body = req.body;
-            let image = req.file ? req.file.location : null;
+            const images = req.files ? req.files.map(file => file.location) : [];
+            const itemId = v1()
             const itemData = {
+                item_id: itemId,
                 funding_id: body.fundingId,
                 user_name: body.userName,
                 item_name: body.title,
@@ -53,15 +55,14 @@ const fundingController = {
 
             await fundingModel.createItem(itemData);
 
-            if (image) {
-                const fundingImg = {
-                    funding_id: fundingId,
-                    image: image,
+            if (req.files && req.files.length > 0) {
+                if (req.files) {
+                    await Promise.all(req.files.map(async (file) => {
+                        images.push(file.location);
+                        await fundingModel.itemImg(itemId, file.location);
+                    }));
                 }
-
-                await fundingModel.itemImg(fundingImg);
             }
-
             return res.status(201).send('Item Data Added');
         } catch (err) {
             return res.status(500).send('Item 데이터를 입력 도중 오류가 발생했습니다.');
@@ -131,7 +132,9 @@ const fundingController = {
     searchItem: async (req, res) => {
         try {
             const { fundingId, itemId } = req.query;
-            if (!fundingId) {
+            if(!fundingId && !itemId){
+                return res.status(404).send("fundingId 혹은 itemId를 입력해야합니다.");
+            }else if (!fundingId) {
                 const result = await fundingModel.selectItem(itemId);
                 const images = await fundingModel.imagesByitemId(itemId);
                 const resultList = {
@@ -142,7 +145,7 @@ const fundingController = {
                     content: result.content,
                     count: result.count,
                     amount: result.amount,
-                    images: images.map(image => image.image_url)
+                    images: images.map(image => image.image)
                 };
                 return res.status(200).json(resultList);
             } else if (!itemId) {
@@ -158,7 +161,7 @@ const fundingController = {
                             content: result.content,
                             count: result.count,
                             amount: result.amount,
-                            images: images.map(image => image.image_url)
+                            images: images.map(image => image.image)
                         };
                     })
                 )

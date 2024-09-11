@@ -11,7 +11,7 @@ const select_fundingItem_query = "SELECT * FROM funding_item WHERE item_id = ?"
 const insert_funding_query = "INSERT INTO funding SET ?"
 const insert_fundingImg_query = "INSERT INTO funding_img (funding_id, image) VALUES (?, ?)";
 const insert_item_query = "INSERT INTO funding_item SET ?"
-const insert_itemImg_query = "INSERT INTO funding_img SET ?"
+const insert_itemImg_query = "INSERT INTO funding_img (item_id, image) VALUES (?, ?)"
 const create_fundingList_query = "INSERT INTO funding_list SET ?"
 
 const update_donation_query = "UPDATE funding SET donation = donation + ? WHERE funding_id = ?;"
@@ -44,9 +44,9 @@ const fundingModel = {
         })
     },
 
-    itemImg: (img) => {
+    itemImg: (itemId, image) => {
         return new Promise((resolve, reject) => {
-            db.query(insert_itemImg_query, img, (err, result) => {
+            db.query(insert_itemImg_query, [itemId, image], (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })
