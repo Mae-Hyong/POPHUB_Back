@@ -173,10 +173,33 @@ const fundingController = {
     },
 
     searchlist: async (req, res) => {
+        const formatResult = (result) => ({
+            orderId: result.order_id,
+            fundingId: result.funding_id,
+            itemId: result.item_id,
+            partnerOrderId: result.partner_order_id,
+            userName: result.user_name,
+            itemName: result.item_name,
+            quantity: result.quantity,
+            totalAmount: result.total_amount,
+            vatAmount: result.vat_amount,
+            taxFreeAmount: result.tax_free_amount,
+        });
+
         try {
+            const { fundingId, itemId, userName } = req.query;
+            let result;
+            
+            if (fundingId) result = await fundingModel.searchListByFunding(fundingId);
+            else if (itemId) result = await fundingModel.searchListByItem(itemId);
+            else result = await fundingModel.searchListByUser(userName);
 
-        } catch (err) {
+            const resultList = await Promise.all(result.map(formatResult));
 
+            return res.status(200).json(resultList);
+
+        } catch (error) {
+            return res.status(500).json({ error: "Internal server error" });
         }
     },
 

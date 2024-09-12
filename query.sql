@@ -132,6 +132,8 @@ CREATE TABLE payment_details (
     order_id varchar(50) primary key, -- 주문 아이디
     store_id varchar(50),
     product_id varchar(50),
+    funding_id varchar(50),
+    item_id varchar(50),
     partner_order_id VARCHAR(255) NOT NULL UNIQUE, -- 가맹점 주문 ID(카카오페이에서 제공)
     user_name varchar(50),
     item_name VARCHAR(255), -- 물품 명
@@ -144,7 +146,9 @@ CREATE TABLE payment_details (
     status_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-    FOREIGN KEY (product_id) REFERENCES products(product_id)
+    FOREIGN KEY (product_id) REFERENCES products(product_id),
+    FOREIGN KEY (funding_id) REFERENCES funding(funding_id),
+    FOREIGN KEY (item_id) REFERENCES funding_item(item_id)
 );
 
 CREATE TABLE payments ( -- 결제 정보

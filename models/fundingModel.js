@@ -7,6 +7,9 @@ const search_fundingId_query = "SELECT * FROM funding WHERE funding_id = ?"
 const userNameByFunding_query = "SELECT * FROM funding WHERE user_name = ?"
 const search_fundingItem_query = "SELECT * FROM funding_item WHERE funding_id = ?"
 const select_fundingItem_query = "SELECT * FROM funding_item WHERE item_id = ?"
+const search_listByFunding_query = "SELECT * FROM payment_details WHERE funding_id = ?"
+const search_listByItem_query = "SELECT * FROM payment_details WHERE item_id = ?"
+const search_listByUser_query = "SELECT * FROM payment_details WHERE user_name = ?"
 
 const insert_funding_query = "INSERT INTO funding SET ?"
 const insert_fundingImg_query = "INSERT INTO funding_img (funding_id, image) VALUES (?, ?)";
@@ -139,6 +142,33 @@ const fundingModel = {
             db.query(update_donation_query, [totalAmount, fundingId], (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
+            })
+        })
+    },
+
+    searchListByFunding: (fundingId) => {
+        return new Promise((resolve, reject) => {
+            db.query(search_listByFunding_query, fundingId, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    },
+
+    searchListByItem: (itemId) => {
+        return new Promise((resolve, reject) => {
+            db.query(search_listByItem_query, itemId, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    },
+
+    searchListByUser: (userName) => {
+        return new Promise((resolve, reject) => {
+            db.query(search_listByUser_query, userName, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
             })
         })
     },
