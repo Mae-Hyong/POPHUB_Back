@@ -37,7 +37,7 @@ const signController = {
     },
 
     kakaoCallBack: async (req, res) => {
-        const code = Math.random().toString();
+        const code = Math.floor(Math.random() * 1000000).toString();
         try {
             // 액세스 토큰 요청
             const tokenResponse = await axios.post('https://kauth.kakao.com/oauth/token', querystring.stringify({
