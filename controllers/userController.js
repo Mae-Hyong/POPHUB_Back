@@ -10,7 +10,6 @@ const bcrypt = require("bcrypt");
 const { v1, v4 } = require("uuid");
 const querystring = require('querystring');
 const axios = require('axios');
-const { response } = require("express");
 require('dotenv').config();
 
 const signController = {
@@ -37,7 +36,7 @@ const signController = {
     },
 
     kakaoCallBack: async (req, res) => {
-        const code = Math.floor(Math.random() * 1000000).toString();
+        const code = req.query.code;
         try {
             // 액세스 토큰 요청
             const tokenResponse = await axios.post('https://kauth.kakao.com/oauth/token', querystring.stringify({
@@ -47,20 +46,21 @@ const signController = {
                 code: code,
             }));
 
+            if (!tokenResponse.data.access_token) {
+                return res.status(400).send('Access token was not provided by Kakao');
+            }
             const accessToken = tokenResponse.data.access_token;
-
             // 액세스 토큰을 이용해 사용자 정보 요청
             const userResponse = await axios.get('https://kapi.kakao.com/v2/user/me', {
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
-
             // 사용자 정보 처리 및 응답
             const hashedPassword = await bcrypt.hash(v4(), 10);
             const userInfo = userResponse.data;
             await signModel.signUp(userInfo.id, hashedPassword, 'General Member');
-            return res.status(201).json(userInfo, accessToken); // 사용자 정보를 JSON 형태로 반환
+            return res.status(201).json(userInfo); // 사용자 정보를 JSON 형태로 반환
         } catch (error) {
             return res.status(500).send('Failed to login with Kakao');
         }
@@ -123,8 +123,7 @@ const signController = {
                 profile_info: profileResponse.data,
             });
         } catch (err) {
-            console.error(err)
-            res.status(500).send('Authentication failed');
+            return res.status(500).send('Authentication failed');
         }
     },
 
@@ -148,7 +147,7 @@ const signController = {
 
     kakaoDelete: async (req, res) => {
         try {
-            const { userId } = req.body;
+            const userId = req.body;
             const userName = v1();
 
             const unlinkRes = await axios.post(
@@ -178,7 +177,6 @@ const signController = {
 
     naverDelete: async (req, res) => {
         try {
-            console.log("test")
             const code = req.query.code;
             const state = req.query.state;
             const userName = v1();
@@ -223,8 +221,7 @@ const signController = {
             // 성공적으로 연결 해제 시 처리
             res.json({ success: true, message: 'User unlinked successfully' });
         } catch (err) {
-            console.error(err)
-            res.status(500).send('Authentication failed');
+            return res.status(500).send('Authentication failed');
         }
     },
 };

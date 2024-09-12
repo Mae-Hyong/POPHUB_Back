@@ -45,7 +45,7 @@ router.post("/signUp", signController.signUp);
 
 /**
  * @swagger
- * /user/oauth/kakao:
+ * /user/auth/kakao:
  *   get:
  *     tags: [User]
  *     summary: 카카오 로그인 페이지로 리다이렉트
@@ -56,7 +56,7 @@ router.post("/signUp", signController.signUp);
  *       500:
  *         description: 서버 오류
  */
-router.get("/oauth/kakao", signController.oauthKakao);
+router.get("/auth/kakao", signController.oauthKakao);
 
 router.get("/auth/kakao/callback", signController.kakaoCallBack);
 
