@@ -58,9 +58,10 @@ const signController = {
             });
             // 사용자 정보 처리 및 응답
             const hashedPassword = await bcrypt.hash(v4(), 10);
-            const userInfo = userResponse.data;
-            await signModel.signUp(userInfo.id, hashedPassword, 'General Member');
-            return res.status(201).json(userInfo.id, accessToken); // 사용자 정보를 JSON 형태로 반환
+            const userInfo = userResponse.data.id;
+            const responseData = { userInfo, accessToken };
+            await signModel.signUp(userInfo, hashedPassword, 'General Member');
+            return res.status(201).json(responseData); // 사용자 정보를 JSON 형태로 반환
         } catch (error) {
             return res.status(500).send('Failed to login with Kakao');
         }
