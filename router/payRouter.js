@@ -11,6 +11,17 @@ router.get('/cancel', payController.cancel);
 
 /**
 * @swagger
+* components:
+*   securitySchemes:
+*     bearerAuth:
+*       type: http
+*       scheme: bearer
+*       bearerFormat: JWT
+*/
+
+
+/**
+* @swagger
 * /pay:
 *   post:
 *     summary: 카카오페이 결제 요청
@@ -48,6 +59,12 @@ router.get('/cancel', payController.cancel);
 *               productId:
 *                 type: string
 *                 description: (선택 사항) 상품 ID
+*               fundongId:
+*                 type: string
+*                 description: (선택 사항) 펀딩 ID
+*               itemId:
+*                 type: string
+*                 description: (선택 사항) 후원 상품 ID
 *     responses:
 *       201:
 *         description: 결제 요청이 성공적으로 처리됨
