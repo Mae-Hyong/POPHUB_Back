@@ -69,7 +69,34 @@ router.get("/event", adminController.searchEvent);
  */
 router.get("/inquiry/search", adminController.searchInquiry);
 
-
+/**
+ * @swagger
+ * /admin/event/create:
+ *   post:
+ *     tags: [Admin]
+ *     summary: 이벤트(광고) 생성
+ *     security:
+ *       - ApiKeyAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               userName:
+ *                 type: string
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: 성공
+ */
 router.post("/event/create", multerimg.upload.single("file"), adminController.createEvent);
 
 /**
