@@ -58,7 +58,7 @@ router.post("/create", multerimg.upload.array('images', 10), fundingController.c
  *             type: object
  *             properties:
  *               fundingId:
- *                 type: integer
+ *                 type: string
  *               userName:
  *                 type: string
  *               title:
@@ -91,7 +91,7 @@ router.post("/item/create", fundingController.createItem);
  *         name: fundingId
  *         required: false
  *         schema:
- *           type: integer
+ *           type: string
  *         description: 검색할 펀딩의 ID
  *       - in: query
  *         name: userName
@@ -108,7 +108,7 @@ router.post("/item/create", fundingController.createItem);
  *               type: object
  *               properties:
  *                 fundingId:
- *                   type: integer
+ *                   type: string
  *                 userName:
  *                   type: string
  *                 title:
