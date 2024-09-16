@@ -82,7 +82,7 @@ router.post("/item/create", fundingController.createItem);
 
 /**
  * @swagger
- * /funding/search:
+ * /funding:
  *   get:
  *     summary: 펀딩을 검색합니다.
  *     tags: [Funding]
@@ -135,6 +135,83 @@ router.post("/item/create", fundingController.createItem);
  *       500:
  *         description: 펀딩 조회 중 오류 발생
  */
-router.get("/search", fundingController.searchFunding);
+router.get("", fundingController.searchFunding);
+
+/**
+* @swagger
+* /item:
+*   get:
+*     summary: 아이템을 검색하거나 펀딩을 검색합니다.
+*     tags: [Funding]
+*     parameters:
+*       - in: query
+*         name: fundingId
+*         required: false
+*         schema:
+*           type: string
+*         description: 검색할 펀딩의 ID
+*       - in: query
+*         name: itemId
+*         required: false
+*         schema:
+*           type: string
+*         description: 검색할 아이템의 ID
+*     responses:
+*       200:
+*         description: 성공적으로 데이터를 반환합니다.
+*         content:
+*           application/json:
+*             schema:
+*               oneOf:
+*                 - type: object
+*                   properties:
+*                     itemId:
+*                       type: string
+*                     fundingId:
+*                       type: string
+*                     userName:
+*                       type: string
+*                     itemName:
+*                       type: string
+*                     content:
+*                       type: string
+*                     count:
+*                       type: integer
+*                     amount:
+*                       type: number
+*                     images:
+*                       type: array
+*                       items:
+*                         type: string
+*                         format: url
+*                 - type: array
+*                   items:
+*                     type: object
+*                     properties:
+*                       itemId:
+*                         type: string
+*                       fundingId:
+*                         type: string
+*                       userName:
+*                         type: string
+*                       itemName:
+*                         type: string
+*                       content:
+*                         type: string
+*                       count:
+*                         type: integer
+*                       amount:
+*                         type: number
+*                       images:
+*                         type: array
+*                         items:
+*                           type: string
+*                           format: url
+*       404:
+*         description: fundingId 혹은 itemId를 입력해야합니다.
+*       500:
+*         description: 아이템 조회 중 오류 발생
+*/
+router.get("/item", fundingController.searchItem);
 
 module.exports = router;

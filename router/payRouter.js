@@ -59,7 +59,7 @@ router.get('/cancel', payController.cancel);
 *               productId:
 *                 type: string
 *                 description: (선택 사항) 상품 ID
-*               fundongId:
+*               fundingId:
 *                 type: string
 *                 description: (선택 사항) 펀딩 ID
 *               itemId:
