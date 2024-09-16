@@ -139,7 +139,7 @@ router.get("", fundingController.searchFunding);
 
 /**
 * @swagger
-* /item:
+* /funding/item:
 *   get:
 *     summary: 아이템을 검색하거나 펀딩을 검색합니다.
 *     tags: [Funding]
