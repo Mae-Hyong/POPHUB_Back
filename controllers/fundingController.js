@@ -113,16 +113,16 @@ const fundingController = {
                         };
                     })
                 );
-                if(!fundingList) return res.status(404).send("Not Found fundingList");
+                if(!fundingList) return res.status(200).send("Not Found fundingList");
                 return res.status(200).send(fundingList);
             } else if (fundingId) {
                 const result = await fundingModel.fundingById(fundingId);
-                if(!result) return res.status(404).send("Not Found Funding");
+                if(!result) return res.status(200).send("Not Found Funding");
                 const images = await fundingModel.imagesByFundingId(fundingId);
                 return res.status(200).json({ result, progress: result.donation / result.amount * 100, images: images.map(image => image.image) })
             } else {
                 const result = await fundingModel.fundingByUser(userName);
-                if(!result) return res.status(404).send("Not Found User");
+                if(!result) return res.status(200).send("Not Found User");
                 fundingId = result.funding_id;
                 const images = await fundingModel.imagesByFundingId(fundingId);
                 return res.status(200).json({ result, progress: result.donation / result.amount * 100, images: images.map(imge => imge.image) })
