@@ -238,12 +238,17 @@ const adminController = {
     popupPendingList: async (req, res) => {
         try {
             const pendingList = await adminModel.popupPendingList();
+            
+            if (pendingList.length === 0) {
+                return res.status(200).json({ message: "현재 승인 요청을 기다리는 팝업이 없습니다." });
+            }
+            
             return res.status(200).json(pendingList);
         } catch (err) {
             throw err;
         }
     },
-
+    
     // 관리자 pending List에서 check값 부여 (승인)
     popupPendingCheck: async (req, res) => {
         try {
