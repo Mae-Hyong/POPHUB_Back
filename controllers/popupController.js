@@ -410,11 +410,11 @@ const popupController = {
     // 추천
     recommendation: async (req, res) => {
         try {
-            if (!req.params.userName) {
+            if (!req.query.userName) {
                 return res.status(200).send("로그인 후 추천 시스템을 사용해보세요!");
             } else {
-                const userRecommendation = await getRecommendation(req.params.userName);
-                const data = await popupModel.recommendationData(userRecommendation);
+                const {recommendedCategory, recommendedCategories, gender} = await getRecommendation(req.query.userName);
+                const data = await popupModel.recommendationData(recommendedCategory, recommendedCategories, gender);
                 res.status(200).json(data);
             }
 
