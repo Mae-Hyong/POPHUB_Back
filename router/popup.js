@@ -529,7 +529,7 @@ router.delete('/review/delete/:reviewId', popupController.deleteReview); // 팝�
  * /popup/recommendation:
  *   get:
  *     tags: [Recommendation]
- *     summary: 추천 시스템 <-- ** 아직 데이터 부족으로 오류 **
+ *     summary: 추천 시스템
  *     parameters:
  *       - in: query
  *         name: userName

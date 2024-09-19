@@ -4,9 +4,16 @@ const db = require('../config/mysqlDatabase');
 const loginUser_query = 'SELECT gender, age FROM user_info WHERE user_name = ?';
 const reservationUser_query = `
             SELECT rv.user_name, ps.category_id, ui.gender, ui.age
-            FROM reservation as rv
-            LEFT JOIN popup_stores as ps ON rv.store_id = ps.store_id
-            LEFT JOIN user_info as ui ON rv.user_name = ui.user_name `;
+            FROM reservation AS rv
+            LEFT JOIN popup_stores AS ps ON rv.store_id = ps.store_id
+            LEFT JOIN user_info AS ui ON rv.user_name = ui.user_name
+
+            UNION ALL
+
+            SELECT wl.user_name, ps.category_id, ui.gender, ui.age
+            FROM wait_list AS wl
+            LEFT JOIN popup_stores AS ps ON wl.store_id = ps.store_id
+            LEFT JOIN user_info AS ui ON wl.user_name = ui.user_name; `;
 
 // 사용자 정보를 가져오는 함수
 async function loginUserInfo(user_name) {
@@ -31,6 +38,7 @@ async function getRecommendation(user_name) {
     try {
         // 사용자 정보 가져오기
         const userInfo = await loginUserInfo(user_name);
+        const gender = userInfo.gender;
 
         // 모든 사용자 정보 가져오기
         const reservationData = await getUserInfo();
@@ -99,9 +107,9 @@ async function getRecommendation(user_name) {
 
         console.log(`${userClusterIndex}번 클러스터`);
         console.log(`추천 카테고리: ${recommendedCategory}`);
-        const recommendedCategories = sortedCategories.slice(0, 2).map(category => category[0]);
-
-        return recommendedCategories;
+        let recommendedCategories = sortedCategories.slice(0, 4).map(category => category[0]);
+        recommendedCategories = recommendedCategories.filter(category => category !== recommendedCategory);
+        return { recommendedCategory, recommendedCategories, gender };
     } catch (err) {
         throw err;
     }

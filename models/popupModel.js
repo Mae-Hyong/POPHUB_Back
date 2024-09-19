@@ -687,7 +687,7 @@ const popupModel = {
             throw err;
         }
     },
-    
+
     createReview: async (reviewdata) => { // 리뷰 생성
         try {
             const result = await new Promise((resolve, reject) => {
@@ -896,7 +896,7 @@ const popupModel = {
     },
 
     // 추천 시스템
-    recommendationData: async (user_recommendation) => {
+    recommendationData: async (recommendedCategory, recommendedCategories, gender) => {
         try {
             const getCategoryData = async (category) => {
                 return new Promise((resolve, reject) => {
@@ -921,16 +921,44 @@ const popupModel = {
                 });
             };
 
-            // 첫 번째 카테고리 데이터
-            const firstCategoryData = await getCategoryData(user_recommendation[0]);
+            // 해당 카테고리 값 출
+            const firstCategoryData = await getCategoryData(recommendedCategory);
 
-            // 첫 번째 카테고리 5개 이하일 경우,
-            let results = firstCategoryData;
-            if (results.length < 5 && user_recommendation.length > 1) {
-                const count = 5 - results.length;
-                const secondCategoryData = await getCategoryData(user_recommendation[1]);
-                const slice = Math.min(count, secondCategoryData.length);
-                results = results.concat(secondCategoryData.slice(0, slice));
+            let results = firstCategoryData.slice(0, 4);
+
+            // 다른 카테고리 추가 선택
+            if (recommendedCategories.length > 0) {
+                let otherData = [];
+
+                for (const category of recommendedCategories) {
+                    const categoryData = await getCategoryData(category);
+                    if (categoryData.length > 0) {
+                        otherData = otherData.concat(categoryData);
+                    }
+                }
+
+                const addData = otherData.sort(() => 0.5 - Math.random()).slice(0, 2);
+
+                results = results.concat(addData);
+            }
+
+            // result의 결과 값이 6개 미만일 경우
+            if (results.length < 6) {
+                const pickCategories = gender === 'F' ? [11, 12, 15, 28, 29, 30, 31, 32] : [10, 16, 19, 23, 24, 33];
+                const categoriesToAdd = pickCategories.filter(cat => !results.some(item => item.category_id === cat));
+
+                let pickData = [];
+                for (const category of categoriesToAdd) {
+                    const categoryData = await getCategoryData(category);
+                    if (categoryData.length > 0) {
+                        pickData = pickData.concat(categoryData);
+                    }
+                }
+
+                const addPickData = pickData.filter(dataItem => !results.some(resultItem => resultItem.category_id === dataItem.category_id))
+                    .sort(() => 0.5 - Math.random()).slice(0, 6 - results.length);
+
+                results = results.concat(addPickData);
             }
 
             return results.length > 0 ? results : '해당 카테고리의 팝업이 존재하지 않습니다.';
