@@ -11,8 +11,8 @@ const select_category_query =
     "SELECT category_name FROM category WHERE category_id = ?";
 const search_notice_query = "SELECT * FROM notice";
 const select_notice_query = "SELECT * FROM notice WHERE notice_id = ?";
-const search_event_query = "SELECT * FROM events ORDER BY created_at DESC";
-const select_event_query = "SELECT * FROM events WHERE event_id = ?";
+const search_event_query = "SELECT * FROM event";
+const select_event_query = "SELECT * FROM event WHERE event_id = ?";
 const search_achieve_query = "SELECT * FROM achieve";
 const select_achieve_query = "SELECT * FROM achieve WHERE achieve_id = ?";
 const search_inquiry_query = "SELECT * FROM inquiry";
