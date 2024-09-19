@@ -526,21 +526,21 @@ router.delete('/review/delete/:reviewId', popupController.deleteReview); // 팝�
 
 /**
  * @swagger
- * /popup/recommendation/{userName}:
+ * /popup/recommendation:
  *   get:
  *     tags: [Recommendation]
  *     summary: 추천 시스템 <-- ** 아직 데이터 부족으로 오류 **
  *     parameters:
- *       - in: path
+ *       - in: query
  *         name: userName
  *         required: false
  *         schema:
  *           type: string
  *     responses:
  *       200:
- *         description: 추천 데이터
+ *         description: 성공
  */
-router.get('/recommendation/:userName?', popupController.recommendation); // 추천 시스템
+router.get('/recommendation', popupController.recommendation); // 추천 시스템
 
 module.exports = router;
 

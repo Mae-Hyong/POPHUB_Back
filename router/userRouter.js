@@ -25,7 +25,7 @@ const { signController, authController, userController } = require('../controlle
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         application/x-www-form-urlencoded:
  *           schema:
  *             type: object
  *             properties:
