@@ -412,10 +412,12 @@ const popupController = {
         try {
             if (!req.params.userName) {
                 return res.status(200).send("로그인 후 추천 시스템을 사용해보세요!");
+            } else {
+                const userRecommendation = await getRecommendation(req.params.userName);
+                const data = await popupModel.recommendationData(userRecommendation);
+                res.status(200).json(data);
             }
-            const userRecommendation = await getRecommendation(req.params.userName);
-            const data = await popupModel.recommendationData(userRecommendation);
-            res.status(200).json(data);
+
         } catch (err) {
             res.status(500).send("추천 시스템 확인 오류가 발생하였습니다.");
         }

@@ -1,7 +1,7 @@
 const kMeans = require('kmeans-js');
 const db = require('../config/mysqlDatabase');
 
-const loginUser_query = `SELECT gender, age FROM user_info WHERE user_name = ?`;
+const loginUser_query = 'SELECT gender, age FROM user_info WHERE user_name = ?';
 const reservationUser_query = `
             SELECT rv.user_name, ps.category_id, ui.gender, ui.age
             FROM reservation as rv
