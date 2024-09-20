@@ -214,4 +214,31 @@ router.get("", fundingController.searchFunding);
 */
 router.get("/item", fundingController.searchItem);
 
+/**
+ * @swagger
+ * /funding/bookmark:
+ *   post:
+ *     summary: Toggle bookmark for a funding
+ *     tags: [Funding]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userName:
+ *                 type: string
+ *               fundingId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         Successfully
+ *       400:
+ *         description: Missing userName or fundingId
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/bookmark", fundingController.bookMark);
+
 module.exports = router;

@@ -168,9 +168,11 @@ CREATE TABLE BookMark (
     user_name VARCHAR(50) NOT NULL,
     store_id VARCHAR(50),
     product_id VARCHAR(50),
+    funding_id VARCHAR(50),
     FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-    FOREIGN KEY (product_id) REFERENCES products(product_id)
+    FOREIGN KEY (product_id) REFERENCES products(product_id),
+    FOREIGN KEY (funding_id) REFERENCES funding(funding_id)
 );
 
 

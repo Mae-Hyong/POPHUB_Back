@@ -12,6 +12,17 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+  cors({
+    origin: "*",
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    credentials: true,
+    optionsSuccessStatus: 204,
+  })
+);
+
 // Swagger 설정
 const swaggerOptions = {
   swaggerDefinition: {
@@ -39,20 +50,6 @@ const reservationRouter = require("./router/reservationRouter");
 const qrCodeRouter = require("./router/qrCodeRouter");
 const deliveryRouter = require("./router/deliveryRouter");
 const fundingRouter = require("./router/fundingRouter");
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(
-  cors({
-    origin: "*",
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true,
-    optionsSuccessStatus: 204,
-  })
-);
-
-// body-parser 미들웨어 등록
-app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
   res.send("Start POPHUB!");

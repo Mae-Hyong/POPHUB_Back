@@ -78,4 +78,34 @@ router.get('/cancel', payController.cancel);
 */
 router.post('', token.verifyToken, payController.payRequest);
 
+/**
+ * @swagger
+ * /pay/cancel:
+ *   post:
+ *     summary: 결제 취소 요청
+ *     tags: [Payment]
+ *     description: KakaoPay 결제 취소 요청을 처리합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               tid:
+ *                 type: string
+ *               cancel_amount:
+ *                 type: int
+ *               cancel_tax_free_amount:
+ *                 type: int
+ *               cancel_vat_amount:
+ *                 type: int
+ *     responses:
+ *       200:
+ *         description: 결제가 성공적으로 취소되었습니다.
+ *       500:
+ *         description: 결제 취소 실패
+ */
+router.post('/cancel', payController.cancelPayment);
+
 module.exports = router;

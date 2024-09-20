@@ -84,6 +84,28 @@ const payController = {
         }
     },
 
+    cancelPayment: async (req, res) => {
+        try {
+            const { tid, cancel_amount, cancel_tax_free_amount, cancel_vat_amount } = req.body;
+
+            const response = await $axios.post('/v1/payment/cancel', {
+                cid: CID, // 상점 아이디 (테스트용 아이디 사용)
+                tid: tid, // 결제 고유 번호
+                cancel_amount: cancel_amount, // 취소 금액
+                cancel_tax_free_amount: cancel_tax_free_amount || 0, // 취소 비과세 금액
+                cancel_vat_amount: cancel_vat_amount || 0, // 취소 부가세 금액
+            });
+
+            // 취소 완료된 결제 정보를 DB에 업데이트
+            await payModel.updateCancelPayment(tid, cancel_amount);
+
+            return res.status(200).send(response.data);
+        } catch (error) {
+            console.error('결제 취소 중 오류 발생:', error);
+            return res.status(500).send('결제 취소 실패');
+        }
+    },
+
     success: async (req, res) => {
         try {
             const param = req.query;
@@ -101,7 +123,7 @@ const payController = {
             await payModel.updatePayments(partnerOrderId, aid);
             await payModel.updatePayReq(partnerOrderId);
 
-            res.send('CLOSE THE POPUP');
+            return res.status(200).send('결제 성공');
         } catch (error) {
             res.status(500).send('카카오페이 결제 승인 실패');
         }

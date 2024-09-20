@@ -207,6 +207,27 @@ const fundingController = {
         }
     },
 
+    bookMark: async(req, res) => {
+        const { userName, fundingId } = req.body;
+
+        if (!userName || !fundingId) return res.status(400).json({ error: 'userName and fundingId are required' });
+
+        try {
+            const existingBookmark = await fundingModel.checkBookMark(userName, fundingId);
+
+            if (existingBookmark.length > 0) {
+                await fundingModel.deleteBookMark(userName, fundingId);
+                return res.status(200).json({ message: 'Bookmark removed successfully' });
+            } else {
+                await fundingModel.createBookMark(userName, fundingId);
+                return res.status(200).json({ message: 'Bookmark added successfully' });
+            }
+        } catch (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Failed to process bookmark' });
+        }
+    },
+
     updateFunding: async (req, res) => {
         try {
 

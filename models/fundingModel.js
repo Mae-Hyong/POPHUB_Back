@@ -10,14 +10,18 @@ const select_fundingItem_query = "SELECT * FROM funding_item WHERE item_id = ?"
 const search_listByFunding_query = "SELECT * FROM payment_details WHERE funding_id = ?"
 const search_listByItem_query = "SELECT * FROM payment_details WHERE item_id = ?"
 const search_listByUser_query = "SELECT * FROM payment_details WHERE user_name = ?"
+const check_bookmark_query = "SELECT * FROM BookMark WHERE user_name = ? AND funding_id = ?"
 
 const insert_funding_query = "INSERT INTO funding SET ?"
 const insert_fundingImg_query = "INSERT INTO funding_img (funding_id, image) VALUES (?, ?)";
 const insert_item_query = "INSERT INTO funding_item SET ?"
 const insert_itemImg_query = "INSERT INTO funding_img (item_id, image) VALUES (?, ?)"
 const create_fundingList_query = "INSERT INTO funding_list SET ?"
+const create_bookmark_query = "INSERT INTO BookMark (user_name, funding_id) VALUES (?, ?)"
 
 const update_donation_query = "UPDATE funding SET donation = donation + ? WHERE funding_id = ?;"
+
+const delete_bookmark_query = "DELETE FROM BookMark WHERE user_name = ? AND funding_id = ?"
 
 const fundingModel = {
     createFunding: (fundingData) => {
@@ -167,6 +171,33 @@ const fundingModel = {
     searchListByUser: (userName) => {
         return new Promise((resolve, reject) => {
             db.query(search_listByUser_query, userName, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    },
+
+    checkBookMark: (userName, fundingId) => {
+        return new Promise((resolve, reject) => {
+            db.query(check_bookmark_query, [userName, fundingId], (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    },
+
+    deleteBookMark: (userName, fundingId) => {
+        return new Promise((resolve, reject) => {
+            db.query(delete_bookmark_query, [userName, fundingId], (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    },
+
+    createBookMark: (userName, fundingId) => {
+        return new Promise((resolve, reject) => {
+            db.query(create_bookmark_query, [userName, fundingId], (err, result) => {
                 if (err) reject(err);
                 else resolve(result);
             })
