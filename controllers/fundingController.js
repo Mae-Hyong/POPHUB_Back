@@ -69,24 +69,22 @@ const fundingController = {
         }
     },
 
-    // createlist: async(req, res) => {
-    //     try {
-    //         const body = req.body;
-    //         let image = req.file ? req.file.location : null;
-    //         const listData = {
-    //             funding_id: body.fundingId,
-    //             item_id: body.itemId,
-    //             partner_order_id: body.partnerOrderId,
-    //             user_name: body.userName,
-    //         };
+    createFundingSupport: async(req, res) => {
+        try {
+            const body = req.body;
+            const insertData = {
+                item_id: body.itemId,
+                user_name: body.userName,
+                amount: body.amount
+            };
 
-    //         await fundingModel.createList(listData);
+            await fundingModel.createFundingSupport(insertData);
 
-    //         return res.status(201).send('Item Data Added')
-    //     } catch (err) {
-
-    //     }
-    // },
+            return res.status(201).send('Item Data Added')
+        } catch (err) {
+            return res.status(500).send('펀딩 후원 목록 조회 중 오류 발생')
+        }
+    },
 
     searchFunding: async (req, res) => {
         try {
@@ -118,8 +116,27 @@ const fundingController = {
             } else if (fundingId) {
                 const result = await fundingModel.fundingById(fundingId);
                 if(!result) return res.status(200).send("Not Found Funding");
+                const fundingList = await Promise.all(
+                    result.map(async (result) => {
+                        fundingId = result.funding_id;
+                        const images = await fundingModel.imagesByFundingId(fundingId);
+                        return {
+                            fundingId: result.funding_id,
+                            userName: result.user_name,
+                            title: result.title,
+                            content: result.content,
+                            amount: result.amount, // 목표금액
+                            donation: result.donation, // 후원 금액
+                            progress: result.donation / result.amount * 100,
+                            status: result.status,
+                            openDate: result.openDate,
+                            closeDate: result.closeDate,
+                            images: images.map(image => image.image)
+                        };
+                    })
+                );
                 const images = await fundingModel.imagesByFundingId(fundingId);
-                return res.status(200).json({ result, progress: result.donation / result.amount * 100, images: images.map(image => image.image) })
+                return res.status(200).json(fundingList)
             } else {
                 const result = await fundingModel.fundingByUser(userName);
                 if(!result) return res.status(200).send("Not Found User");
@@ -177,19 +194,6 @@ const fundingController = {
     },
 
     searchlist: async (req, res) => {
-        const formatResult = (result) => ({
-            orderId: result.order_id,
-            fundingId: result.funding_id,
-            itemId: result.item_id,
-            partnerOrderId: result.partner_order_id,
-            userName: result.user_name,
-            itemName: result.item_name,
-            quantity: result.quantity,
-            totalAmount: result.total_amount,
-            vatAmount: result.vat_amount,
-            taxFreeAmount: result.tax_free_amount,
-        });
-
         try {
             const { fundingId, itemId, userName } = req.query;
             let result;
@@ -198,12 +202,53 @@ const fundingController = {
             else if (itemId) result = await fundingModel.searchListByItem(itemId);
             else result = await fundingModel.searchListByUser(userName);
 
-            const resultList = await Promise.all(result.map(formatResult));
+            const resultList = result.map(result => ({
+                orderId: result.order_id,
+                fundingId: result.funding_id,
+                itemId: result.item_id,
+                partnerOrderId: result.partner_order_id,
+                userName: result.user_name,
+                itemName: result.item_name,
+                quantity: result.quantity,
+                totalAmount: result.total_amount,
+                vatAmount: result.vat_amount,
+                taxFreeAmount: result.tax_free_amount,
+            }));
 
             return res.status(200).json(resultList);
 
         } catch (error) {
             return res.status(500).json({ error: "Internal server error" });
+        }
+    },
+
+    searchSupport: async (req, res) => {
+        try {
+            const itemId = req.query.itemId;
+            const userName = req.query.userName;
+            const supportId = req.query.supportId;
+
+            let result;
+
+            if (!itemId && !userName)  result = await fundingModel.searchSupport();
+            else if (itemId) result = await fundingModel.supportByItem(itemId);
+            else if (userName) result = await fundingModel.supportByUser(userName);
+            else result = await fundingModel.supportById(supportId);
+
+            if (!result || result.length === 0) return res.status(200).send("Not Found");
+
+            const supportList = result.map(result => ({
+                fundingId: result.support_id,
+                itemId: result.item_id,
+                userName: result.user_name,
+                amount: result.amount, // 목표 금액
+                createdAt: result.created_at
+            }));
+
+            return res.status(200).json(supportList);
+        } catch (err) {
+            console.error(err)
+            return res.status(500).send("펀딩 조회 중 오류 발생")
         }
     },
 

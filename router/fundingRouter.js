@@ -82,6 +82,33 @@ router.post("/item/create", fundingController.createItem);
 
 /**
  * @swagger
+ * /funding/support/create:
+ *   post:
+ *     summary: 펀딩 후원 목록 생성합니다.
+ *     tags: [Funding]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               itemId:
+ *                 type: string
+ *               userName:
+ *                 type: string
+ *               amount:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Item Data Added
+ *       500:
+ *         description: Item 데이터를 입력 도중 오류가 발생했습니다.
+ */
+router.post("/support/create", fundingController.createFundingSupport);
+
+/**
+ * @swagger
  * /funding:
  *   get:
  *     summary: 펀딩을 검색합니다.
@@ -213,6 +240,49 @@ router.get("", fundingController.searchFunding);
 *         description: 아이템 조회 중 오류 발생
 */
 router.get("/item", fundingController.searchItem);
+
+/**
+ * @swagger
+ * /funding/support:
+ *   get:
+ *     summary: 후원자 목록을 검색합니다.
+ *     parameters:
+ *       - name: itemId
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: userName
+ *         in: query
+ *         required: false
+ *         type: string
+ *       - name: supportId
+ *         in: query
+ *         required: false
+ *         type: string
+ *     responses:
+ *       200:
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               fundingId:
+ *                 type: string
+ *               itemId:
+ *                 type: string
+ *               userName:
+ *                 type: string
+ *               title:
+ *                 type: string
+ *               amount:
+ *                 type: integer
+ *               createdAt:
+ *                 type: string
+ *                 format: date-time
+ *       404:
+ *         description: No support found
+ */
+router.get('/support', fundingController.searchSupport);
 
 /**
  * @swagger

@@ -25,6 +25,14 @@ CREATE TABLE wait_list(
 
 const checkDelivery_query = 'SELECT tracking_number, courier FROM delivery WHERE status = "주문 완료" OR status = "배송 중"';
 const deliveryStatus_query = 'UPDATE delivery SET status = ? WHERE courier = ? AND tracking_number = ?';
+
+const check_funding_query = `
+    UPDATE funding 
+    SET status = 'successful' 
+    WHERE close_date < NOW() 
+    AND donation >= amount;
+`;
+
 const updateStatus = (query) =>
     new Promise((resolve, reject) => {
         db.query(query, (err, result) => {
@@ -110,12 +118,22 @@ const updateWaitList = async () => {
     }
 };
 
+async function checkFundingGoals() {
+    new Promise((resolve, reject) => {
+        db.query(check_funding_query, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+}
+
 function scheduleDatabaseUpdate() {
     cron.schedule('0 0 * * *', async () => {
         await updatePopupStatus();
         await updateDeliveryStatus();
         //await updateReservationStatus();
         await updateWaitList();
+        await checkFundingGoals();
     });
 };
 

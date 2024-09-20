@@ -1,4 +1,5 @@
 const db = require('../config/mysqlDatabase');
+const { searchSupport } = require('../controllers/fundingController');
 
 const search_funding_query = "SELECT * FROM funding"
 const imagesByFundingId_query = "SELECT * FROM funding_img WHERE funding_id = ?"
@@ -10,7 +11,11 @@ const select_fundingItem_query = "SELECT * FROM funding_item WHERE item_id = ?"
 const search_listByFunding_query = "SELECT * FROM payment_details WHERE funding_id = ?"
 const search_listByItem_query = "SELECT * FROM payment_details WHERE item_id = ?"
 const search_listByUser_query = "SELECT * FROM payment_details WHERE user_name = ?"
+const search_support_query = "SELECT * FROM funding_support"
 const check_bookmark_query = "SELECT * FROM BookMark WHERE user_name = ? AND funding_id = ?"
+const search_supportByItem_query = "SELECT * FROM funding_support WHERE item_id = ?"
+const search_supportByUser_query = "SELECT * FROM funding_support WHERE user_name = ?"
+const search_supportById_query = "SELECT * FROM funding_support WHERE support_id = ?"
 
 const insert_funding_query = "INSERT INTO funding SET ?"
 const insert_fundingImg_query = "INSERT INTO funding_img (funding_id, image) VALUES (?, ?)";
@@ -18,6 +23,7 @@ const insert_item_query = "INSERT INTO funding_item SET ?"
 const insert_itemImg_query = "INSERT INTO funding_img (item_id, image) VALUES (?, ?)"
 const create_fundingList_query = "INSERT INTO funding_list SET ?"
 const create_bookmark_query = "INSERT INTO BookMark (user_name, funding_id) VALUES (?, ?)"
+const create_fundingSupport_query = "INSERT INTO funding_support SET ?"
 
 const update_donation_query = "UPDATE funding SET donation = donation + ? WHERE funding_id = ?;"
 
@@ -100,14 +106,14 @@ const fundingModel = {
         return new Promise((resolve, reject) => {
             db.query(userNameByFunding_query, userName, (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             })
         })
     },
 
-    createFundingList: (payRequestData) => {
+    createFundingSupport: (insertData) => {
         return new Promise((resolve, reject) => {
-            db.query(create_fundingList_query, payRequestData, (err, result) => {
+            db.query(create_fundingSupport_query, insertData, (err, result) => {
                 if (err) reject(err);
                 else resolve(result[0]);
             })
@@ -173,6 +179,42 @@ const fundingModel = {
             db.query(search_listByUser_query, userName, (err, result) => {
                 if (err) reject(err);
                 else resolve(result);
+            })
+        })
+    },
+
+    searchSupport: () => {
+        return new Promise((resolve, reject) => {
+            db.query(search_support_query, itemId, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    },
+
+    supportByItem: (itemId) => {
+        return new Promise((resolve, reject) => {
+            db.query(search_supportByItem_query, itemId, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    },
+
+    supportByUser: (userName) => {
+        return new Promise((resolve, reject) => {
+            db.query(search_supportByUser_query, userName, (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    },
+
+    supportById: (supportId) => {
+        return new Promise((resolve, reject) => {
+            db.query(search_supportById_query, supportId, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
             })
         })
     },
