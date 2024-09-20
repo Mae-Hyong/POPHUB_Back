@@ -58,10 +58,10 @@ const signController = {
             });
             // 사용자 정보 처리 및 응답
             const hashedPassword = await bcrypt.hash(v4(), 10);
-            const userInfo = userResponse.data.id;
-            const responseData = { userInfo, accessToken };
-            await signModel.signUp(userInfo, hashedPassword, 'General Member');
-            return res.status(201).json(responseData); // 사용자 정보를 JSON 형태로 반환
+            const userId = userResponse.data.id;
+            await signModel.signUp(userId, hashedPassword, 'General Member');
+            const token = Token.generateToken(userId);
+            return res.status(201).json({ userId: userId, token: token }); // 사용자 정보를 JSON 형태로 반환
         } catch (error) {
             return res.status(500).send('Failed to login with Kakao');
         }
@@ -114,15 +114,13 @@ const signController = {
                     Authorization: `Bearer ${access_token}`,
                 },
             });
-
+            const userId = profileResponse.data.response.id;
             // 사용자 정보 처리 및 응답
             const hashedPassword = await bcrypt.hash(v4(), 10);
-            await signModel.signUp(profileResponse.data.response.id, hashedPassword, 'General Member');
+            await signModel.signUp(userId, hashedPassword, 'General Member');
+            const token = Token.generateToken(userId);
 
-            return res.status(201).json({
-                token_info: tokenResponse.data,
-                profile_info: profileResponse.data,
-            });
+            return res.status(201).json({ userId: userId, token: token });
         } catch (err) {
             return res.status(500).send('Authentication failed');
         }
@@ -137,7 +135,7 @@ const signController = {
             if (isPasswordValid) {
                 const token = Token.generateToken(userId);
                 await achieveModel.checkAndAddAchieve(userId);
-                return res.status(200).json({ user_id: userId, token });
+                return res.status(200).json({ userId: userId, token });
             } else {
                 return res.status(401).send("Invalid password");
             }
@@ -536,7 +534,7 @@ const userController = {
             const result = await Promise.all(searchResult.map(async (searchResult) => {
                 return {
                     userName: searchResult.user_name,
-                    point_score: searchResult.points,
+                    pointScore: searchResult.points,
                     description: searchResult.description,
                     calcul: searchResult.calcul
                 };
