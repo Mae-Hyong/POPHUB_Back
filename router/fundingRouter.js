@@ -33,6 +33,9 @@ const multerimg = require('../function/multer');
  *               closeDate:
  *                 type: string
  *                 format: date
+ *               paymentDate:
+ *                 type: string
+ *                 format: date
  *               image:
  *                 type: string
  *                 format: binary
