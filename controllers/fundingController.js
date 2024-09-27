@@ -33,7 +33,7 @@ const fundingController = {
                 }
             }
             
-            return res.status(201).send('Funding Data Added');
+            return res.status(201).json({Msg: 'Funding Data Added', fundingId: fundingId});
         } catch (err) {
             console.error(err)
             return res.status(500).send('Funding 데이터를 입력 도중 오류가 발생했습니다.');
@@ -49,7 +49,7 @@ const fundingController = {
                 item_id: itemId,
                 funding_id: body.fundingId,
                 user_name: body.userName,
-                item_name: body.title,
+                item_name: body.itemName,
                 content: body.content,
                 count: body.count,
                 amount: body.amount,
@@ -90,70 +90,51 @@ const fundingController = {
 
     searchFunding: async (req, res) => {
         try {
-            let fundingId = req.query.fundingId;
+            const fundingId = req.query.fundingId;
             const userName = req.query.userName;
+    
+            const getFundingDetails = async (result) => {
+                const images = await fundingModel.imagesByFundingId(result.funding_id);
+                return {
+                    fundingId: result.funding_id,
+                    userName: result.user_name,
+                    title: result.title,
+                    content: result.content,
+                    amount: result.amount, // 목표금액
+                    donation: result.donation, // 후원 금액
+                    progress: result.amount ? (result.donation / result.amount) * 100 : 0,
+                    status: result.status,
+                    openDate: result.openDate,
+                    closeDate: result.closeDate,
+                    payment_date: result.paymentDate,
+                    images: images.map(image => image.image)
+                };
+            };
+    
+            let result;
+    
             if (!fundingId && !userName) {
-                const result = await fundingModel.searchFunding();
-                const fundingList = await Promise.all(
-                    result.map(async (result) => {
-                        fundingId = result.funding_id;
-                        const images = await fundingModel.imagesByFundingId(fundingId);
-                        return {
-                            fundingId: result.funding_id,
-                            userName: result.user_name,
-                            title: result.title,
-                            content: result.content,
-                            amount: result.amount, // 목표금액
-                            donation: result.donation, // 후원 금액
-                            progress: result.donation / result.amount * 100,
-                            status: result.status,
-                            openDate: result.openDate,
-                            closeDate: result.closeDate,
-                            payment_date: result.paymentDate,
-                            images: images.map(image => image.image)
-                        };
-                    })
-                );
-                if (!fundingList) return res.status(200).send("Not Found fundingList");
-                return res.status(200).send(fundingList);
+                result = await fundingModel.searchFunding();
+                if (!result.length) return res.status(200).send("Not Found fundingList");
+                const fundingList = await Promise.all(result.map(getFundingDetails));
+                return res.status(200).json(fundingList);
             } else if (fundingId) {
-                const result = await fundingModel.fundingById(fundingId);
+                result = await fundingModel.fundingById(fundingId);
                 if (!result) return res.status(200).send("Not Found Funding");
-                const fundingList = await Promise.all(
-                    result.map(async (result) => {
-                        fundingId = result.funding_id;
-                        const images = await fundingModel.imagesByFundingId(fundingId);
-                        return {
-                            fundingId: result.funding_id,
-                            userName: result.user_name,
-                            title: result.title,
-                            content: result.content,
-                            amount: result.amount, // 목표금액
-                            donation: result.donation, // 후원 금액
-                            progress: result.donation / result.amount * 100,
-                            status: result.status,
-                            openDate: result.openDate,
-                            closeDate: result.closeDate,
-                            payment_date: body.paymentDate,
-                            images: images.map(image => image.image)
-                        };
-                    })
-                );
-                const images = await fundingModel.imagesByFundingId(fundingId);
-                return res.status(200).json(fundingList)
-            } else {
-                const result = await fundingModel.fundingByUser(userName);
+                const fundingList = await Promise.all(result.map(getFundingDetails));
+                return res.status(200).json(fundingList);
+            } else { // userName이 주어진 경우
+                result = await fundingModel.fundingByUser(userName);
                 if (!result) return res.status(200).send("Not Found User");
-                fundingId = result.funding_id;
-                const images = await fundingModel.imagesByFundingId(fundingId);
-                return res.status(200).json({ result, progress: result.donation / result.amount * 100, images: images.map(imge => imge.image) })
+                const fundingDetails = await getFundingDetails(result);
+                return res.status(200).json(fundingDetails);
             }
         } catch (err) {
-            console.error(err)
-            return res.status(500).send("펀딩 조회 중 오류 발생")
+            console.error(err);
+            return res.status(500).send("펀딩 조회 중 오류 발생");
         }
     },
-
+    
     searchItem: async (req, res) => {
         try {
             const { fundingId, itemId } = req.query;

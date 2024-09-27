@@ -124,7 +124,7 @@ const adminController = {
                 title: body.title,
                 content: body.content,
                 img: img,
-                usesr_name: body.userName,
+                user_name: body.userName,
                 start_date: body.startDate,
                 end_date: body.endDate
             };

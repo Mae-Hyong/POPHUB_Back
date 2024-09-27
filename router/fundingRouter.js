@@ -62,7 +62,7 @@ router.post("/create", multerimg.upload.array('images', 10), fundingController.c
  *                 type: string
  *               userName:
  *                 type: string
- *               title:
+ *               itemName:
  *                 type: string
  *               content:
  *                 type: string
@@ -70,6 +70,12 @@ router.post("/create", multerimg.upload.array('images', 10), fundingController.c
  *                 type: integer
  *               amount:
  *                 type: number
+ *               openDate:
+ *                 type: date
+ *               closeDate:
+ *                 type: date
+ *               paymentDate:
+ *                 type: date
  *               images:
  *                 type: string
  *                 format: binary

@@ -88,8 +88,10 @@ router.get("/inquiry/search", adminController.searchInquiry);
  *                 type: string
  *               content:
  *                 type: string
+ *               startDate:
+ *                 type: date
  *               endDate:
- *                 type: datetime
+ *                 type: date
  *               userName:
  *                 type: string
  *               file:
