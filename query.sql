@@ -247,6 +247,17 @@ CREATE TABLE wait_list (
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
 );
 
+CREATE TABLE event (
+	event_id int auto_increment primary key,
+    title varchar(50),
+    content text,
+    img longtext,
+    user_name varchar(50),
+    end_date datetime,
+    
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
+);
+
 -- QR코드 생성
 CREATE TABLE qrcodes (
 	qrcode_id INT AUTO_INCREMENT PRIMARY KEY,

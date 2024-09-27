@@ -33,6 +33,12 @@ const check_funding_query = `
     AND donation >= amount;
 `;
 
+const close_event_query = `
+    UPDATE event 
+    SET status = 'end' 
+    WHERE end_date < NOW();
+`;
+
 const updateStatus = (query) =>
     new Promise((resolve, reject) => {
         db.query(query, (err, result) => {
@@ -127,6 +133,16 @@ async function checkFundingGoals() {
     });
 }
 
+async function endEventCheck() {
+    new Promise((resolve, reject) => {
+        db.query(close_event_query, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+}
+
+
 function scheduleDatabaseUpdate() {
     cron.schedule('0 0 * * *', async () => {
         await updatePopupStatus();
@@ -134,6 +150,7 @@ function scheduleDatabaseUpdate() {
         //await updateReservationStatus();
         await updateWaitList();
         await checkFundingGoals();
+        await endEventCheck();
     });
 };
 
