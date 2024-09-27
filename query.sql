@@ -334,7 +334,7 @@ CREATE TABLE delivery (
 );
 
 create Table funding (
-   funding_id int auto_increment primary key,
+    funding_id int auto_increment primary key,
     user_name varchar(50),
     title varchar(100),
     content text,
@@ -343,22 +343,23 @@ create Table funding (
     status ENUM('pending', 'open', 'successful', 'fail') NOT NULL DEFAULT 'pending',
     open_date datetime,
     close_date datetime,
+    payment_date datetime,
     
     foreign key (user_name) references user_info(user_name) on update cascade
 );
 
 create Table funding_img (
-   img_id int auto_increment primary key,
-   funding_id int,
+    img_id int auto_increment primary key,
+    funding_id int,
     item_id int,
     image longtext,
-   
+    
     foreign key (funding_id) references funding(funding_id) on update cascade,
     foreign key (item_id) references funding_item(item_id) on update cascade
 );
 
 create Table funding_item(
-   item_id int auto_increment primary key,
+    item_id int auto_increment primary key,
     funding_id int,
     user_name varchar(50),
     item_name varchar(25),
@@ -370,8 +371,8 @@ create Table funding_item(
 );
 
 create table funding_list(
-   list_id int auto_increment primary key,
-   funding_id int,
+    list_id int auto_increment primary key,
+    funding_id int,
     item_id int,
     partner_order_id VARCHAR(255),
     user_name varchar(50),
@@ -425,3 +426,6 @@ INSERT INTO achieve (title, content, conditions, points) VALUES
 ('소중한 조언자', '첫 문의', '첫 문의를 작성한 사용자', 300),
 ('waiting...', '3번 이상 예약 대기 중인 사용자', '3번 이상 예약 대기 상태인 사용자', 1000),
 ('오랜 친구', '앱 가입 기간 1년 이상', '앱 가입 기간이 1년을 초과한 사용자', 1000);
+
+alter table pophub.event
+Add column end_date datetime;

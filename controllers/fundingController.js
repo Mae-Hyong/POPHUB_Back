@@ -16,7 +16,8 @@ const fundingController = {
                 amount: body.amount,
                 donation: body.donation,
                 open_date: body.openDate,
-                close_date: body.closeDate
+                close_date: body.closeDate,
+                payment_date: body.paymentDate
             };
 
             // 데이터베이스에 펀딩 정보 저장
@@ -69,7 +70,7 @@ const fundingController = {
         }
     },
 
-    createFundingSupport: async(req, res) => {
+    createFundingSupport: async (req, res) => {
         try {
             const body = req.body;
             const insertData = {
@@ -107,15 +108,16 @@ const fundingController = {
                             status: result.status,
                             openDate: result.openDate,
                             closeDate: result.closeDate,
+                            payment_date: body.paymentDate,
                             images: images.map(image => image.image)
                         };
                     })
                 );
-                if(!fundingList) return res.status(200).send("Not Found fundingList");
+                if (!fundingList) return res.status(200).send("Not Found fundingList");
                 return res.status(200).send(fundingList);
             } else if (fundingId) {
                 const result = await fundingModel.fundingById(fundingId);
-                if(!result) return res.status(200).send("Not Found Funding");
+                if (!result) return res.status(200).send("Not Found Funding");
                 const fundingList = await Promise.all(
                     result.map(async (result) => {
                         fundingId = result.funding_id;
@@ -131,6 +133,7 @@ const fundingController = {
                             status: result.status,
                             openDate: result.openDate,
                             closeDate: result.closeDate,
+                            payment_date: body.paymentDate,
                             images: images.map(image => image.image)
                         };
                     })
@@ -139,7 +142,7 @@ const fundingController = {
                 return res.status(200).json(fundingList)
             } else {
                 const result = await fundingModel.fundingByUser(userName);
-                if(!result) return res.status(200).send("Not Found User");
+                if (!result) return res.status(200).send("Not Found User");
                 fundingId = result.funding_id;
                 const images = await fundingModel.imagesByFundingId(fundingId);
                 return res.status(200).json({ result, progress: result.donation / result.amount * 100, images: images.map(imge => imge.image) })
@@ -153,9 +156,9 @@ const fundingController = {
     searchItem: async (req, res) => {
         try {
             const { fundingId, itemId } = req.query;
-            if(!fundingId && !itemId){
+            if (!fundingId && !itemId) {
                 return res.status(404).send("fundingId 혹은 itemId를 입력해야합니다.");
-            }else if (!fundingId) {
+            } else if (!fundingId) {
                 const result = await fundingModel.selectItem(itemId);
                 const images = await fundingModel.imagesByitemId(itemId);
                 const resultList = {
@@ -197,7 +200,7 @@ const fundingController = {
         try {
             const { fundingId, itemId, userName } = req.query;
             let result;
-            
+
             if (fundingId) result = await fundingModel.searchListByFunding(fundingId);
             else if (itemId) result = await fundingModel.searchListByItem(itemId);
             else result = await fundingModel.searchListByUser(userName);
@@ -230,7 +233,7 @@ const fundingController = {
 
             let result;
 
-            if (!itemId && !userName)  result = await fundingModel.searchSupport();
+            if (!itemId && !userName) result = await fundingModel.searchSupport();
             else if (itemId) result = await fundingModel.supportByItem(itemId);
             else if (userName) result = await fundingModel.supportByUser(userName);
             else result = await fundingModel.supportById(supportId);
@@ -252,7 +255,7 @@ const fundingController = {
         }
     },
 
-    bookMark: async(req, res) => {
+    bookMark: async (req, res) => {
         const { userName, fundingId } = req.body;
 
         if (!userName || !fundingId) return res.status(400).json({ error: 'userName and fundingId are required' });
@@ -270,22 +273,6 @@ const fundingController = {
         } catch (err) {
             console.error(err);
             return res.status(500).json({ error: 'Failed to process bookmark' });
-        }
-    },
-
-    updateFunding: async (req, res) => {
-        try {
-
-        } catch (err) {
-
-        }
-    },
-
-    updateItem: async (req, res) => {
-        try {
-
-        } catch (err) {
-
         }
     },
 }
