@@ -14,8 +14,7 @@ const fundingController = {
                 title: body.title,
                 content: body.content,
                 amount: body.amount,
-                donation: body.donation,
-                donation: body.donation,
+                donation: 0,
                 open_date: body.openDate,
                 close_date: body.closeDate,
                 payment_date: body.paymentDate,
@@ -33,12 +32,6 @@ const fundingController = {
                                 fundingId,
                                 file.location
                             );
-                        })
-                    );
-                    await Promise.all(
-                        req.files.map(async (file) => {
-                            images.push(file.location);
-                            await fundingModel.fundingImg(fundingId, file.location);
                         })
                     );
                 }
@@ -130,7 +123,7 @@ const fundingController = {
             const getFundingDetails = async (result) => {
                 const images = await fundingModel.imagesByFundingId(fundingId);
                 return {
-                    fundingId: fundingId,
+                    fundingId: result.funding_id,
                     userName: result.user_name,
                     title: result.title,
                     content: result.content,

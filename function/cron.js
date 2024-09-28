@@ -36,7 +36,7 @@ const fail_funding_query = `
     UPDATE funding 
     SET status = 'fail' 
     WHERE close_date < NOW() 
-    AND donation <= amount;
+    AND donation < amount;
 `;
 
 const successful_funding_query = `
