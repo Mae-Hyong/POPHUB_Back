@@ -80,7 +80,7 @@ router.get("/inquiry/search", adminController.searchInquiry);
  *     requestBody:
  *       required: true
  *       content:
- *         application/form-data:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             properties:

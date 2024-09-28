@@ -29,7 +29,7 @@ const deliveryStatus_query = 'UPDATE delivery SET status = ? WHERE courier = ? A
 const open_funding_query = `
     UPDATE funding 
     SET status = 'open' 
-    WHERE open_date == NOW()
+    WHERE open_date = NOW()
 `;
 
 const fail_funding_query = `

@@ -116,6 +116,7 @@ const adminController = {
                 .send("공지사항 조회 중 오류가 발생했습니다.");
         }
     },
+
     createEvent: async (req, res) => {
         try {
             let img = req.file ? req.file.location : null;
@@ -152,6 +153,7 @@ const adminController = {
                 .send("공지사항 작성 중 오류가 발생했습니다.");
         }
     },
+    
     createPopupStoreNotification: async (req, res) => {
         try {
             const body = req.body;
