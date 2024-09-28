@@ -1,7 +1,5 @@
 const fundingModel = require("../models/fundingModel");
 const { v1 } = require("uuid");
-const fundingModel = require("../models/fundingModel");
-const { v1 } = require("uuid");
 
 const fundingController = {
     createFunding: async (req, res) => {
