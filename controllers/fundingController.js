@@ -111,14 +111,8 @@ const fundingController = {
                 }
             }
             return res.status(201).send("Item Data Added");
-            return res.status(201).send("Item Data Added");
         } catch (err) {
-            return res
-                .status(500)
-                .send("Item 데이터를 입력 도중 오류가 발생했습니다.");
-            return res
-                .status(500)
-                .send("Item 데이터를 입력 도중 오류가 발생했습니다.");
+            return res.status(500).send("Item 데이터를 입력 도중 오류가 발생했습니다.");
         }
     },
 
@@ -135,9 +129,7 @@ const fundingController = {
             await fundingModel.createFundingSupport(insertData);
 
             return res.status(201).send("Item Data Added");
-            return res.status(201).send("Item Data Added");
         } catch (err) {
-            return res.status(500).send("펀딩 후원 목록 조회 중 오류 발생");
             return res.status(500).send("펀딩 후원 목록 조회 중 오류 발생");
         }
     },
@@ -186,8 +178,6 @@ const fundingController = {
         } catch (err) {
             console.error(err);
             return res.status(500).send("펀딩 조회 중 오류 발생");
-            console.error(err);
-            return res.status(500).send("펀딩 조회 중 오류 발생");
         }
     },
     
@@ -210,16 +200,13 @@ const fundingController = {
                     count: result.count,
                     amount: result.amount,
                     images: images.map((image) => image.image),
-                    images: images.map((image) => image.image),
                 };
                 return res.status(200).json(resultList);
             } else if (!itemId) {
                 const result = await fundingModel.searchFunding(fundingId);
                 const resultList = await new Promise.all(
                     result.map(async (result) => {
-                        const images = await fundingModel.imagesByFundingId(
-                            fundingId
-                        );
+                        const images = await fundingModel.imagesByFundingId(fundingId);
                         return {
                             itemId: result.item_id,
                             fundingId: result.funding_id,
@@ -229,15 +216,12 @@ const fundingController = {
                             count: result.count,
                             amount: result.amount,
                             images: images.map((image) => image.image),
-                            images: images.map((image) => image.image),
                         };
                     })
-                );
                 );
                 return res.status(200).json(resultList);
             }
         } catch (err) {
-            return res.status(500).send("아이템 조회 중 오류 발생");
             return res.status(500).send("아이템 조회 중 오류 발생");
         }
     },
@@ -247,17 +231,10 @@ const fundingController = {
             const { fundingId, itemId, userName } = req.query;
             let result;
 
-            if (fundingId)
-                result = await fundingModel.searchListByFunding(fundingId);
-            else if (itemId)
-                result = await fundingModel.searchListByItem(itemId);
-            if (fundingId)
-                result = await fundingModel.searchListByFunding(fundingId);
-            else if (itemId)
-                result = await fundingModel.searchListByItem(itemId);
+            if (fundingId) result = await fundingModel.searchListByFunding(fundingId);
+            else if (itemId) result = await fundingModel.searchListByItem(itemId);
             else result = await fundingModel.searchListByUser(userName);
 
-            const resultList = result.map((result) => ({
             const resultList = result.map((result) => ({
                 orderId: result.order_id,
                 fundingId: result.funding_id,
@@ -285,23 +262,14 @@ const fundingController = {
 
             let result;
 
-            if (!itemId && !userName)
-                result = await fundingModel.searchSupport();
-            if (!itemId && !userName)
-                result = await fundingModel.searchSupport();
+            if (!itemId && !userName) result = await fundingModel.searchSupport();
             else if (itemId) result = await fundingModel.supportByItem(itemId);
-            else if (userName)
-                result = await fundingModel.supportByUser(userName);
-            else if (userName)
-                result = await fundingModel.supportByUser(userName);
+            else if (userName) result = await fundingModel.supportByUser(userName);
             else result = await fundingModel.supportById(supportId);
 
             if (!result || result.length === 0)
                 return res.status(200).send("Not Found");
-            if (!result || result.length === 0)
-                return res.status(200).send("Not Found");
 
-            const supportList = result.map((result) => ({
             const supportList = result.map((result) => ({
                 fundingId: result.support_id,
                 itemId: result.item_id,
@@ -313,8 +281,6 @@ const fundingController = {
 
             return res.status(200).json(supportList);
         } catch (err) {
-            console.error(err);
-            return res.status(500).send("펀딩 조회 중 오류 발생");
             console.error(err);
             return res.status(500).send("펀딩 조회 중 오류 발생");
         }
@@ -340,9 +306,6 @@ const fundingController = {
                 return res
                     .status(200)
                     .json({ message: "Bookmark added successfully" });
-                return res
-                    .status(200)
-                    .json({ message: "Bookmark added successfully" });
             }
         } catch (err) {
             console.error(err);
@@ -350,7 +313,5 @@ const fundingController = {
         }
     },
 };
-};
 
 module.exports = fundingController;
-
