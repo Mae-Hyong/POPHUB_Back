@@ -14,13 +14,14 @@ const fundingController = {
                 title: body.title,
                 content: body.content,
                 amount: body.amount,
-                donation: body.donation,
+                donation: 0,
                 open_date: body.openDate,
                 close_date: body.closeDate,
                 payment_date: body.paymentDate
             };
 
             // 데이터베이스에 펀딩 정보 저장
+            console.log(fundingData)
             await fundingModel.createFunding(fundingData);
 
             if (req.files && req.files.length > 0) {
@@ -31,7 +32,7 @@ const fundingController = {
                     }));
                 }
             }
-
+            
             return res.status(201).send('Funding Data Added');
         } catch (err) {
             console.error(err)
@@ -108,7 +109,7 @@ const fundingController = {
                             status: result.status,
                             openDate: result.openDate,
                             closeDate: result.closeDate,
-                            payment_date: body.paymentDate,
+                            payment_date: result.paymentDate,
                             images: images.map(image => image.image)
                         };
                     })

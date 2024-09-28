@@ -25,8 +25,6 @@ const multerimg = require('../function/multer');
  *                 type: string
  *               amount:
  *                 type: number
- *               donation:
- *                 type: number
  *               openDate:
  *                 type: string
  *                 format: date
@@ -36,7 +34,7 @@ const multerimg = require('../function/multer');
  *               paymentDate:
  *                 type: string
  *                 format: date
- *               image:
+ *               images:
  *                 type: string
  *                 format: binary
  *     responses:
@@ -72,7 +70,7 @@ router.post("/create", multerimg.upload.array('images', 10), fundingController.c
  *                 type: integer
  *               amount:
  *                 type: number
- *               image:
+ *               images:
  *                 type: string
  *                 format: binary
  *     responses:
@@ -81,7 +79,7 @@ router.post("/create", multerimg.upload.array('images', 10), fundingController.c
  *       500:
  *         description: Item 데이터를 입력 도중 오류가 발생했습니다.
  */
-router.post("/item/create", fundingController.createItem);
+router.post("/item/create", multerimg.upload.array('images', 10), fundingController.createItem);
 
 /**
  * @swagger
@@ -249,6 +247,7 @@ router.get("/item", fundingController.searchItem);
  * /funding/support:
  *   get:
  *     summary: 후원자 목록을 검색합니다.
+ *     tags: [Funding]
  *     parameters:
  *       - name: itemId
  *         in: query

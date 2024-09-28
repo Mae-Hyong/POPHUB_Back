@@ -26,11 +26,30 @@ CREATE TABLE wait_list(
 const checkDelivery_query = 'SELECT tracking_number, courier FROM delivery WHERE status = "주문 완료" OR status = "배송 중"';
 const deliveryStatus_query = 'UPDATE delivery SET status = ? WHERE courier = ? AND tracking_number = ?';
 
-const check_funding_query = `
+const open_funding_query = `
+    UPDATE funding 
+    SET status = 'open' 
+    WHERE open_date == NOW()
+`;
+
+const fail_funding_query = `
+    UPDATE funding 
+    SET status = 'fail' 
+    WHERE close_date < NOW() 
+    AND donation <= amount;
+`;
+
+const successful_funding_query = `
     UPDATE funding 
     SET status = 'successful' 
     WHERE close_date < NOW() 
     AND donation >= amount;
+`;
+
+const progress_event_query = `
+    UPDATE event 
+    SET status = 'wait' 
+    WHERE start_date == NOW();
 `;
 
 const close_event_query = `
@@ -124,9 +143,36 @@ const updateWaitList = async () => {
     }
 };
 
-async function checkFundingGoals() {
+async function openFundingGoals() {
     new Promise((resolve, reject) => {
-        db.query(check_funding_query, (err, result) => {
+        db.query(open_funding_query, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+}
+
+async function failFundingGoals() {
+    new Promise((resolve, reject) => {
+        db.query(fail_funding_query, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+}
+
+async function successFundingGoals() {
+    new Promise((resolve, reject) => {
+        db.query(successful_funding_query, (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+        });
+    });
+}
+
+async function progressEventCheck() {
+    new Promise((resolve, reject) => {
+        db.query(progress_event_query, (err, result) => {
             if (err) reject(err);
             else resolve(result);
         });
@@ -142,14 +188,16 @@ async function endEventCheck() {
     });
 }
 
-
 function scheduleDatabaseUpdate() {
     cron.schedule('0 0 * * *', async () => {
         await updatePopupStatus();
         await updateDeliveryStatus();
         //await updateReservationStatus();
         await updateWaitList();
-        await checkFundingGoals();
+        await openFundingGoals();
+        await failFundingGoals();
+        await successFundingGoals();
+        await progressEventCheck();
         await endEventCheck();
     });
 };

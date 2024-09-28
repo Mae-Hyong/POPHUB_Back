@@ -125,7 +125,8 @@ const adminController = {
                 content: body.content,
                 img: img,
                 usesr_name: body.userName,
-                end_date: body.end_date
+                start_date: body.startDate,
+                end_date: body.endDate
             };
 
             await adminModel.createEvent(eventData);
@@ -190,11 +191,13 @@ const adminController = {
                 const results = await Promise.all(
                     searchResult.map(async (searchResult) => {
                         return {
-                            noticeId: searchResult.event_id,
+                            eventId: searchResult.event_id,
                             userName: searchResult.user_name,
                             title: searchResult.title,
                             content: searchResult.content,
                             img: searchResult.img,
+                            startDate: searchResult.start_date,
+                            endDate: searchResult.end_date
                         };
                     })
                 );

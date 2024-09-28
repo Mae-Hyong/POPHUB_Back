@@ -253,8 +253,10 @@ CREATE TABLE event (
     content text,
     img longtext,
     user_name varchar(50),
-    end_date datetime,
-    
+    start_date date,
+    end_date date,
+    status ENUM('wait', 'progress', 'end') DEFAULT 'wait',
+
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
@@ -341,9 +343,9 @@ create Table funding (
     amount int,
     donation int,
     status ENUM('pending', 'open', 'successful', 'fail') NOT NULL DEFAULT 'pending',
-    open_date datetime,
-    close_date datetime,
-    payment_date datetime,
+    open_date date,
+    close_date date,
+    payment_date date,
     
     foreign key (user_name) references user_info(user_name) on update cascade
 );

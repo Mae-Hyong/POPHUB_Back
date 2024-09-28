@@ -1,5 +1,4 @@
 const db = require('../config/mysqlDatabase');
-const { searchSupport } = require('../controllers/fundingController');
 
 const search_funding_query = "SELECT * FROM funding"
 const imagesByFundingId_query = "SELECT * FROM funding_img WHERE funding_id = ?"
@@ -21,7 +20,6 @@ const insert_funding_query = "INSERT INTO funding SET ?"
 const insert_fundingImg_query = "INSERT INTO funding_img (funding_id, image) VALUES (?, ?)";
 const insert_item_query = "INSERT INTO funding_item SET ?"
 const insert_itemImg_query = "INSERT INTO funding_img (item_id, image) VALUES (?, ?)"
-const create_fundingList_query = "INSERT INTO funding_list SET ?"
 const create_bookmark_query = "INSERT INTO BookMark (user_name, funding_id) VALUES (?, ?)"
 const create_fundingSupport_query = "INSERT INTO funding_support SET ?"
 
