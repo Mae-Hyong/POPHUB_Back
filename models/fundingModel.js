@@ -2,7 +2,7 @@ const db = require('../config/mysqlDatabase');
 
 const search_funding_query = "SELECT * FROM funding"
 const imagesByFundingId_query = "SELECT * FROM funding_img WHERE funding_id = ?"
-const imagesByitemId_query = "SELECT * FROM funding_img WHERE funding_id = ?"
+const imagesByitemId_query = "SELECT * FROM funding_img WHERE item_id = ?"
 const search_fundingId_query = "SELECT * FROM funding WHERE funding_id = ?"
 const userNameByFunding_query = "SELECT * FROM funding WHERE user_name = ?"
 const search_fundingItem_query = "SELECT * FROM funding_item WHERE funding_id = ?"
@@ -95,7 +95,7 @@ const fundingModel = {
         return new Promise((resolve, reject) => {
             db.query(search_fundingId_query, fundingId, (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             })
         })
     },

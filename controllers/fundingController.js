@@ -131,9 +131,9 @@ const fundingController = {
                     donation: result.donation, // 후원 금액
                     progress: result.amount ? (result.donation / result.amount) * 100 : 0,
                     status: result.status,
-                    openDate: result.openDate,
-                    closeDate: result.closeDate,
-                    payment_date: result.paymentDate,
+                    openDate: result.open_date,
+                    closeDate: result.close_date,
+                    payment_date: result.payment_date,
                     images: images.map(image => image.image)
                 };
             };
@@ -153,8 +153,8 @@ const fundingController = {
             } else { // userName이 주어진 경우
                 result = await fundingModel.fundingByUser(userName);
                 if (!result) return res.status(200).send("Not Found User");
-                const fundingDetails = await getFundingDetails(result);
-                return res.status(200).json(fundingDetails);
+                const fundingList = await Promise.all(result.map(getFundingDetails));
+                return res.status(200).json(fundingList);
             }
         } catch (err) {
             console.error(err);
