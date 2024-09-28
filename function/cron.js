@@ -49,7 +49,7 @@ const successful_funding_query = `
 const progress_event_query = `
     UPDATE event 
     SET status = 'wait' 
-    WHERE start_date == NOW();
+    WHERE start_date = NOW();
 `;
 
 const close_event_query = `
