@@ -121,7 +121,7 @@ const fundingController = {
             const userName = req.query.userName;
     
             const getFundingDetails = async (result) => {
-                const images = await fundingModel.imagesByFundingId(fundingId);
+                const images = await fundingModel.imagesByFundingId(result.funding_id);
                 return {
                     fundingId: result.funding_id,
                     userName: result.user_name,
