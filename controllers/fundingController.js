@@ -21,7 +21,6 @@ const fundingController = {
                 open_date: body.openDate,
                 close_date: body.closeDate,
                 payment_date: body.paymentDate,
-                payment_date: body.paymentDate,
             };
 
             // 데이터베이스에 펀딩 정보 저장
@@ -41,10 +40,7 @@ const fundingController = {
                     await Promise.all(
                         req.files.map(async (file) => {
                             images.push(file.location);
-                            await fundingModel.fundingImg(
-                                fundingId,
-                                file.location
-                            );
+                            await fundingModel.fundingImg(fundingId, file.location);
                         })
                     );
                 }
@@ -96,12 +92,6 @@ const fundingController = {
 
             if (req.files && req.files.length > 0) {
                 if (req.files) {
-                    await Promise.all(
-                        req.files.map(async (file) => {
-                            images.push(file.location);
-                            await fundingModel.itemImg(itemId, file.location);
-                        })
-                    );
                     await Promise.all(
                         req.files.map(async (file) => {
                             images.push(file.location);
@@ -185,9 +175,7 @@ const fundingController = {
         try {
             const { fundingId, itemId } = req.query;
             if (!fundingId && !itemId) {
-                return res
-                    .status(404)
-                    .send("fundingId 혹은 itemId를 입력해야합니다.");
+                return res.status(404).send("fundingId 혹은 itemId를 입력해야합니다.");
             } else if (!fundingId) {
                 const result = await fundingModel.selectItem(itemId);
                 const images = await fundingModel.imagesByitemId(itemId);
@@ -276,7 +264,6 @@ const fundingController = {
                 userName: result.user_name,
                 amount: result.amount, // 목표 금액
                 createdAt: result.created_at,
-                createdAt: result.created_at,
             }));
 
             return res.status(200).json(supportList);
@@ -293,19 +280,14 @@ const fundingController = {
             return res.status(400).json({ error: "userName and fundingId are required" });
 
         try {
-            const existingBookmark = await fundingModel.checkBookMark(
-                userName,
-                fundingId
-            );
+            const existingBookmark = await fundingModel.checkBookMark(userName, fundingId);
 
             if (existingBookmark.length > 0) {
                 await fundingModel.deleteBookMark(userName, fundingId);
                 return res.status(200).json({ message: "Bookmark removed successfully" });
             } else {
                 await fundingModel.createBookMark(userName, fundingId);
-                return res
-                    .status(200)
-                    .json({ message: "Bookmark added successfully" });
+                return res.status(200).json({ message: "Bookmark added successfully" });
             }
         } catch (err) {
             console.error(err);
