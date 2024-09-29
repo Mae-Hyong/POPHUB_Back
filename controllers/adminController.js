@@ -127,25 +127,25 @@ const adminController = {
                 img: img,
                 user_name: body.userName,
                 start_date: body.startDate,
-                end_date: body.endDate
+                end_date: body.endDate,
             };
 
             await adminModel.createEvent(eventData);
 
             // 모든 사용자에게 알림 전송
-            const users = await adminModel.getAllUsers(); // 모든 사용자 가져오기
-            for (const user of users) {
-                const alarmData = {
-                    user_name: user.user_name,
-                    title: eventData.title,
-                    content: eventData.content,
-                    img: eventData.img,
-                    notified_at: new Date(),
-                };
+            // const users = await adminModel.getAllUsers(); // 모든 사용자 가져오기
+            // for (const user of users) {
+            //     const alarmData = {
+            //         user_name: user.user_name,
+            //         title: eventData.title,
+            //         content: eventData.content,
+            //         img: eventData.img,
+            //         notified_at: new Date(),
+            //     };
 
-                await sendAlarm(alarmData); // 알림 전송
-                await db.collection("Alarms").add(alarmData); // Firebase에 알림 저장
-            }
+            //     await sendAlarm(alarmData); // 알림 전송
+            //     await db.collection("Alarms").add(alarmData); // Firebase에 알림 저장
+            // }
             return res.status(201).send("공지사항 작성 완료");
         } catch (err) {
             return res
@@ -153,7 +153,7 @@ const adminController = {
                 .send("공지사항 작성 중 오류가 발생했습니다.");
         }
     },
-    
+
     createPopupStoreNotification: async (req, res) => {
         try {
             const body = req.body;
@@ -199,7 +199,7 @@ const adminController = {
                             content: searchResult.content,
                             img: searchResult.img,
                             startDate: searchResult.start_date,
-                            endDate: searchResult.end_date
+                            endDate: searchResult.end_date,
                         };
                     })
                 );
@@ -246,7 +246,11 @@ const adminController = {
             const pendingList = await adminModel.popupPendingList();
 
             if (pendingList.length === 0) {
-                return res.status(200).json({ message: "현재 승인 요청을 기다리는 팝업이 없습니다." });
+                return res
+                    .status(200)
+                    .json({
+                        message: "현재 승인 요청을 기다리는 팝업이 없습니다.",
+                    });
             }
 
             return res.status(200).json(pendingList);
