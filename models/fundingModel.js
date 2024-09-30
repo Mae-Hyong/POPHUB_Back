@@ -127,15 +127,6 @@ const fundingModel = {
         })
     },
 
-    searchItem: (itemId) => {
-        return new Promise((resolve, reject) => {
-            db.query(search_fundingItem_query, itemId, (err, result) => {
-                if (err) reject(err);
-                else resolve(result);
-            })
-        })
-    },
-
     selectItem: (itemId) => {
         return new Promise((resolve, reject) => {
             db.query(select_fundingItem_query, itemId, (err, result) => {
