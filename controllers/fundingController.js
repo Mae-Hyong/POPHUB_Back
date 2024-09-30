@@ -5,7 +5,9 @@ const fundingController = {
     createFunding: async (req, res) => {
         try {
             const body = req.body;
-            const images = req.files? req.files.map((file) => file.location) : []; // 파일이 여러 개일 경우 배열로 처리
+            const images = req.files
+                ? req.files.map((file) => file.location)
+                : []; // 파일이 여러 개일 경우 배열로 처리
             const fundingId = v1();
             // Funding 데이터를 객체로 생성
             const fundingData = {
@@ -36,38 +38,42 @@ const fundingController = {
                     );
                 }
             }
-            // 펀딩 성공 여부를 확인
-            const fundingDetails = await fundingModel.fundingById(fundingId);
-            const isFundingSuccess = fundingDetails.donation >= fundingDetails.amount; // 목표 금액 달성 여부 판단
-            const userId = body.user_id;
+            // // 펀딩 성공 여부를 확인
+            // const fundingDetails = await fundingModel.fundingById(fundingId);
+            // const isFundingSuccess = fundingDetails.donation >= fundingDetails.amount; // 목표 금액 달성 여부 판단
+            // const userId = body.user_id;
 
-            if (isFundingSuccess) {
-                // 성공 알림 전송
-                await alarmService.sendNotification(
-                    userId,
-                    "펀딩 성공",
-                    "펀딩이 성공적으로 완료되었습니다. 결제 화면으로 이동하려면 클릭하세요."
-                );
-            } else {
-                // 실패 알림 전송
-                await alarmService.sendNotification(
-                    userId,
-                    "펀딩 실패",
-                    "펀딩이 실패했습니다."
-                );
-            }
+            // if (isFundingSuccess) {
+            //     // 성공 알림 전송
+            //     await alarmService.sendNotification(
+            //         userId,
+            //         "펀딩 성공",
+            //         "펀딩이 성공적으로 완료되었습니다. 결제 화면으로 이동하려면 클릭하세요."
+            //     );
+            // } else {
+            //     // 실패 알림 전송
+            //     await alarmService.sendNotification(
+            //         userId,
+            //         "펀딩 실패",
+            //         "펀딩이 실패했습니다."
+            //     );
+            // }
 
             return res.status(201).send(fundingId);
         } catch (err) {
             console.error(err);
-            return res.status(500).send("Funding 데이터를 입력 도중 오류가 발생했습니다.");
+            return res
+                .status(500)
+                .send("Funding 데이터를 입력 도중 오류가 발생했습니다.");
         }
     },
 
     createItem: async (req, res) => {
         try {
             const body = req.body;
-            const images = req.files? req.files.map((file) => file.location) : [];
+            const images = req.files
+                ? req.files.map((file) => file.location)
+                : [];
             const itemId = v1();
             const itemData = {
                 item_id: itemId,
@@ -93,7 +99,9 @@ const fundingController = {
             }
             return res.status(201).send("Item Data Added");
         } catch (err) {
-            return res.status(500).send("Item 데이터를 입력 도중 오류가 발생했습니다.");
+            return res
+                .status(500)
+                .send("Item 데이터를 입력 도중 오류가 발생했습니다.");
         }
     },
 
@@ -119,9 +127,11 @@ const fundingController = {
         try {
             const fundingId = req.query.fundingId;
             const userName = req.query.userName;
-    
+
             const getFundingDetails = async (result) => {
-                const images = await fundingModel.imagesByFundingId(result.funding_id);
+                const images = await fundingModel.imagesByFundingId(
+                    result.funding_id
+                );
                 return {
                     fundingId: result.funding_id,
                     userName: result.user_name,
@@ -129,31 +139,41 @@ const fundingController = {
                     content: result.content,
                     amount: result.amount, // 목표금액
                     donation: result.donation, // 후원 금액
-                    progress: result.amount ? (result.donation / result.amount) * 100 : 0,
+                    progress: result.amount
+                        ? (result.donation / result.amount) * 100
+                        : 0,
                     status: result.status,
                     openDate: result.open_date,
                     closeDate: result.close_date,
                     payment_date: result.payment_date,
-                    images: images.map(image => image.image)
+                    images: images.map((image) => image.image),
                 };
             };
-    
+
             let result;
-    
+
             if (!fundingId && !userName) {
                 result = await fundingModel.searchFunding();
-                if (!result.length) return res.status(200).send("Not Found fundingList");
-                const fundingList = await Promise.all(result.map(getFundingDetails));
+                if (!result.length)
+                    return res.status(200).send("Not Found fundingList");
+                const fundingList = await Promise.all(
+                    result.map(getFundingDetails)
+                );
                 return res.status(200).json(fundingList);
             } else if (fundingId) {
                 result = await fundingModel.fundingById(fundingId);
                 if (!result) return res.status(200).send("Not Found Funding");
-                const fundingList = await Promise.all(result.map(getFundingDetails));
+                const fundingList = await Promise.all(
+                    result.map(getFundingDetails)
+                );
                 return res.status(200).json(fundingList);
-            } else { // userName이 주어진 경우
+            } else {
+                // userName이 주어진 경우
                 result = await fundingModel.fundingByUser(userName);
                 if (!result) return res.status(200).send("Not Found User");
-                const fundingList = await Promise.all(result.map(getFundingDetails));
+                const fundingList = await Promise.all(
+                    result.map(getFundingDetails)
+                );
                 return res.status(200).json(fundingList);
             }
         } catch (err) {
@@ -161,12 +181,14 @@ const fundingController = {
             return res.status(500).send("펀딩 조회 중 오류 발생");
         }
     },
-    
+
     searchItem: async (req, res) => {
         try {
             const { fundingId, itemId } = req.query;
             if (!fundingId && !itemId) {
-                return res.status(404).send("fundingId 혹은 itemId를 입력해야합니다.");
+                return res
+                    .status(404)
+                    .send("fundingId 혹은 itemId를 입력해야합니다.");
             } else if (!fundingId) {
                 const result = await fundingModel.selectItem(itemId);
                 const images = await fundingModel.imagesByitemId(itemId);
@@ -185,7 +207,9 @@ const fundingController = {
                 const result = await fundingModel.searchFunding(fundingId);
                 const resultList = await new Promise.all(
                     result.map(async (result) => {
-                        const images = await fundingModel.imagesByFundingId(fundingId);
+                        const images = await fundingModel.imagesByFundingId(
+                            fundingId
+                        );
                         return {
                             itemId: result.item_id,
                             fundingId: result.funding_id,
@@ -210,8 +234,10 @@ const fundingController = {
             const { fundingId, itemId, userName } = req.query;
             let result;
 
-            if (fundingId) result = await fundingModel.searchListByFunding(fundingId);
-            else if (itemId) result = await fundingModel.searchListByItem(itemId);
+            if (fundingId)
+                result = await fundingModel.searchListByFunding(fundingId);
+            else if (itemId)
+                result = await fundingModel.searchListByItem(itemId);
             else result = await fundingModel.searchListByUser(userName);
 
             const resultList = result.map((result) => ({
@@ -241,9 +267,11 @@ const fundingController = {
 
             let result;
 
-            if (!itemId && !userName) result = await fundingModel.searchSupport();
+            if (!itemId && !userName)
+                result = await fundingModel.searchSupport();
             else if (itemId) result = await fundingModel.supportByItem(itemId);
-            else if (userName) result = await fundingModel.supportByUser(userName);
+            else if (userName)
+                result = await fundingModel.supportByUser(userName);
             else result = await fundingModel.supportById(supportId);
 
             if (!result || result.length === 0)
@@ -268,21 +296,32 @@ const fundingController = {
         const { userName, fundingId } = req.body;
 
         if (!userName || !fundingId)
-            return res.status(400).json({ error: "userName and fundingId are required" });
+            return res
+                .status(400)
+                .json({ error: "userName and fundingId are required" });
 
         try {
-            const existingBookmark = await fundingModel.checkBookMark(userName, fundingId);
+            const existingBookmark = await fundingModel.checkBookMark(
+                userName,
+                fundingId
+            );
 
             if (existingBookmark.length > 0) {
                 await fundingModel.deleteBookMark(userName, fundingId);
-                return res.status(200).json({ message: "Bookmark removed successfully" });
+                return res
+                    .status(200)
+                    .json({ message: "Bookmark removed successfully" });
             } else {
                 await fundingModel.createBookMark(userName, fundingId);
-                return res.status(200).json({ message: "Bookmark added successfully" });
+                return res
+                    .status(200)
+                    .json({ message: "Bookmark added successfully" });
             }
         } catch (err) {
             console.error(err);
-            return res.status(500).json({ error: "Failed to process bookmark" });
+            return res
+                .status(500)
+                .json({ error: "Failed to process bookmark" });
         }
     },
 };
