@@ -23,7 +23,7 @@ CREATE TABLE wait_list(
   )
 `;
 
-const checkDelivery_query = 'SELECT tracking_number, courier FROM delivery WHERE status = "주문 완료" OR status = "배송 중"';
+const checkDelivery_query = 'SELECT tracking_number, courier FROM delivery WHERE (status = "주문 완료" OR status = "배송 중") AND courier IS NOT NULL AND tracking_number IS NOT NULL';
 const deliveryStatus_query = 'UPDATE delivery SET status = ? WHERE courier = ? AND tracking_number = ?';
 
 const open_funding_query = `
