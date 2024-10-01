@@ -36,26 +36,6 @@ const fundingController = {
                     );
                 }
             }
-            // // 펀딩 성공 여부를 확인
-            // const fundingDetails = await fundingModel.fundingById(fundingId);
-            // const isFundingSuccess = fundingDetails.donation >= fundingDetails.amount; // 목표 금액 달성 여부 판단
-            // const userId = body.user_id;
-
-            // if (isFundingSuccess) {
-            //     // 성공 알림 전송
-            //     await alarmService.sendNotification(
-            //         userId,
-            //         "펀딩 성공",
-            //         "펀딩이 성공적으로 완료되었습니다. 결제 화면으로 이동하려면 클릭하세요."
-            //     );
-            // } else {
-            //     // 실패 알림 전송
-            //     await alarmService.sendNotification(
-            //         userId,
-            //         "펀딩 실패",
-            //         "펀딩이 실패했습니다."
-            //     );
-            // }
 
             return res.status(201).send(fundingId);
         } catch (err) {
