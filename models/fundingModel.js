@@ -95,7 +95,7 @@ const fundingModel = {
         return new Promise((resolve, reject) => {
             db.query(search_fundingId_query, fundingId, (err, result) => {
                 if (err) reject(err);
-                else resolve(result);
+                else resolve(result[0]);
             })
         })
     },
@@ -174,7 +174,7 @@ const fundingModel = {
 
     searchSupport: () => {
         return new Promise((resolve, reject) => {
-            db.query(search_support_query, itemId, (err, result) => {
+            db.query(search_support_query, (err, result) => {
                 if (err) reject(err);
                 else resolve(result);
             })

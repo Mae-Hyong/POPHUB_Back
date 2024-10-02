@@ -72,9 +72,7 @@ const fundingController = {
             }
             return res.status(201).send("Item Data Added");
         } catch (err) {
-            return res
-                .status(500)
-                .send("Item 데이터를 입력 도중 오류가 발생했습니다.");
+            return res.status(500).send("Item 데이터를 입력 도중 오류가 발생했습니다.");
         }
     },
 
@@ -85,7 +83,7 @@ const fundingController = {
                 item_id: body.itemId,
                 user_name: body.userName,
                 amount: body.amount,
-                amount: body.amount,
+                count: body.count,
             };
 
             await fundingModel.createFundingSupport(insertData);
@@ -125,16 +123,12 @@ const fundingController = {
                 result = await fundingModel.searchFunding();
                 if (!result.length)
                     return res.status(200).send("Not Found fundingList");
-                const fundingList = await Promise.all(
-                    result.map(getFundingDetails)
-                );
+                const fundingList = await Promise.all(result.map(getFundingDetails));
                 return res.status(200).json(fundingList);
             } else if (fundingId) {
                 result = await fundingModel.fundingById(fundingId);
                 if (!result) return res.status(200).send("Not Found Funding");
-                const fundingList = await Promise.all(
-                    result.map(getFundingDetails)
-                );
+                const fundingList = [await getFundingDetails(result)];
                 return res.status(200).json(fundingList);
             } else {
                 // userName이 주어진 경우
@@ -225,10 +219,7 @@ const fundingController = {
 
     searchSupport: async (req, res) => {
         try {
-            const itemId = req.query.itemId;
-            const userName = req.query.userName;
-            const supportId = req.query.supportId;
-
+            const { itemId, userName, supportId } = req.query;
             let result;
 
             if (!itemId && !userName)
@@ -240,17 +231,26 @@ const fundingController = {
 
             if (!result || result.length === 0)
                 return res.status(200).send("Not Found");
+            const resultList = await Promise.all(
+                result.map(async (result) => {
+                    const itemData = await fundingModel.selectItem(result.item_id);
+                    const fundingName = await fundingModel.fundingById(itemData.funding_id);
+                    return {
+                        supportId: result.support_id,
+                        itemId: result.item_id,
+                        userName: result.user_name,
+                        amount: result.amount,
+                        count: result.count,
+                        createdAt: result.created_at,
+                        itemName: itemData.item_name,
+                        fundingName: fundingName.title
+                    };
+                })
+            );
 
-            const supportList = result.map((result) => ({
-                fundingId: result.support_id,
-                itemId: result.item_id,
-                userName: result.user_name,
-                amount: result.amount, // 목표 금액
-                createdAt: result.created_at,
-            }));
-
-            return res.status(200).json(supportList);
+            return res.status(200).json(resultList);
         } catch (err) {
+            console.error(err);
             return res.status(500).send("펀딩 조회 중 오류 발생");
         }
     },

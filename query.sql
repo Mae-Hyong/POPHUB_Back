@@ -336,7 +336,7 @@ CREATE TABLE delivery (
 );
 
 create Table funding (
-    funding_id int auto_increment primary key,
+    funding_id varchar(50) primary key,
     user_name varchar(50),
     title varchar(100),
     content text,
@@ -352,8 +352,8 @@ create Table funding (
 
 create Table funding_img (
     img_id int auto_increment primary key,
-    funding_id int,
-    item_id int,
+    funding_id varchar(50),
+    item_id varchar(50),
     image longtext,
     
     foreign key (funding_id) references funding(funding_id) on update cascade,
@@ -361,8 +361,8 @@ create Table funding_img (
 );
 
 create Table funding_item(
-    item_id int auto_increment primary key,
-    funding_id int,
+    item_id varchar(50) primary key,
+    funding_id varchar(50),
     user_name varchar(50),
     item_name varchar(25),
     content text,
@@ -372,10 +372,13 @@ create Table funding_item(
     foreign key (funding_id) references funding(funding_id) on update cascade
 );
 
+alter table pophub.funding_support
+Add column count int;
+
 create table funding_list(
     list_id int auto_increment primary key,
-    funding_id int,
-    item_id int,
+    funding_id varchar(50),
+    item_id varchar(50),
     partner_order_id VARCHAR(255),
     user_name varchar(50),
     count int,
