@@ -1,31 +1,32 @@
 const db = require('../config/mysqlDatabase');
 
-const search_funding_query = "SELECT * FROM funding"
-const imagesByFundingId_query = "SELECT * FROM funding_img WHERE funding_id = ?"
-const imagesByitemId_query = "SELECT * FROM funding_img WHERE item_id = ?"
-const search_fundingId_query = "SELECT * FROM funding WHERE funding_id = ?"
-const userNameByFunding_query = "SELECT * FROM funding WHERE user_name = ?"
-const search_fundingItem_query = "SELECT * FROM funding_item WHERE funding_id = ?"
-const select_fundingItem_query = "SELECT * FROM funding_item WHERE item_id = ?"
-const search_listByFunding_query = "SELECT * FROM payment_details WHERE funding_id = ?"
-const search_listByItem_query = "SELECT * FROM payment_details WHERE item_id = ?"
-const search_listByUser_query = "SELECT * FROM payment_details WHERE user_name = ?"
-const search_support_query = "SELECT * FROM funding_support"
-const check_bookmark_query = "SELECT * FROM BookMark WHERE user_name = ? AND funding_id = ?"
-const search_supportByItem_query = "SELECT * FROM funding_support WHERE item_id = ?"
-const search_supportByUser_query = "SELECT * FROM funding_support WHERE user_name = ?"
-const search_supportById_query = "SELECT * FROM funding_support WHERE support_id = ?"
+const search_funding_query = "SELECT * FROM funding";
+const imagesByFundingId_query = "SELECT * FROM funding_img WHERE funding_id = ?";
+const imagesByitemId_query = "SELECT * FROM funding_img WHERE item_id = ?";
+const search_fundingId_query = "SELECT * FROM funding WHERE funding_id = ?";
+const userNameByFunding_query = "SELECT * FROM funding WHERE user_name = ?";
+const search_fundingItem_query = "SELECT * FROM funding_item WHERE funding_id = ?";
+const select_fundingItem_query = "SELECT * FROM funding_item WHERE item_id = ?";
+const search_listByFunding_query = "SELECT * FROM payment_details WHERE funding_id = ?";
+const search_listByItem_query = "SELECT * FROM payment_details WHERE item_id = ?";
+const search_listByUser_query = "SELECT * FROM payment_details WHERE user_name = ?";
+const search_support_query = "SELECT * FROM funding_support";
+const check_bookmark_query = "SELECT * FROM BookMark WHERE user_name = ? AND funding_id = ?";
+const search_supportByItem_query = "SELECT * FROM funding_support WHERE item_id = ?";
+const search_supportByUser_query = "SELECT * FROM funding_support WHERE user_name = ?";
+const search_supportById_query = "SELECT * FROM funding_support WHERE support_id = ?";
 
-const insert_funding_query = "INSERT INTO funding SET ?"
+const insert_funding_query = "INSERT INTO funding SET ?";
 const insert_fundingImg_query = "INSERT INTO funding_img (funding_id, image) VALUES (?, ?)";
-const insert_item_query = "INSERT INTO funding_item SET ?"
-const insert_itemImg_query = "INSERT INTO funding_img (item_id, image) VALUES (?, ?)"
-const create_bookmark_query = "INSERT INTO BookMark (user_name, funding_id) VALUES (?, ?)"
-const create_fundingSupport_query = "INSERT INTO funding_support SET ?"
+const insert_item_query = "INSERT INTO funding_item SET ?";
+const insert_itemImg_query = "INSERT INTO funding_img (item_id, image) VALUES (?, ?)";
+const create_bookmark_query = "INSERT INTO BookMark (user_name, funding_id) VALUES (?, ?)";
+const create_fundingSupport_query = "INSERT INTO funding_support SET ?";
 
-const update_donation_query = "UPDATE funding SET donation = donation + ? WHERE funding_id = ?;"
+const update_donation_query = "UPDATE funding SET donation = donation + ? WHERE funding_id = ?";
+const cancel_support_query = "UPDATE funding_support SET status = ? WHERE support_id = ?";
 
-const delete_bookmark_query = "DELETE FROM BookMark WHERE user_name = ? AND funding_id = ?"
+const delete_bookmark_query = "DELETE FROM BookMark WHERE user_name = ? AND funding_id = ?";
 
 const fundingModel = {
     createFunding: (fundingData) => {
@@ -234,6 +235,15 @@ const fundingModel = {
             })
         })
     },
+
+    cancelSupport: (supportId) => {
+        return new Promise((resolve, reject) => {
+            db.query(cancel_support_query, ["cancel", supportId], (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            })
+        })
+    }
 }
 
 module.exports = fundingModel;

@@ -275,6 +275,18 @@ const fundingController = {
             return res.status(500).json({ error: "Failed to process bookmark" });
         }
     },
+
+    cancelSupport: async (req, res) => {
+        try {
+            const { supportId } = req.body;
+
+            await fundingModel.cancelSupport(supportId);
+
+            return res.status(200).send("cancel successfully");
+        } catch (err) {
+            return res.status(500).send("후원 취소 중 오류 발생");
+        }
+    }
 };
 
 module.exports = fundingController;

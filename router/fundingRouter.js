@@ -284,6 +284,8 @@ router.get("/item", fundingController.searchItem);
  *                 type: string
  *               amount:
  *                 type: integer
+ *               count:
+ *                 type: integer
  *               createdAt:
  *                 type: string
  *                 format: date-time
@@ -318,5 +320,28 @@ router.get('/support', fundingController.searchSupport);
  *         description: Internal server error
  */
 router.post("/bookmark", fundingController.bookMark);
+
+/**
+ * @swagger
+ * /funding/support/cancel:
+ *   post:
+ *     summary: 펀딩 후원을 취소 합니다.
+ *     tags: [Funding]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               supportId:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: cancel successfully
+ *       500:
+ *         description: 후원 취소 중 오류 발생
+ */
+router.post("/support/cancel", fundingController.cancelSupport);
 
 module.exports = router;
