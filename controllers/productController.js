@@ -121,7 +121,22 @@ const productController = {
             const productId = req.params.productId;
             const userName = req.body.userName;
             const likeCount = await achieveModel.countBookMark(userName);
-            if(likeCount == 10) await achieveModel.clearAchieve(userName, 3);
+            if(likeCount == 10) {
+                const achieve = await achieveModel.selectAchiveHub(userName, 3);
+
+                if (!achieve) {
+                    await achieveModel.clearAchieve(userName, 3);
+                    const result = await achieveModel.selectAchive(3);
+                    const insertData = {
+                        user_name: userName,
+                        points: result.points,
+                        description: result.title,
+                        calcul: "+"
+                    }
+
+                    await achieveModel.addedPoint(insertData);
+                }
+            }
             const like = await productModel.likeProduct(userName, productId);
             res.status(201).json(like);
         } catch (err) {

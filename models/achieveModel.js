@@ -1,8 +1,11 @@
 const db = require('../config/mysqlDatabase');
 
 const insert_achieveHub_query = "INSERT IGNORE INTO achieve_hub (user_name, achieve_id) VALUES (?, ?)";
+const insert_point_query = "INSERT INTO point_history SET ?"
 
-const select_achieveHub_query = 'SELECT * FROM achieve_hub WHERE user_name = ?';
+const search_achieveHub_query = 'SELECT * FROM achieve_hub WHERE user_name = ?';
+const select_achieveHub_query = "SELECT * FROM achieve_hub WHERE user_name = ? AND achieve_id = ?"
+const select_achieve_query = "SELECT * FROM achieve WHERE achieve_id = ?"
 const count_mark_query = 'SELECT COUNT(*) AS markCount FROM BookMark WHERE user_name = ?';
 const joinDate_count_query = `
     SELECT uj.user_id, ui.user_name 
@@ -21,11 +24,29 @@ const achieveModel = {
         })
     },
 
+    selectAchive: async (achieveId) => {
+        return new Promise((resolve, reject) => {
+            db.query(select_achieve_query, achieveId, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
+            })
+        })
+    },
+
     searchAchiveHub: async (userName) => {
         return new Promise((resolve, reject) => {
-            db.query(select_achieveHub_query, userName, (err, result) => {
+            db.query(search_achieveHub_query, userName, (err, result) => {
                 if (err) reject(err);
                 else resolve(result);
+            })
+        })
+    },
+
+    selectAchiveHub: async (userName, achieveId) => {
+        return new Promise((resolve, reject) => {
+            db.query(select_achieveHub_query, [userName, achieveId], (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
             })
         })
     },
@@ -54,6 +75,15 @@ const achieveModel = {
                 }
             });
         });
+    },
+
+    addedPoint: (insertData) => {
+        return new Promise((resolve, reject) => {
+            db.query(insert_point_query, insertData, (err, result) => {
+                if (err) reject(err);
+                else resolve(result[0]);
+            })
+        })
     }
 }
 

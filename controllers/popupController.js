@@ -222,7 +222,22 @@ const popupController = {
             const storeId = req.params.storeId;
             const userName = req.body.userName;
             const likeCount = await achieveModel.countBookMark(userName);
-            if (likeCount == 10) await achieveModel.clearAchieve(userName, 3);
+            if (likeCount == 10) {
+                const achieve = await achieveModel.selectAchiveHub(userName, 3);
+
+                if (!achieve) {
+                    await achieveModel.clearAchieve(userName, 3);
+                    const result = await achieveModel.selectAchive(3);
+                    const insertData = {
+                        user_name: userName,
+                        points: result.points,
+                        description: result.title,
+                        calcul: "+"
+                    }
+
+                    await achieveModel.addedPoint(insertData);
+                }
+            }
             const like = await popupModel.likePopup(userName, storeId);
             res.status(201).json(like);
         } catch (err) {
@@ -275,7 +290,7 @@ const popupController = {
         try {
             const body = req.body;
             const storeId = req.params.storeId;
-            await achieveModel.clearAchieve(body.userName, 1);
+
             const reviewData = {
                 user_name: body.userName,
                 store_id: storeId,
@@ -291,6 +306,20 @@ const popupController = {
                     return res.status(400).json({ message: "이미 리뷰를 작성하셨습니다." });
                 }
                 await popupModel.createReview(reviewData);
+                const achieve = await achieveModel.selectAchiveHub(body.userName, 1);
+
+                if (!achieve) {
+                    await achieveModel.clearAchieve(body.userName, 1);
+                    const result = await achieveModel.selectAchive(1);
+                    const insertData = {
+                        user_name: body.userName,
+                        points: result.points,
+                        description: result.title,
+                        calcul: "+"
+                    }
+
+                    await achieveModel.addedPoint(insertData);
+                }
                 return res.status(201).json({ message: "리뷰가 등록되었습니다." });
             }
 

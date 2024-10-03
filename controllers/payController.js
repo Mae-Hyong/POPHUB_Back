@@ -51,8 +51,35 @@ const payController = {
             if (fundingId) {
                 await fundingModel.createFundingList(payRequestData);
                 await fundingModel.updatedonation(totalAmount, fundingId);
+                const achieve = await achieveModel.selectAchiveHub(userName, 4);
+
+                if (!achieve) {
+                    await achieveModel.clearAchieve(userName, 4);
+                    const result = await achieveModel.selectAchive(4);
+                    const insertData = {
+                        user_name: userName,
+                        points: result.points,
+                        description: result.title,
+                        calcul: "+"
+                    }
+
+                    await achieveModel.addedPoint(insertData);
+                }
             } else {
-                await achieveModel.clearAchieve(userName, 9);
+                const achieve = await achieveModel.selectAchiveHub(userName, 5);
+
+                if (!achieve) {
+                    await achieveModel.clearAchieve(userName, 5);
+                    const result = await achieveModel.selectAchive(5);
+                    const insertData = {
+                        user_name: userName,
+                        points: result.points,
+                        description: result.title,
+                        calcul: "+"
+                    }
+
+                    await achieveModel.addedPoint(insertData);
+                }
             }
 
             const response = await $axios.post('/v1/payment/ready', {

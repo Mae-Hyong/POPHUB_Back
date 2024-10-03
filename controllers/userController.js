@@ -339,16 +339,27 @@ const userController = {
             try {
                 let userImage = req.file ? req.file.location : null;
                 await userModel.createProfile(userId, userName, phoneNumber, Gender, Age, userImage);
-                await achieveModel.clearAchieve(userName, 2);
+                const achieve = await achieveModel.selectAchiveHub(userName, 2);
+
+                if (!achieve) {
+                    await achieveModel.clearAchieve(userName, 2);
+                    const result = await achieveModel.selectAchive(2);
+                    const insertData = {
+                        user_name: userName,
+                        points: result.points,
+                        description: result.title,
+                        calcul: "+"
+                    }
+
+                    await achieveModel.addedPoint(insertData);
+                }
 
                 return res.status(201).send("Profile added successfully");
             } catch (error) {
-                return res.status(500).json({
-                    resultMsg: "이미지를 Cloudinary에 업로드하는 도중 오류가 발생했습니다.",
-                    error: error.message,
-                });
+                return res.status(500).send(error.message);
             }
         } catch (err) {
+            console.error(err)
             return res.status(500).send("프로필 생성 중 오류가 발생했습니다.");
         }
     },
@@ -407,7 +418,21 @@ const userController = {
             let userImage = null;
             if (req.file) userImage = req.file ? req.file.location : '';
 
-            await achieveModel.clearAchieve(userName, 7);
+            const achieve = await achieveModel.selectAchiveHub(userName, 7);
+
+                if (!achieve) {
+                    await achieveModel.clearAchieve(userName, 7);
+                    const result = await achieveModel.selectAchive(7);
+                    const insertData = {
+                        user_name: userName,
+                        points: result.points,
+                        description: result.title,
+                        calcul: "+"
+                    }
+
+                    await achieveModel.addedPoint(insertData);
+                }
+
             await userModel.createInquiry(userName, categoryId, title, content, userImage);
             res.status(201).send("Inquiry added successfully");
         } catch (err) {
@@ -476,18 +501,6 @@ const userController = {
             });
         } catch (err) {
             return res.status(500).send("문의 내역을 가져오는 중 오류가 발생했습니다.");
-        }
-    },
-
-    clearAchieve: async (req, res) => { // 추후 조건에 맞춰 쪼개질 예정
-        try {
-            const { userName, achieveId } = req.body;
-            if (userName && achieveId) {
-                await achieveModel.clearAchieve(userName, achieveId);
-                return res.status(201).json({ Msg: "clear achieve" });
-            } else return res.status(404).send("userName or achieveId not found");
-        } catch (err) {
-            return res.status(500).send("achieve Hub에 입력 중 오류가 발생했습니다.");
         }
     },
 

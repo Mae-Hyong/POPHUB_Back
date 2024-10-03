@@ -72,8 +72,7 @@ const reservationController = {
         try {
             const reservationId = req.query.reservationId;
             const result = await reservationModel.completedReservation(reservationId);
-
-
+            
             if (result && result.length > 0) {
                 const calendarData = {
                     user_name: result[0].user_name,
@@ -83,12 +82,27 @@ const reservationController = {
 
                 try {
                     await qrCodeModel.createCalendar(calendarData);
-                    await achieveModel.clearAchieve(result, 6);
+                    console.log(result[0].user_name)
+                    const achieve = await achieveModel.selectAchiveHub(result[0].user_name, 6);
+
+                    if (!achieve) {
+                        await achieveModel.clearAchieve(result[0].user_name, 6);
+                        const data = await achieveModel.selectAchive(6);
+                        console.log(result)
+                        const insertData = {
+                            user_name: result[0].user_name,
+                            points: data.points,
+                            description: data.title,
+                            calcul: "+"
+                        }
+
+                        await achieveModel.addedPoint(insertData);
+                    }
+
                 } catch (err) {
                     return res.status(500).json({ message: "처리된 방문인증입니다." });
                 }
             }
-
             res.status(201).json({ message: "입장이 성공적으로 완료되었습니다.", userName: result[0].user_name });
         } catch (err) {
             res.status(500).json({ message: "사전 예약 입장 수락 중 오류가 발생하였습니다." });
