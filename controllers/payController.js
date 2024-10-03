@@ -21,7 +21,7 @@ const $axios = axios.create({
 const payController = {
     payRequest: async (req, res) => {
         try {
-            const { userName, itemName, quantity, totalAmount, vatAmount, taxFreeAmount } = req.body;
+            const { userName, itemName, quantity, totalAmount, vatAmount, taxFreeAmount, point } = req.body;
             const orderId = v4();
             const PARTNER_ORDER_ID = v4();
             const PARTNER_USER_ID = v4();
@@ -84,6 +84,17 @@ const payController = {
                 }
             }
 
+            if (point) {
+                await userModel.usePoints(userName, point);
+                const insertData = {
+                    user_name: userName,
+                    points: point,
+                    description: "포인트 사용",
+                    calcul: "-"
+                }
+
+                await achieveModel.addedPoint(insertData);
+            }
             const response = await $axios.post('/v1/payment/ready', {
                 cid: CID,
                 partner_order_id: PARTNER_ORDER_ID, // 가맹점 주문 ID

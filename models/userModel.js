@@ -24,6 +24,7 @@ const name_change_query = 'UPDATE user_info SET user_name = ?  WHERE user_id = ?
 const image_change_query = 'UPDATE user_info SET user_image = ?  WHERE user_id = ?';
 const delete_change_query = 'UPDATE user_info SET user_name = ?, withdrawal = ? WHERE user_id = ?'
 const points_update_query = "UPDATE user_info SET points = points + ? WHERE user_name = ?"
+const points_use_query = "UPDATE user_info SET points = points - ? WHERE user_name = ?"
 
 // ------- DELETE Query -------
 const user_delete_query = 'DELETE FROM user_join_info WHERE user_id = ?'
@@ -208,7 +209,16 @@ const userModel = {
                 else resolve(result);
             });
         });
-    }
+    },
+
+    usePoints: (userName, points) => {
+        return new Promise((resolve, reject) => {
+            db.query(points_use_query, [points, userName], (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            });
+        });
+    },
 }
 
 module.exports = userModel;

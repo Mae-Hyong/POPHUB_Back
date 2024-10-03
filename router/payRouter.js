@@ -65,6 +65,9 @@ router.get('/cancel', payController.cancel);
 *               itemId:
 *                 type: string
 *                 description: (선택 사항) 후원 상품 ID
+*               point:
+*                 type: integer
+*                 description: (선택 사항) 사용할 포인트
 *     responses:
 *       201:
 *         description: 결제 요청이 성공적으로 처리됨
