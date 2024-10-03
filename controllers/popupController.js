@@ -1,5 +1,6 @@
 const popupModel = require('../models/popupModel');
 const achieveModel = require('../models/achieveModel');
+const userModel = require('../models/userModel')
 const moment = require('moment');
 const { v4: uuidv4 } = require("uuid");
 const { getRecommendation } = require('../function/recommendation');
@@ -236,6 +237,7 @@ const popupController = {
                     }
 
                     await achieveModel.addedPoint(insertData);
+                    await userModel.updateUserPoints(userName, result.points);
                 }
             }
             const like = await popupModel.likePopup(userName, storeId);
@@ -319,6 +321,7 @@ const popupController = {
                     }
 
                     await achieveModel.addedPoint(insertData);
+                    await userModel.updateUserPoints(userName, result.points);
                 }
                 return res.status(201).json({ message: "리뷰가 등록되었습니다." });
             }

@@ -1,6 +1,6 @@
 const payModel = require('../models/payModel');
 const achieveModel = require('../models/achieveModel');
-
+const userModel = require('../models/userModel')
 const axios = require('axios');
 const { v4 } = require('uuid');
 const fundingModel = require('../models/fundingModel');
@@ -64,6 +64,7 @@ const payController = {
                     }
 
                     await achieveModel.addedPoint(insertData);
+                    await userModel.updateUserPoints(userName, result.points);
                 }
             } else {
                 const achieve = await achieveModel.selectAchiveHub(userName, 5);
@@ -79,6 +80,7 @@ const payController = {
                     }
 
                     await achieveModel.addedPoint(insertData);
+                    await userModel.updateUserPoints(userName, result.points);
                 }
             }
 

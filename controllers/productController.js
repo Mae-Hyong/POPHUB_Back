@@ -1,5 +1,6 @@
 const achieveModel = require('../models/achieveModel');
 const productModel = require('../models/productModel');
+const userModel = require('../models/userModel')
 const { v4: uuidv4 } = require("uuid");
 
 const productController = {
@@ -135,6 +136,7 @@ const productController = {
                     }
 
                     await achieveModel.addedPoint(insertData);
+                    await userModel.updateUserPoints(userName, result.points);
                 }
             }
             const like = await productModel.likeProduct(userName, productId);

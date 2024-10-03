@@ -28,9 +28,7 @@ const adminController = {
             if (results) return res.status(200).json(results);
             else return res.status(203).json({ msg: "해당 카테고리 미존재" });
         } catch (err) {
-            return res
-                .status(500)
-                .send("카테고리 조회 중 오류가 발생했습니다.");
+            return res.status(500).send("카테고리 조회 중 오류가 발생했습니다.");
         }
     },
 

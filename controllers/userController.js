@@ -352,6 +352,7 @@ const userController = {
                     }
 
                     await achieveModel.addedPoint(insertData);
+                    await userModel.updateUserPoints(userName, result.points);                    
                 }
 
                 return res.status(201).send("Profile added successfully");
@@ -431,6 +432,7 @@ const userController = {
                     }
 
                     await achieveModel.addedPoint(insertData);
+                    await userModel.updateUserPoints(userName, result.points);
                 }
 
             await userModel.createInquiry(userName, categoryId, title, content, userImage);

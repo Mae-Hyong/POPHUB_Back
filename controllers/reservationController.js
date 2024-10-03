@@ -1,6 +1,7 @@
 const reservationModel = require("../models/reservationModel");
 const qrCodeModel = require('../models/qrCodeModel');
 const achieveModel = require("../models/achieveModel");
+const userModel = require('../models/userModel')
 const { sendAlarm } = require("../function/alarmService");
 const admin = require("firebase-admin");
 const { v4: uuidv4 } = require("uuid");
@@ -97,6 +98,7 @@ const reservationController = {
                         }
 
                         await achieveModel.addedPoint(insertData);
+                        await userModel.updateUserPoints(result[0], data.points);
                     }
 
                 } catch (err) {

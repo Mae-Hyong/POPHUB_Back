@@ -13,14 +13,18 @@ const search_category_query = 'SELECT category_name FROM category WHERE category
 const search_points_query = 'SELECT * FROM point_history WHERE user_name = ?'
 
 // ------- POST Query -------
-const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE user_id = ?';
 const profile_add_query = 'INSERT INTO user_info (user_id, user_name, phone_number, gender, age, user_image) VALUES (?, ?, ?, ?, ?, ?)';
-const name_change_query = 'UPDATE user_info SET user_name = ?  WHERE user_id = ?';
-const image_change_query = 'UPDATE user_info SET user_image = ?  WHERE user_id = ?';
 const inquiry_add_query = 'INSERT INTO inquiry (user_name, category_id, title, content, image) VALUES (?, ?, ?, ?, ?)';
 const delete_add_query = 'INSERT INTO user_delete(user_id, phone_number) VALUES (?, ?)'
-const delete_change_query = 'UPDATE user_info SET user_name = ?, withdrawal = ? WHERE user_id = ?'
 const gain_point_query = "INSERT INTO point_history SET ?";
+
+// ------- UPDATE Query -------
+const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE user_id = ?';
+const name_change_query = 'UPDATE user_info SET user_name = ?  WHERE user_id = ?';
+const image_change_query = 'UPDATE user_info SET user_image = ?  WHERE user_id = ?';
+const delete_change_query = 'UPDATE user_info SET user_name = ?, withdrawal = ? WHERE user_id = ?'
+const points_update_query = "UPDATE user_info SET points = points + ? WHERE user_name = ?"
+
 // ------- DELETE Query -------
 const user_delete_query = 'DELETE FROM user_join_info WHERE user_id = ?'
 
@@ -195,6 +199,15 @@ const userModel = {
                 else resolve(result);
             })
         })
+    },
+
+    updateUserPoints: (userName, points) => {
+        return new Promise((resolve, reject) => {
+            db.query(points_update_query, [points, userName], (err, result) => {
+                if (err) reject(err);
+                else resolve(result);
+            });
+        });
     }
 }
 
