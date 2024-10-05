@@ -169,10 +169,10 @@ CREATE TABLE BookMark (
     store_id VARCHAR(50),
     product_id VARCHAR(50),
     funding_id VARCHAR(50),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE,
-    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-    FOREIGN KEY (product_id) REFERENCES products(product_id),
-    FOREIGN KEY (funding_id) REFERENCES funding(funding_id)
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
+    FOREIGN KEY (store_id) REFERENCES popup_stores(store_id) ON UPDATE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON UPDATE CASCADE,
+    FOREIGN KEY (funding_id) REFERENCES funding(funding_id) ON UPDATE CASCADE
 );
 
 
@@ -249,10 +249,10 @@ CREATE TABLE wait_list (
 
 CREATE TABLE event (
 	event_id int auto_increment primary key,
+    user_name varchar(50),
     title varchar(50),
     content text,
     img longtext,
-    user_name varchar(50),
     start_date date,
     end_date date,
     status ENUM('wait', 'progress', 'end') DEFAULT 'wait',
@@ -372,22 +372,21 @@ create Table funding_item(
     foreign key (funding_id) references funding(funding_id) on update cascade
 );
 
+CREATE TABLE funding_support (
+    support_id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id VARCHAR(50),
+    user_name VARCHAR(50),
+    amount INT,
+    count INT,
+    status ENUM("cancel", "boost") DEFAULT "boost",
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (item_id) REFERENCES funding_item(item_id),
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) on update cascade
+);
+
 alter table pophub.funding_support
 Add column count int;
-
-create table funding_list(
-    list_id int auto_increment primary key,
-    funding_id varchar(50),
-    item_id varchar(50),
-    partner_order_id VARCHAR(255),
-    user_name varchar(50),
-    count int,
-    
-    foreign key (funding_id) references funding(funding_id) on update cascade,
-    foreign key (item_id) references funding_item(item_id) on update cascade,
-    foreign key (user_name) references user_info(user_name) on update cascade,
-    FOREIGN KEY (partner_order_id) REFERENCES payment_details(partner_order_id)
-);
 
 INSERT INTO category (category_id, category_name) VALUES
 (0, '기술 문의'),
