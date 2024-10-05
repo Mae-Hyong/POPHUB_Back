@@ -30,12 +30,12 @@ CREATE TABLE user_delete (
 
 CREATE TABLE notice (
 	notice_id int auto_increment primary key,
+    user_name varchar(50),
     title varchar(50),
     content text,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    user_name varchar(50),
     
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name)
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
 CREATE TABLE category (
@@ -132,9 +132,9 @@ CREATE TABLE payment_details (
     order_id varchar(50) primary key, -- 주문 아이디
     store_id varchar(50),
     product_id varchar(50),
+    partner_order_id VARCHAR(255) NOT NULL UNIQUE, -- 가맹점 주문 ID(카카오페이에서 제공)
     funding_id varchar(50),
     item_id varchar(50),
-    partner_order_id VARCHAR(255) NOT NULL UNIQUE, -- 가맹점 주문 ID(카카오페이에서 제공)
     user_name varchar(50),
     item_name VARCHAR(255), -- 물품 명
     quantity INT, -- 상품 수량
@@ -159,6 +159,8 @@ CREATE TABLE payments ( -- 결제 정보
     aid VARCHAR(255), -- 승인 ID (카카오페이에서 제공)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- 결제 생성 시간
     aid_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    cancel_amount INT,
+
     FOREIGN KEY (partner_order_id) REFERENCES payment_details(partner_order_id),
     FOREIGN KEY (order_id) REFERENCES payment_details(order_id) -- Orders 테이블의 외래키
 );
@@ -294,6 +296,7 @@ CREATE TABLE point_history (
     description text,
     calcul ENUM("+", "-"),
     transaction_at timestamp default current_timestamp,
+    
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
@@ -380,7 +383,7 @@ CREATE TABLE funding_support (
     count INT,
     status ENUM("cancel", "boost") DEFAULT "boost",
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
+
     FOREIGN KEY (item_id) REFERENCES funding_item(item_id),
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) on update cascade
 );
