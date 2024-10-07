@@ -114,14 +114,35 @@ const signController = {
                     Authorization: `Bearer ${access_token}`,
                 },
             });
-            const userId = profileResponse.data.response.id;
+            const response = profileResponse.data.response;
+
             // 사용자 정보 처리 및 응답
             const hashedPassword = await bcrypt.hash(v4(), 10);
-            await signModel.signUp(userId, hashedPassword, 'General Member');
-            const token = Token.generateToken(userId);
+            await signModel.signUp(response.id, hashedPassword, 'General Member');
+            const token = Token.generateToken(response.id);
+            const currentYear = new Date().getFullYear();
+            const formattedNumber = response.mobile.replace(/-/g, '');
+            await userModel.createProfile(response.id, response.nickname, formattedNumber, response.gender, currentYear - response.birthyear + 1, response.profile_image);
 
-            return res.status(201).json({ userId: userId, token: token });
+            const achieve = await achieveModel.selectAchiveHub(response.nickname, 2);
+
+            if (!achieve) {
+                await achieveModel.clearAchieve(response.nickname, 2);
+                const result = await achieveModel.selectAchive(2);
+                const insertData = {
+                    user_name: response.nickname,
+                    points: result.points,
+                    description: result.title,
+                    calcul: "+"
+                }
+
+                await achieveModel.addedPoint(insertData);
+                await userModel.updateUserPoints(response.nickname, result.points);                    
+            }
+
+            return res.status(201).json({ userId: response.id, token: token});
         } catch (err) {
+            console.error(err)
             return res.status(500).send('Authentication failed');
         }
     },
@@ -220,6 +241,7 @@ const signController = {
             // 성공적으로 연결 해제 시 처리
             res.json({ success: true, message: 'User unlinked successfully' });
         } catch (err) {
+            console.error(err)
             return res.status(500).send('Authentication failed');
         }
     },

@@ -23,7 +23,7 @@ const password_change_query = 'UPDATE user_join_info SET user_password = ? WHERE
 const name_change_query = 'UPDATE user_info SET user_name = ?  WHERE user_id = ?';
 const image_change_query = 'UPDATE user_info SET user_image = ?  WHERE user_id = ?';
 const delete_change_query = 'UPDATE user_info SET user_name = ?, withdrawal = ? WHERE user_id = ?'
-const points_update_query = "UPDATE user_info SET points = points + ? WHERE user_name = ?"
+const points_update_query = "UPDATE user_info SET point_score = point_score + ? WHERE user_name = ?"
 const points_use_query = "UPDATE user_info SET points = points - ? WHERE user_name = ?"
 
 // ------- DELETE Query -------
