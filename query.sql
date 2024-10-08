@@ -433,6 +433,3 @@ INSERT INTO achieve (title, content, conditions, points) VALUES
 ('소중한 조언자', '첫 문의', '첫 문의를 작성한 사용자', 300),
 ('waiting...', '3번 이상 예약 대기 중인 사용자', '3번 이상 예약 대기 상태인 사용자', 1000),
 ('오랜 친구', '앱 가입 기간 1년 이상', '앱 가입 기간이 1년을 초과한 사용자', 1000);
-
-alter table pophub.event
-Add column end_date datetime;
