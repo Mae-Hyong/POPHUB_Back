@@ -203,8 +203,6 @@ CREATE TABLE reservation (
     FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE ON DELETE SET NULL
 );
 
-
-
 CREATE TABLE store_capacity (
     store_id VARCHAR(50) NOT NULL,
     reservation_date DATE NOT NULL,
@@ -218,25 +216,6 @@ CREATE TABLE store_capacity (
 
 ALTER TABLE popup_stores
 ADD INDEX idx_max_capacity (max_capacity);
-
-CREATE TABLE product_review (
-    review_id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    product_id VARCHAR(50) NOT NULL,
-    user_name VARCHAR(50) NOT NULL,
-    review_rating INT NOT NULL,
-    review_content LONGTEXT,
-    review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    review_modified_date TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(product_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE ON DELETE SET NULL
-);
-
-CREATE TABLE stand_store (
-    user_name VARCHAR(50) NOT NULL,
-    store_id VARCHAR(50) NOT NULL,
-    stand_at TIMESTAMP NOT NULL,
-    PRIMARY KEY (user_name, store_id)
-);
 
 CREATE TABLE wait_list (
     reservation_id VARCHAR(50) PRIMARY KEY,
