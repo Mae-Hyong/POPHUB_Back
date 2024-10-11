@@ -99,7 +99,7 @@ const qrCodeController = {
             }
 
         } catch (err) {
-            res.status(500).send("QR코드 스캔 중 오류가 발생하였습니다.");
+            res.status(500).send("사전 예약 및 현장 대기 등록 진행 후 방문 인증이 가능합니다.");
         }
     },
 
