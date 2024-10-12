@@ -369,6 +369,8 @@ router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"
  *   get:
  *     tags: [User]
  *     summary: 업적 조회
+ *     security:
+ *       - ApiKeyAuth: []
  *     parameters:
  *       - in: query
  *         name: userName
@@ -379,36 +381,7 @@ router.post("/profile/update", token.verifyToken, multerimg.upload.single("file"
  *       200:
  *         description: 성공
  */
-router.get("/achieveHub", token.verifyToken, userController.searchAchiveHub);
-
-/**
- * @swagger
- * /user/point/gain:
- *   post:
- *     tags: [User]
- *     summary: 포인트 추가
- *     security:
- *       - ApiKeyAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               userName:
- *                 type: string
- *               points:
- *                 type: integer
- *               description:
- *                 type: string
- *               calcul:
- *                 type: ENUM['+', '-']
- *     responses:
- *       201:
- *         description: 성공
- */
-router.post("/point/gain", token.verifyToken, userController.gainPoint);
+router.get("/achieveHub", token.verifyToken, userController.searchAchieveHub);
 
 /**
  * @swagger

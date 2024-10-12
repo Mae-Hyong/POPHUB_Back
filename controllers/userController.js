@@ -528,14 +528,16 @@ const userController = {
         }
     },
 
-    searchAchiveHub: async (req, res) => {
+    searchAchieveHub: async (req, res) => {
         try {
-            const userName = req.query;
-            if (userName && achieveId) {
+            const { userName } = req.query;
+            if (userName) {
                 const searchResult = await achieveModel.searchAchiveHub(userName);
                 const results = await Promise.all(searchResult.map(async (searchResult) => {
+                    const titles = await achieveModel.selectAchive(searchResult.achieve_id);
                     return {
-                        achiveId: searchResult.achive_id,
+                        achieveId: searchResult.achieve_id,
+                        achieveTitle: titles.title,
                         userName: searchResult.user_name,
                         completeAt: searchResult.complete_at
                     };
@@ -544,23 +546,8 @@ const userController = {
             } else return res.status(404).send("userName or achieveId not found");
 
         } catch (err) {
+            console.error(err)
             return res.status(500).send("이벤트 조회 중 오류가 발생했습니다.");
-        }
-    },
-
-    gainPoint: async (req, res) => {
-        try {
-            const body = req.body;
-            const insertData = {
-                user_name: body.userName,
-                points: body.points,
-                description: body.description,
-                calcul: body.calcul
-            };
-            await userModel.gainPoint(insertData);
-            return res.status(201).json({ Msg: "gainPoint" });
-        } catch (err) {
-            return res.status(500).send("point 입력 중 오류가 발생했습니다.");
         }
     },
 
