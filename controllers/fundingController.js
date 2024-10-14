@@ -230,7 +230,7 @@ const fundingController = {
             else result = await fundingModel.supportById(supportId);
 
             if (!result || result.length === 0)
-                return res.status(200).send("Not Found");
+                return res.status(200).send([]);
             const resultList = await Promise.all(
                 result.map(async (result) => {
                     const itemData = await fundingModel.selectItem(result.item_id);
