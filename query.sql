@@ -1,4 +1,4 @@
-use stc5hxkqsgukf26b;
+use pophub;
 
 create table user_join_info(
 	user_id varchar(50) primary key,
@@ -18,7 +18,6 @@ create table user_info(
 	age	int,
 	user_image	longtext,
     withdrawal bool default False,
-    
     foreign key (user_id) REFERENCES user_join_info(user_id) ON UPDATE CASCADE ON DELETE SET NULL
 );
 
@@ -45,7 +44,7 @@ CREATE TABLE category (
 
 CREATE TABLE inquiry (
 	inquiry_id	int AUTO_INCREMENT primary key,
-	user_name	varchar(50)	NOT NULL,
+	user_name	varchar(50) NOT NULL,
 	category_id	int	NOT NULL,
 	title	varchar(100)	NOT NULL,
 	content	text	NOT NULL,
@@ -53,7 +52,7 @@ CREATE TABLE inquiry (
     write_date datetime default now(),
 	status	enum("pending", "complete")	NOT NULL DEFAULT "pending",
 	
-    foreign key (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE ON DELETE SET NULL,
+    foreign key (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
     foreign key (category_id) REFERENCES category(category_id) ON UPDATE CASCADE
 );
 
@@ -64,7 +63,7 @@ CREATE TABLE answer (
     content text NOT NULL,
     write_date datetime default now(),
     
-    foreign key (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE ON DELETE SET NULL
+    foreign key (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
 CREATE TABLE popup_stores ( -- 팝업 스토어 정보
@@ -80,7 +79,7 @@ CREATE TABLE popup_stores ( -- 팝업 스토어 정보
     store_end_date DATE, -- 팝업 종료 날짜
     store_mark_number INT DEFAULT 0, -- 찜 수
     store_view_count INT DEFAULT 0, -- 조회수
-    store_wait_status ENUM('false', 'true') DEFAULT 'false', -- 대기 상태
+    store_wait_status ENUM('false', 'true') DEFAULT 'false', -- 예약 대기 상태
     approval_status ENUM('pending', 'check', 'deny') DEFAULT 'pending', -- 승인 상태
     deleted ENUM('false', 'true') DEFAULT 'false', -- 팝업 삭제 여부
     max_capacity INT NOT NULL, -- 시간대별 최대 인원
@@ -115,6 +114,7 @@ CREATE TABLE products (
     remaining_quantity INT, -- 잔여 수량
     product_view_count INT DEFAULT 0, -- 조회수
     product_mark_number INT DEFAULT 0, -- 찜 수
+    deleted ENUM('false', 'true') DEFAULT 'false', -- 상품 삭제 여부
     PRIMARY KEY (product_id),
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
 );
@@ -126,6 +126,56 @@ CREATE TABLE images (
     image_url LONGTEXT NOT NULL,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
     FOREIGN KEY (product_id) REFERENCES products(product_id)
+);
+
+create Table funding (
+    funding_id varchar(50) primary key,
+    user_name varchar(50),
+    title varchar(100),
+    content text,
+    amount int,
+    donation int,
+    status ENUM('pending', 'open', 'successful', 'fail') NOT NULL DEFAULT 'pending',
+    open_date date,
+    close_date date,
+    payment_date date,
+    
+    foreign key (user_name) references user_info(user_name) on update cascade ON DELETE SET NULL
+);
+
+create Table funding_item(
+    item_id varchar(50) primary key,
+    funding_id varchar(50),
+    user_name varchar(50),
+    item_name varchar(25),
+    content text,
+    count int,
+    amount int,
+    foreign key (user_name) references user_info(user_name) on update cascade ON DELETE SET NULL,
+    foreign key (funding_id) references funding(funding_id) on update cascade
+);
+
+create Table funding_img (
+    img_id int auto_increment primary key,
+    funding_id varchar(50),
+    item_id varchar(50),
+    image longtext,
+    
+    foreign key (funding_id) references funding(funding_id) on update cascade,
+    foreign key (item_id) references funding_item(item_id) on update cascade
+);
+
+CREATE TABLE funding_support (
+    support_id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id VARCHAR(50),
+    user_name VARCHAR(50),
+    amount INT,
+    count INT,
+    status ENUM("cancel", "boost") DEFAULT "boost",
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (item_id) REFERENCES funding_item(item_id),
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) on update cascade ON DELETE SET NULL
 );
 
 CREATE TABLE payment_details (
@@ -171,7 +221,7 @@ CREATE TABLE BookMark (
     store_id VARCHAR(50),
     product_id VARCHAR(50),
     funding_id VARCHAR(50),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id) ON UPDATE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON UPDATE CASCADE,
     FOREIGN KEY (funding_id) REFERENCES funding(funding_id) ON UPDATE CASCADE
@@ -187,7 +237,7 @@ CREATE TABLE store_review (
     review_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     review_modified_date TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE ON DELETE SET NULL
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name)  ON UPDATE CASCADE
 );
 
 CREATE TABLE reservation (
@@ -200,8 +250,11 @@ CREATE TABLE reservation (
 	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     reservation_status ENUM('pending', 'completed') NOT NULL DEFAULT 'pending',
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE ON DELETE SET NULL
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
+
+ALTER TABLE popup_stores
+ADD INDEX idx_max_capacity (max_capacity);
 
 CREATE TABLE store_capacity (
     store_id VARCHAR(50) NOT NULL,
@@ -214,9 +267,6 @@ CREATE TABLE store_capacity (
     FOREIGN KEY (max_capacity) REFERENCES popup_stores(max_capacity)
 );
 
-ALTER TABLE popup_stores
-ADD INDEX idx_max_capacity (max_capacity);
-
 CREATE TABLE wait_list (
     reservation_id VARCHAR(50) PRIMARY KEY,
     user_name VARCHAR(50) NOT NULL,
@@ -224,7 +274,7 @@ CREATE TABLE wait_list (
     status ENUM('pending', 'completed') DEFAULT 'pending',
     capacity INT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
 );
 
@@ -264,7 +314,7 @@ CREATE TABLE achieve_hub (
     complete_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     primary key (user_name, achieve_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
     FOREIGN KEY (achieve_id) REFERENCES achieve(achieve_id) ON UPDATE CASCADE
 );
 
@@ -284,7 +334,7 @@ CREATE TABLE calendar (
     user_name VARCHAR(50) NOT NULL,
     store_id VARCHAR(50) NOT NULL,
     reservation_date DATE NOT NULL,
-    FOREIGN KEY(user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY(user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
     FOREIGN KEY(store_id) REFERENCES popup_stores(store_id)
 );
 
@@ -296,7 +346,7 @@ CREATE TABLE user_address (
     user_name VARCHAR(50) NOT NULL,
     address VARCHAR(100) NOT NULL,
     create_at TIMESTAMP default now(),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE ON DELETE SET NULL
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE
 );
 
 CREATE TABLE delivery (
@@ -313,62 +363,9 @@ CREATE TABLE delivery (
     status ENUM('주문 완료', '주문 취소', '배송중', '배송 완료') NOT NULL DEFAULT '주문 완료',
     cancel_reason ENUM('고객 변심', '상품 문제', '배송 지연', '기타') DEFAULT NULL, -- 주문 취소 사유
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE ON DELETE SET NULL,
+    FOREIGN KEY (user_name) REFERENCES user_info(user_name) ON UPDATE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
-
-create Table funding (
-    funding_id varchar(50) primary key,
-    user_name varchar(50),
-    title varchar(100),
-    content text,
-    amount int,
-    donation int,
-    status ENUM('pending', 'open', 'successful', 'fail') NOT NULL DEFAULT 'pending',
-    open_date date,
-    close_date date,
-    payment_date date,
-    
-    foreign key (user_name) references user_info(user_name) on update cascade ON DELETE SET NULL
-);
-
-create Table funding_img (
-    img_id int auto_increment primary key,
-    funding_id varchar(50),
-    item_id varchar(50),
-    image longtext,
-    
-    foreign key (funding_id) references funding(funding_id) on update cascade,
-    foreign key (item_id) references funding_item(item_id) on update cascade
-);
-
-create Table funding_item(
-    item_id varchar(50) primary key,
-    funding_id varchar(50),
-    user_name varchar(50),
-    item_name varchar(25),
-    content text,
-    count int,
-    amount int,
-    foreign key (user_name) references user_info(user_name) on update cascade ON DELETE SET NULL,
-    foreign key (funding_id) references funding(funding_id) on update cascade
-);
-
-CREATE TABLE funding_support (
-    support_id INT AUTO_INCREMENT PRIMARY KEY,
-    item_id VARCHAR(50),
-    user_name VARCHAR(50),
-    amount INT,
-    count INT,
-    status ENUM("cancel", "boost") DEFAULT "boost",
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (item_id) REFERENCES funding_item(item_id),
-    FOREIGN KEY (user_name) REFERENCES user_info(user_name) on update cascade ON DELETE SET NULL
-);
-
-alter table pophub.funding_support
-Add column count int;
 
 INSERT INTO category (category_id, category_name) VALUES
 (0, '기술 문의'),
@@ -396,7 +393,7 @@ INSERT INTO category (category_id, category_name) VALUES
 (26, '예술/공예'),
 (27, '애니메이션'),
 (28, '체험'),
-(29, '전시/문화')
+(29, '전시/문화'),
 (30, '연예인/굿즈'),
 (31, '동물'),
 (32, '캐릭터'),
