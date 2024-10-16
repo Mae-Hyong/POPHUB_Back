@@ -365,19 +365,6 @@ const reservationModel = {
 
     },
 
-    createStand: (insertData) => {
-        return new Promise((resolve, reject) => {
-            db.query(
-                insert_stand_query,
-                [insertData.user_name, insertData.store_id],
-                async (err, result) => {
-                    if (err) reject(err);
-                    else resolve(result[0]);
-                }
-            );
-        });
-    },
-
     searchUserStoreWait: (userName, storeId) => {
         return new Promise((resolve, reject) => {
             db.query(waitPosition_query, [userName, storeId], (err, results) => {
