@@ -165,7 +165,6 @@ const productController = {
     //         await productModel.orderProduct(productId);
     //         res.status(200).json('주문이 완료되었습니다.');
     //     } catch (err) {
-    //         console.log(err);
     //         res.status(500).send("오류가 발생하였습니다.");
     //     }
     // },
@@ -177,7 +176,6 @@ const productController = {
     //         const review = await (productModel.productReview(productId));
     //         res.status(200).json(review);
     //     } catch (err) {
-    //         console.log(err);
     //         res.status(500).send("오류가 발생하였습니다.");
     //     }
     // },
@@ -189,7 +187,6 @@ const productController = {
     //         const reviewDetail = await productModel.productReviewDetail(review_id);
     //         res.status(200).json(reviewDetail);
     //     } catch (err) {
-    //         console.log(err);
     //         res.status(500).send("오류가 발생하였습니다.");
     //     }
     // },
@@ -216,7 +213,6 @@ const productController = {
     //         const allreview = await productModel.createReview(reviewdata);
     //         res.status(201).json(allreview);
     //     } catch (err) {
-    //         console.log(err);
     //         res.status(500).send("오류가 발생하였습니다.");
     //     }
     // },
@@ -241,7 +237,6 @@ const productController = {
     //         await productModel.updateReview(reviewdata, review_id);
     //         res.status(200).json('수정이 완료되었습니다.');
     //     } catch (err) {
-    //         console.log(err);
     //         res.status(500).send("오류가 발생하였습니다.");
     //     }
     // },
@@ -253,7 +248,6 @@ const productController = {
     //         await productModel.deleteReview(review_id);
     //         res.status(200).json('삭제가 완료되었습니다.');
     //     } catch (err) {
-    //         console.log(err);
     //         res.status(500).send("오류가 발생하였습니다.");
     //     }
     // }

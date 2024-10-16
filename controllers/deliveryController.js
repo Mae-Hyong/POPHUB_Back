@@ -94,7 +94,6 @@ const deliveryController = {
             }
 
         } catch (err) {
-            console.log(err);
             res.status(500).send("운송장 번호 생성 중 오류가 발생하였습니다.");
         }
     },

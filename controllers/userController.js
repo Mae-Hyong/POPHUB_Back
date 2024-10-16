@@ -142,7 +142,6 @@ const signController = {
 
             return res.status(201).json({ userId: response.id, token: token});
         } catch (err) {
-            console.error(err)
             return res.status(500).send('Authentication failed');
         }
     },
@@ -241,7 +240,6 @@ const signController = {
             // 성공적으로 연결 해제 시 처리
             res.json({ success: true, message: 'User unlinked successfully' });
         } catch (err) {
-            console.error(err)
             return res.status(500).send('Authentication failed');
         }
     },
@@ -382,7 +380,6 @@ const userController = {
                 return res.status(500).send(error.message);
             }
         } catch (err) {
-            console.error(err)
             return res.status(500).send("프로필 생성 중 오류가 발생했습니다.");
         }
     },
@@ -546,7 +543,6 @@ const userController = {
             } else return res.status(404).send("userName or achieveId not found");
 
         } catch (err) {
-            console.error(err)
             return res.status(500).send("이벤트 조회 중 오류가 발생했습니다.");
         }
     },

@@ -83,13 +83,11 @@ const reservationController = {
 
                 try {
                     await qrCodeModel.createCalendar(calendarData);
-                    console.log(result[0].user_name)
                     const achieve = await achieveModel.selectAchiveHub(result[0].user_name, 6);
 
                     if (!achieve) {
                         await achieveModel.clearAchieve(result[0].user_name, 6);
                         const data = await achieveModel.selectAchive(6);
-                        console.log(result)
                         const insertData = {
                             user_name: result[0].user_name,
                             points: data.points,
