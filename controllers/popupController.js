@@ -321,7 +321,7 @@ const popupController = {
                     }
 
                     await achieveModel.addedPoint(insertData);
-                    await userModel.updateUserPoints(userName, result.points);
+                    await userModel.updateUserPoints(body.userName, result.points);
                 }
                 return res.status(201).json({ message: "리뷰가 등록되었습니다." });
             }
