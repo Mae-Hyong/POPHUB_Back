@@ -39,6 +39,7 @@ async function getRecommendation(user_name) {
         // 사용자 정보 가져오기
         const userInfo = await loginUserInfo(user_name);
         const gender = userInfo.gender;
+        const age = userInfo.age;
 
         // 모든 사용자 정보 가져오기
         const reservationData = await getUserInfo();
@@ -109,7 +110,7 @@ async function getRecommendation(user_name) {
         console.log(`추천 카테고리: ${recommendedCategory}`);
         let recommendedCategories = sortedCategories.slice(0, 4).map(category => category[0]);
         recommendedCategories = recommendedCategories.filter(category => category !== recommendedCategory);
-        return { recommendedCategory, recommendedCategories, gender };
+        return { recommendedCategory, recommendedCategories, gender, age };
     } catch (err) {
         throw err;
     }

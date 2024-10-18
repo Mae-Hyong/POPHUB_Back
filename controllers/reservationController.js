@@ -34,7 +34,7 @@ const reservationController = {
 
             const check = await reservationModel.checkStatusForReservation(req.body.userName, storeId);
             if (!check.success) {
-                return res.status(400).json({ message: "현재 해당 팝업 스토어 사전 예약이 되어 있습니다. 방문 이후 재예약이 가능합니다." });
+                return res.status(400).json({ message: "현재 해당 팝업 스토어에 사전 예약이 되어 있습니다. 방문 이후 재예약이 가능합니다." });
             }
 
             const result = await reservationModel.reservation(reservationData);

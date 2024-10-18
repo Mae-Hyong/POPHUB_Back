@@ -896,7 +896,7 @@ const popupModel = {
     },
 
     // 추천 시스템
-    recommendationData: async (recommendedCategory, recommendedCategories, gender) => {
+    recommendationData: async (recommendedCategory, recommendedCategories, gender, age) => {
         try {
             const getCategoryData = async (category) => {
                 return new Promise((resolve, reject) => {
@@ -921,7 +921,7 @@ const popupModel = {
                 });
             };
 
-            // 해당 카테고리 값 출
+            // 해당 카테고리 값 출력
             const firstCategoryData = await getCategoryData(recommendedCategory);
 
             let results = firstCategoryData.slice(0, 4);
@@ -941,10 +941,26 @@ const popupModel = {
 
                 results = results.concat(addData);
             }
-
+            
             // result의 결과 값이 6개 미만일 경우
             if (results.length < 6) {
-                const pickCategories = gender === 'F' ? [11, 12, 15, 28, 29, 30, 31, 32] : [10, 16, 19, 23, 24, 33];
+
+                // 성별 및 나이에 따른 카테고리 분리
+                const pickCategoriesByGenderAndAge = (gender, age) => {
+                    if (gender === 'F') {
+                        if (age < 22) return [32, 30, 15];
+                        if (age < 33) return [11, 12, 18];
+                        if (age < 40) return [17, 22, 25];
+                        return [33, 29, 22];
+                    } else {
+                        if (age < 22) return [27, 30, 32];
+                        if (age < 30) return [10, 23, 28];
+                        if (age < 40) return [10, 16, 17];
+                        return [29, 33, 22];
+                    }
+                };
+            
+                const pickCategories = pickCategoriesByGenderAndAge(gender, age);
                 const categoriesToAdd = pickCategories.filter(cat => !results.some(item => item.category_id === cat));
 
                 let pickData = [];
