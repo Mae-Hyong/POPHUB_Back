@@ -26,6 +26,7 @@ const alarmController = {
 
             res.status(201).send(`알람이 성공적으로 추가되었습니다`);
         } catch (error) {
+            console.log(error);
             res.status(500).send("알람 추가 오류");
         }
     },
