@@ -4,40 +4,41 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const cron = require("./function/cron");
 const admin = require("firebase-admin");
-const serviceAccount = require("./config/PopHub_Key.json");
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 
+var serviceAccount = process.env.AlARM_JSON;
+var fcmKey = Buffer.from(serviceAccount, "base64").toString();
 admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(JSON.parse(fcmKey)),
 });
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
-  cors({
-    origin: "*",
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-    credentials: true,
-    optionsSuccessStatus: 204,
-  })
+    cors({
+        origin: "*",
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        credentials: true,
+        optionsSuccessStatus: 204,
+    })
 );
 
 // Swagger 설정
 const swaggerOptions = {
-  swaggerDefinition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'My API',
-      version: '1.0.0',
-      description: 'A simple Express API'
+    swaggerDefinition: {
+        openapi: "3.0.0",
+        info: {
+            title: "My API",
+            version: "1.0.0",
+            description: "A simple Express API",
+        },
     },
-  },
-  apis: ['./router/*.js']
+    apis: ["./router/*.js"],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Routes
 const adminRouter = require("./router/adminRouter");
@@ -52,7 +53,7 @@ const deliveryRouter = require("./router/deliveryRouter");
 const fundingRouter = require("./router/fundingRouter");
 
 app.get("/", (req, res) => {
-  res.send("Start POPHUB!");
+    res.send("Start POPHUB!");
 });
 
 // 인증 라우터
@@ -70,5 +71,5 @@ app.use("/funding", fundingRouter);
 cron.scheduleDatabaseUpdate();
 
 app.listen(process.env.PORT, () => {
-  console.log(`${process.env.PORT}번 실행 중`);
+    console.log(`${process.env.PORT}번 실행 중`);
 });

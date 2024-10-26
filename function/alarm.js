@@ -7,9 +7,10 @@ const app = express();
 const routes = require("./routes");
 
 // Firebase Admin SDK 초기화
-var serviceAccount = require("/config/PopHub_Key.json");
+var serviceAccount = process.env.AlARM_JSON;
+var fcmKey = Buffer.from(serviceAccount, "base64").toString();
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: admin.credential.cert(JSON.parse(fcmKey)),
 });
 
 const db = admin.firestore();
