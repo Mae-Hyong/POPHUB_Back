@@ -64,7 +64,7 @@ router.get('/show', qrCodeController.showQrCode); // qr코드 조회
  *      summary: QR코드 스캔 - 스토어 조회
  *      parameters:
  *        - in: query
- *          name: qrCode
+ *          name: qrCodeId
  *          required: true
  *          schema:
  *            type: string
@@ -95,9 +95,9 @@ router.get('/scan/store', qrCodeController.scanQrCodeForStore); // qr코드 스�
  *           schema:
  *             type: object
  *             properties:
- *               userName:
+ *               reservationId:
  *                 type: string
- *               qrCode:
+ *               qrCodeId:
  *                 type: string
  *     responses:
  *       200:

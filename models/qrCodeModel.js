@@ -3,9 +3,9 @@ const db = require('../config/mysqlDatabase');
 // ------- GET Query -------
 const popupExists_query = 'SELECT * FROM popup_stores WHERE store_id = ?';
 const qrCodeExistsQuery = 'SELECT * FROM qrcodes WHERE store_id = ?';
-const scanQrCode_query = 'SELECT * FROM qrcodes WHERE qrcode_url = ?';
-const reservationCheck_query = 'SELECT * FROM reservation WHERE store_id = ? AND user_name = ? AND reservation_status = "pending"';
-const waitListCheck_query = 'SELECT * FROM wait_list WHERE store_id = ? AND user_name = ? AND status = "pending"';
+const scanQrCode_query = 'SELECT * FROM qrcodes WHERE qrcode_id = ?';
+const reservationCheck_query = 'SELECT * FROM reservation WHERE store_id = ? AND reservation_id = ? AND reservation_status = "pending"';
+const waitListCheck_query = 'SELECT * FROM wait_list WHERE store_id = ? AND reservation_id = ? AND status = "pending"';
 const showCalendar_query = 'SELECT * FROM calendar WHERE user_name = ?';
 const showStore_query = 'SELECT store_name FROM popup_stores WHERE store_id = ?';
 const showImages_query = 'SELECT image_url FROM images WHERE store_id = ?';
@@ -110,10 +110,10 @@ const qrCodeModel = {
     },
 
     // 사전 예약 방문 인증
-    reservationForVisit: async (store_id, user_name) => {
+    reservationForVisit: async (store_id, reservationId) => {
         try {
             const results = await new Promise((resolve, reject) => {
-                db.query(reservationCheck_query, [store_id, user_name], (err, results) => {
+                db.query(reservationCheck_query, [store_id, reservationId], (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 });
@@ -121,14 +121,14 @@ const qrCodeModel = {
 
             if (results.length > 0) {
                 await new Promise((resolve, reject) => {
-                    db.query(reservationForVisit_query, results[0].reservation_id, (err, results) => {
+                    db.query(reservationForVisit_query, reservationId, (err, results) => {
                         if (err) reject(err);
                         resolve(results);
                     });
                 });
 
                 const date = results[0].reservation_date.toISOString().split('T')[0];
-                return { success: true, reservation_date: date };
+                return { success: true, reservation_date: date, user_name: results[0].user_name };
             } else {
                 return { success: false };
             }
@@ -138,10 +138,10 @@ const qrCodeModel = {
     },
 
     // 현장 대기 방문 인증
-    waitingForVisit: async (store_id, user_name) => {
+    waitingForVisit: async (store_id, reservationId) => {
         try {
             const results = await new Promise((resolve, reject) => {
-                db.query(waitListCheck_query, [store_id, user_name], (err, results) => {
+                db.query(waitListCheck_query, [store_id, reservationId], (err, results) => {
                     if (err) reject(err);
                     resolve(results);
                 });
@@ -149,14 +149,14 @@ const qrCodeModel = {
             
             if (results.length > 0) {
                 await new Promise((resolve, reject) => {
-                    db.query(waitingForVisit_query, results[0].reservation_id, (err, results) => {
+                    db.query(waitingForVisit_query, reservationId, (err, results) => {
                         if (err) reject(err);
                         resolve(results);
                     });
                 });
 
                 const date = results[0].created_at.toISOString().split('T')[0];
-                return { success: true, reservation_date: date };
+                return { success: true, reservation_date: date, user_name: results[0].user_name };
             } else {
                 return { success: false };
             }
