@@ -220,6 +220,36 @@ router.get('/waiting/popup', reservationController.searchWaitListPopup);
  */
 router.post('/waiting', reservationController.createWaitList); // 대기 신청
 
+
+/**
+ * @swagger
+ * /reservation/waiting/create:
+ *  post:
+ *      tags: [Waiting - 현장 대기]
+ *      summary: 현장 대기 신청 ( 전화번호 추가 ver )
+ *      requestBody:
+ *          required: true
+ *          content:
+ *              application/x-www-form-urlencoded:
+ *                  schema:
+ *                      type: object
+ *                      properties:
+ *                          userName:
+ *                              type: string
+ *                          storeId:
+ *                              type: string
+ *                          capacity:
+ *                              type: integer
+ *                          phoneNumber:
+ *                              type: string
+ *                              example: "010-1234-5678"
+ *      responses:
+ *          201:
+ *              description: 성공
+ */
+router.post('/waiting/create', reservationController.createWaiting); // 대기 신청
+
+
 /**
  * @swagger
  * /reservation/waiting/admission:

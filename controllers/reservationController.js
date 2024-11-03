@@ -209,6 +209,33 @@ const reservationController = {
         }
     },
 
+    createWaiting: async (req, res) => {
+        try {
+            const body = req.body;
+            const reservationId = uuidv4();
+            const insertData = {
+                reservation_id: reservationId,
+                user_name: body.userName,
+                store_id: body.storeId,
+                capacity: body.capacity,
+                phone_number: body.phoneNumber
+            };
+            const check = await reservationModel.checkStatusForWaitList(
+                body.userName,
+                body.storeId
+            );
+            if (!check.success) {
+                return res.status(400).json({ message: "동일 팝업 스토어의 현장 대기 신청을 중복하여 할 수 없습니다." });
+            }
+            await reservationModel.createWaitList(insertData);
+            const waitList = await reservationModel.searchUserStoreWait(body.userName, body.storeId);
+            res.status(201).send({ message: "현장 대기 신청이 완료되었습니다.", waitPosition: waitList[0].position });
+        } catch (err) {
+            console.log(err);
+            res.status(500).send("현장 대기 신청 중 오류가 발생하였습니다.");
+        }
+    },
+
     admissionWaitList: async (req, res) => {
         try {
             const { reservationId } = req.body;
