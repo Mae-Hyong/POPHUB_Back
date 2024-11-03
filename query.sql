@@ -278,6 +278,9 @@ CREATE TABLE wait_list (
     FOREIGN KEY (store_id) REFERENCES popup_stores(store_id)
 );
 
+ALTER TABLE wait_list
+ADD COLUMN phone_number VARCHAR(15);
+
 CREATE TABLE event (
 	event_id int auto_increment primary key,
     user_name varchar(50),
