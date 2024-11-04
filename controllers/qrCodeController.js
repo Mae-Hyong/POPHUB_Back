@@ -12,7 +12,7 @@ const qrCodeController = {
             if (check === null) {
                 return res.status(404).json({ message: "해당 팝업의 ID가 존재하지 않습니다." });
             } else if (check.length > 0) {
-                return res.status(200).json({ message: "이미 QR코드가 존재합니다.", QRcode: check[0].qrcode_url });
+                return res.status(200).json({ message: "이미 QR코드가 존재합니다.", qrCodeId: check[0].qrcode_id, QRcode: check[0].qrcode_url });
             } else {
                 const QRCode = await qrCode.toDataURL(storeId);
                 const qrCodeData = {
