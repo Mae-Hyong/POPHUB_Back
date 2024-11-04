@@ -68,14 +68,13 @@ const qrCodeController = {
     scanQrCodeForVisit: async (req, res) => {
         try {
             const type = req.query.type;
-            const qrCodeId = req.body.qrCodeId;
-            const reservationId = req.body.reservationId;
-            const storeId = await qrCodeModel.scanQrCodeForStore(qrCodeId);
+            const storeId = req.body.storeId;
+            const userName = req.body.userName;
             let result;
             if (type == 'reservation') {
-                result = await qrCodeModel.reservationForVisit(storeId, reservationId);
+                result = await qrCodeModel.reservationForVisit(storeId, userName);
             } else if (type == 'waiting') {
-                result = await qrCodeModel.waitingForVisit(storeId, reservationId);
+                result = await qrCodeModel.waitingForVisit(storeId, userName);
             } else {
                 return res.status(400).send("정확한 값을 입력해주세요.");
             }
@@ -100,7 +99,6 @@ const qrCodeController = {
             }
 
         } catch (err) {
-            console.log(err);
             res.status(500).send("사전 예약 및 현장 대기 등록 진행 후 방문 인증이 가능합니다.");
         }
     },

@@ -95,9 +95,9 @@ router.get('/scan/store', qrCodeController.scanQrCodeForStore); // qr코드 스�
  *           schema:
  *             type: object
  *             properties:
- *               reservationId:
+ *               userName:
  *                 type: string
- *               qrCodeId:
+ *               storeId:
  *                 type: string
  *     responses:
  *       200:
