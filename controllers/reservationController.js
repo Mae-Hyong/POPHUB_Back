@@ -175,7 +175,9 @@ const reservationController = {
             const storeId = req.query.storeId;
             const result = await reservationModel.searchStoreWait(storeId);
 
-            res.status(200).json(result);
+            const count = result.length > 0 ? result.length : 0;
+
+            res.status(200).json({ result, count });
         } catch (err) {
             res.status(500).send("현장 대기 조회 중 오류가 발생하였습니다.");
         }
