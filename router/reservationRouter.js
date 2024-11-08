@@ -133,12 +133,10 @@ router.delete('/advance/delete/:reservationId', reservationController.deleteRese
  *      parameters:
  *          - in: query
  *            name: userName
- *            required: true
  *            schema:
  *              type: string
  *          - in: query
  *            name: storeId
- *            required: true
  *            schema:
  *              type: string
  *      responses:
@@ -146,6 +144,7 @@ router.delete('/advance/delete/:reservationId', reservationController.deleteRese
  *              description: 성공
  */
 router.get('/waiting/show', reservationController.searchWaitList);
+
 
 /**
  * @swagger
