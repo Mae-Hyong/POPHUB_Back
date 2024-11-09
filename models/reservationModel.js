@@ -1,7 +1,7 @@
 const db = require("../config/mysqlDatabase");
 
 // ------- GET Query -------
-const search_userWait_query = "SELECT * FROM wait_list WHERE user_name = ?";
+const search_userWait_query = 'SELECT * FROM wait_list WHERE user_name = ? AND status = "pending"';
 const search_storeWait_query = "SELECT * FROM wait_list WHERE store_id = ? AND status = 'pending' ORDER BY created_at ASC";
 const waitPosition_query = 'SELECT *, (SELECT COUNT(*) FROM wait_list AS wl WHERE wl.store_id = wait_list.store_id AND wl.status = "pending" AND wl.created_at <= wait_list.created_at) AS position FROM wait_list WHERE user_name = ? AND store_id = ? AND status = "pending" ORDER BY created_at ASC';
 const get_reservationtime_query = 'SELECT * FROM wait_list WHERE created_at <= NOW() AND status = "pending"';
@@ -298,7 +298,7 @@ const reservationModel = {
         return new Promise((resolve, reject) => {
             db.query(search_userWait_query, userName, async (err, result) => {
                 if (err) reject(err);
-                else resolve(result[0]);
+                else resolve(result);
             });
         });
     },
